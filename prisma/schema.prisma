@@ -1,0 +1,360 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+
+
+
+// ===== ENUMS =====
+enum UserRole {
+  customer
+  supplier
+  admin
+}
+
+enum UserStatus {
+  active
+  suspended
+  deleted
+}
+
+enum ActivityStatus {
+  draft
+  active
+  inactive
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  refunded
+  failed
+}
+
+enum PaymentMethod {
+  credit_card
+  paypal
+  bank_transfer
+}
+
+// ===== CORE TABLES =====
+
+model User {
+  id            BigInt     @id @default(autoincrement())
+  email         String     @unique @db.VarChar(255)
+  passwordHash  String     @map("password_hash") @db.VarChar(255)
+  firstName     String?     @map("first_name") @db.VarChar(100) 
+  lastName      String?     @map("last_name") @db.VarChar(100) 
+  phone         String?    @db.VarChar(20)
+  avatar        String?    @db.VarChar(500)
+  role          String     @default("customer") @db.VarChar(20) // customer, supplier, admin
+  status        UserStatus @default(active)
+  supplierId    BigInt?    @map("supplier_id") // Link to supplier if role is supplier
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  supplier      Supplier? 
+  bookings      Booking[]
+  reviews       Review[]
+  wishlists     Wishlist[]
+  cartItems     CartItem[]
+
+  @@map("users")
+}
+
+model Supplier {
+  id             BigInt   @id @default(autoincrement())
+  companyName    String   @map("company_name") @db.VarChar(255)
+  email          String   @db.VarChar(255)
+  phone          String?  @db.VarChar(20)
+  address        String?  @db.Text
+  commissionRate Decimal  @default(15.00) @map("commission_rate") @db.Decimal(5, 2)
+  status         UserStatus @default(active)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+
+  activities     Activity[]
+  bookings       Booking[]
+
+  @@map("suppliers")
+}
+
+model Country {
+  code        String   @id @db.VarChar(2) // ISO code làm khóa chính
+  name        String   @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  cities      City[]
+
+  @@map("countries")
+}
+
+model City {
+  id          BigInt        @id @default(autoincrement())
+  name        String        @db.VarChar(100)
+  countryCode String        @map("country_code") @db.VarChar(2)
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  country     Country       @relation(fields: [countryCode], references: [code])
+  destinations Destination[]
+
+  @@map("cities")
+}
+
+model Destination {
+  id          BigInt     @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  slug        String     @unique @db.VarChar(255)
+  cityId      BigInt     @map("city_id")
+  imageUrl    String?    @map("image_url") @db.VarChar(500)
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  city        City       @relation(fields: [cityId], references: [id])
+  activities  Activity[]
+
+  @@map("destinations")
+}
+
+model Category {
+  id        BigInt     @id @default(autoincrement())
+  name      String     @db.VarChar(255)
+  slug      String     @unique @db.VarChar(255)
+  parentId  BigInt?    @map("parent_id")
+  imageUrl  String?    @map("image_url") @db.VarChar(500)
+  sortOrder Int        @default(0) @map("sort_order")
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  activities Activity[]
+
+  @@map("categories")
+}
+
+// ===== ACTIVITY/PRODUCT =====
+
+model Activity {
+  id                  BigInt         @id @default(autoincrement())
+  supplierId          BigInt         @map("supplier_id")
+  destinationId       BigInt         @map("destination_id")
+  categoryId          BigInt         @map("category_id")
+  name                String         @db.VarChar(255)
+  slug                String         @unique @db.VarChar(255)
+  description         String?        @db.Text
+  highlights          Json?          // ["point1", "point2"]
+  duration            Int?           // minutes
+  price               Decimal        @db.Decimal(10, 2)
+  currency            String         @default("USD") @db.VarChar(3)
+  maxParticipants     Int?           @map("max_participants")
+  rating              Decimal        @default(0) @db.Decimal(3, 2)
+  reviewCount         Int            @default(0) @map("review_count")
+  instantConfirmation Boolean        @default(true) @map("instant_confirmation")
+  freeCancellation    Boolean        @default(false) @map("free_cancellation")
+  status              ActivityStatus @default(draft)
+  featured            Boolean        @default(false)
+  createdAt           DateTime       @default(now()) @map("created_at")
+  updatedAt           DateTime       @updatedAt @map("updated_at")
+
+  supplier      Supplier           @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  destination   Destination        @relation(fields: [destinationId], references: [id])
+  category      Category           @relation(fields: [categoryId], references: [id])
+  images        ActivityImage[]
+  schedules     ActivitySchedule[]
+  bookings      Booking[]
+  reviews       Review[]
+  wishlists     Wishlist[]
+  cartItems     CartItem[]
+
+  @@map("activities")
+}
+
+model ActivityImage {
+  id         BigInt   @id @default(autoincrement())
+  activityId BigInt   @map("activity_id")
+  imageUrl   String   @map("image_url") @db.VarChar(500)
+  isPrimary  Boolean  @default(false) @map("is_primary")
+  sortOrder  Int      @default(0) @map("sort_order")
+
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@map("activity_images")
+}
+
+model ActivitySchedule {
+  id             BigInt   @id @default(autoincrement())
+  activityId     BigInt   @map("activity_id")
+  date           DateTime @db.Date
+  timeSlot       String?  @map("time_slot") @db.VarChar(10) // "09:00", "14:30"
+  availableSpots Int      @map("available_spots")
+  bookedSpots    Int      @default(0) @map("booked_spots")
+  price          Decimal? @db.Decimal(10, 2) // Override activity price
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  activity Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+  cartItems CartItem[]
+
+  @@unique([activityId, date, timeSlot])
+  @@map("activity_schedules")
+}
+
+// ===== BOOKING =====
+
+model Booking {
+  id               BigInt        @id @default(autoincrement())
+  bookingRef       String        @unique @map("booking_ref") @db.VarChar(20)
+  userId           BigInt        @map("user_id")
+  activityId       BigInt        @map("activity_id")
+  scheduleId       BigInt        @map("schedule_id")
+  supplierId       BigInt        @map("supplier_id")
+  
+  customerName     String        @map("customer_name") @db.VarChar(255)
+  customerEmail    String        @map("customer_email") @db.VarChar(255)
+  customerPhone    String?       @map("customer_phone") @db.VarChar(20)
+  
+  bookingDate      DateTime      @map("booking_date") @db.Date
+  participants     Int           @default(1)
+  
+  subtotal         Decimal       @db.Decimal(10, 2)
+  discount         Decimal       @default(0) @db.Decimal(10, 2)
+  total            Decimal       @db.Decimal(10, 2)
+  currency         String        @default("USD") @db.VarChar(3)
+  
+  status           BookingStatus @default(pending)
+  paymentStatus    PaymentStatus @default(pending) @map("payment_status")
+  
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  user      User             @relation(fields: [userId], references: [id])
+  activity  Activity         @relation(fields: [activityId], references: [id])
+  schedule  ActivitySchedule @relation(fields: [scheduleId], references: [id])
+  supplier  Supplier         @relation(fields: [supplierId], references: [id])
+  payments  Payment[]
+  reviews   Review[]
+
+  @@map("bookings")
+}
+
+// ===== PAYMENT =====
+
+model Payment {
+  id            BigInt        @id @default(autoincrement())
+  bookingId     BigInt        @map("booking_id")
+  method        PaymentMethod
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD") @db.VarChar(3)
+  transactionId String?       @map("transaction_id") @db.VarChar(255)
+  status        PaymentStatus @default(pending)
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
+// ===== REVIEW =====
+
+model Review {
+  id        BigInt   @id @default(autoincrement())
+  bookingId BigInt   @map("booking_id")
+  rating    Int      @db.SmallInt // 1-5
+  comment   String?  @db.Text
+  images    Json?    // ["url1", "url2"]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  activity Activity @relation(fields: [activityId], references: [id])
+
+  @@unique([bookingId, userId])
+  @@map("reviews")
+}
+
+// ===== COUPON =====
+
+model Coupon {
+  id            BigInt   @id @default(autoincrement())
+  code          String   @unique @db.VarChar(50)
+  name          String   @db.VarChar(255)
+  discountType  String   @map("discount_type") @db.VarChar(20) // "percentage", "fixed"
+  discountValue Decimal  @map("discount_value") @db.Decimal(10, 2)
+  minAmount     Decimal  @default(0) @map("min_amount") @db.Decimal(10, 2)
+  maxDiscount   Decimal? @map("max_discount") @db.Decimal(10, 2)
+  usageLimit    Int?     @map("usage_limit")
+  usedCount     Int      @default(0) @map("used_count")
+  validFrom     DateTime @map("valid_from")
+  validTo       DateTime @map("valid_to")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("coupons")
+}
+
+// ===== WISHLIST & CART =====
+
+model Wishlist {
+  id         BigInt   @id @default(autoincrement())
+  userId     BigInt   @map("user_id")
+  activityId BigInt   @map("activity_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@map("wishlists")
+}
+
+model CartItem {
+  id           BigInt   @id @default(autoincrement())
+  sessionId    String   @map("session_id") @db.VarChar(255)
+  userId       BigInt?  @map("user_id")
+  activityId   BigInt   @map("activity_id")
+  scheduleId   BigInt   @map("schedule_id")
+  participants Int      @default(1)
+  price        Decimal  @db.Decimal(10, 2)
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user     User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  schedule ActivitySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@map("cart_items")
+}
+
+// ===== SYSTEM =====
+
+model Notification {
+  id        BigInt    @id @default(autoincrement())
+  userId    BigInt    @map("user_id")
+  title     String    @db.VarChar(255)
+  message   String    @db.Text
+  type      String    @db.VarChar(50)
+  isRead    Boolean   @default(false) @map("is_read")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("notifications")
+}
