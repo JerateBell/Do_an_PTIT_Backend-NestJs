@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 // initialize Prisma Client
 const prisma = new PrismaClient();
@@ -172,6 +173,44 @@ async function main() {
       currency: 'EUR',
     },
   });
+
+  const password1 = await bcrypt.hash('password123', 10);
+  const password2 = await bcrypt.hash('password456', 10);
+  const password3 = await bcrypt.hash('password789', 10);
+
+  await prisma.user.createMany({
+    data: [
+      {
+        email: 'admin@example.com',
+        passwordHash: password1,
+        firstName: 'Admin',
+        lastName: 'User',
+        phone: '0123456789',
+        role: 'admin',
+        status: 'active',
+      },
+      {
+        email: 'supplier@example.com',
+        passwordHash: password2,
+        firstName: 'John',
+        lastName: 'Supplier',
+        phone: '0987654321',
+        role: 'supplier',
+        status: 'active',
+      },
+      {
+        email: 'customer@example.com',
+        passwordHash: password3,
+        firstName: 'Jane',
+        lastName: 'Customer',
+        phone: '0909090909',
+        role: 'customer',
+        status: 'active',
+      },
+    ],
+  });
+
+  console.log('✅ Seeded 3 users successfully!');
 
   console.log('Seed completed:', {
     tourCategory,

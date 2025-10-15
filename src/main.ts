@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   // Fix BigInt serialization issue
@@ -9,6 +10,11 @@ async function bootstrap() {
   };
 
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // ✅ tự động ép kiểu theo DTO
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Travoloke API')

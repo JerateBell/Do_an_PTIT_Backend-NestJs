@@ -21,6 +21,8 @@ export class ActivitiesService {
     });
   }
 
+  filter() {}
+
   update(id: number, updateActivityDto: UpdateActivityDto) {
     return `This action updates a #${id} activity`;
   }
