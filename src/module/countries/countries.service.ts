@@ -8,22 +8,31 @@ export class CountriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createCountryDto: CountryDto) {
-    return 'This action adds a new country';
+    return this.prisma.country.create({
+      data: createCountryDto,
+    });
   }
 
   async findAll() {
     return await this.prisma.country.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} country`;
+  findOne(code: string) {
+    return this.prisma.country.findUnique({
+      where: { code },
+    });
   }
 
-  update(id: number, updateCountryDto: UpdateCountryDto) {
-    return `This action updates a #${id} country`;
+  update(code: string, updateCountryDto: UpdateCountryDto) {
+    return this.prisma.country.update({
+      where: { code },
+      data: updateCountryDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} country`;
+  remove(code: string) {
+    return this.prisma.country.delete({
+      where: { code },
+    });
   }
 }

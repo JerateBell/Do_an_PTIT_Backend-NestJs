@@ -118,6 +118,7 @@ model City {
   destinations Destination[]
 
   @@map("cities")
+  @@unique([name, countryCode])
 }
 
 model Destination {

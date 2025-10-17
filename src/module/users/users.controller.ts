@@ -22,6 +22,7 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  //Admin get all user
   @Get('admin/all')
   findAll(@Query() filter: FilterUsersDto) {
     return this.usersService.findByFilterAdmin(filter);
@@ -34,6 +35,12 @@ export class UsersController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(+id, updateUserDto);
+  }
+
+  //Admin change status user
+  @Patch('change-status/:id')
+  changeStatus(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 

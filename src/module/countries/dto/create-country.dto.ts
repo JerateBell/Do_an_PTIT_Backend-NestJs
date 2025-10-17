@@ -1,4 +1,9 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class CountryDto {
+  @ApiProperty()
   name: string;
-  countryCode: string;
+
+  @ApiProperty()
+  code: string;
 }
