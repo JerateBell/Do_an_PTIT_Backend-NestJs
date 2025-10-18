@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { PrismaExceptionFilter } from './filters/prisma-exception.filter';
 
 async function bootstrap() {
   // Fix BigInt serialization issue
@@ -15,6 +16,8 @@ async function bootstrap() {
       transform: true, // ✅ tự động ép kiểu theo DTO
     }),
   );
+
+  app.useGlobalFilters(new PrismaExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Travoloke API')

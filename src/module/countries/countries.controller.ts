@@ -25,18 +25,21 @@ export class CountriesController {
     return this.countriesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.countriesService.findOne(+id);
+  @Get(':code')
+  findOne(@Param('code') code: string) {
+    return this.countriesService.findOne(code);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCountryDto: UpdateCountryDto) {
-    return this.countriesService.update(+id, updateCountryDto);
+  @Patch(':code')
+  update(
+    @Param('code') code: string,
+    @Body() updateCountryDto: UpdateCountryDto,
+  ) {
+    return this.countriesService.update(code, updateCountryDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.countriesService.remove(+id);
+  @Delete(':code')
+  remove(@Param('code') code: string) {
+    return this.countriesService.remove(code);
   }
 }

@@ -8,7 +8,9 @@ export class CitiesService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createCityDto: CreateCityDto) {
-    return 'This action adds a new city';
+    return this.prisma.city.create({
+      data: { ...createCityDto },
+    });
   }
 
   async findAll() {
@@ -20,10 +22,15 @@ export class CitiesService {
   }
 
   update(id: number, updateCityDto: UpdateCityDto) {
-    return `This action updates a #${id} city`;
+    return this.prisma.city.update({
+      where: { id },
+      data: { ...updateCityDto },
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} city`;
+    return this.prisma.city.delete({
+      where: { id },
+    });
   }
 }
