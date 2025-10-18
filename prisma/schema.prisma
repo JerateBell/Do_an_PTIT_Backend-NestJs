@@ -68,7 +68,7 @@ model User {
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
-  supplier      Supplier?       @relation(fields: [supplierId], references: [id])
+  supplier     Supplier?  @relation("UserSupplier")
   bookings      Booking[]
   reviews       Review[]
   wishlists     Wishlist[]
@@ -89,8 +89,8 @@ model Supplier {
   createdAt      DateTime   @default(now()) @map("created_at")
   updatedAt      DateTime   @updatedAt @map("updated_at")
   userId         BigInt     @unique   // mỗi supplier chỉ gắn với 1 user
-  user           User       @relation(fields: [userId], references: [id])
-
+  user           User       @relation("UserSupplier", fields: [userId], references: [id])
+  status         UserStatus @default(active)
 
   activities Activity[]
   bookings   Booking[]

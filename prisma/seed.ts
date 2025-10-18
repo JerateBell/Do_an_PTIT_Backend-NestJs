@@ -69,6 +69,18 @@ async function main() {
   });
 
   //  ========== SUPPLIER
+  const supplierUser = await prisma.user.create({
+    data: {
+      email: 'supplier@example.com',
+      passwordHash: await bcrypt.hash('password456', 10),
+      firstName: 'John',
+      lastName: 'Supplier',
+      phone: '0987654321',
+      role: 'supplier',
+      status: 'active',
+    },
+  });
+
   const supplier = await prisma.supplier.create({
     data: {
       companyName: 'Global Travel Co.',
@@ -77,6 +89,9 @@ async function main() {
       address: '123 Main Street, Hanoi, Vietnam',
       commissionRate: 15.0, // mặc định cũng ok, có thể bỏ
       status: 'active', // enum UserStatus
+      user: {
+        connect: { id: supplierUser.id }, // userId là id của user đã có
+      }
     },
   });
   // ========== CATEGORY ==========
