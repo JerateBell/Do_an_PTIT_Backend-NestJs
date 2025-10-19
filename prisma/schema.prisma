@@ -53,7 +53,6 @@ enum PaymentMethod {
 }
 
 // ===== CORE TABLES =====
-
 model User {
   id           BigInt     @id @default(autoincrement())
   email        String     @unique @db.VarChar(255)
@@ -62,41 +61,41 @@ model User {
   lastName     String?    @map("last_name") @db.VarChar(100)
   phone        String?    @db.VarChar(20)
   avatar       String?    @db.VarChar(500)
-  role         String     @default("customer") @db.VarChar(20) // customer, supplier, admin
+  role         String     @default("customer") @db.VarChar(20)
   status       UserStatus @default(active)
-  supplierId   BigInt?    @map("supplier_id") // Link to supplier if role is supplier
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
-  supplier     Supplier?  @relation("UserSupplier")
-  bookings      Booking[]
-  reviews       Review[]
-  wishlists     Wishlist[]
-  cartItems     CartItem[]
-  searchHistory SearchHistory[]
-  userBehaviors UserBehavior[]
+  supplierProfile Supplier?
+  bookings        Booking[]
+  reviews         Review[]
+  wishlists       Wishlist[]
+  cartItems       CartItem[]
+  searchHistory   SearchHistory[]
+  userBehaviors   UserBehavior[]
+  notifications   Notification[]
 
   @@map("users")
 }
 
 model Supplier {
-  id             BigInt     @id @default(autoincrement())
-  companyName    String     @map("company_name") @db.VarChar(255)
-  email          String     @db.VarChar(255)
-  phone          String?    @db.VarChar(20)
-  address        String?    @db.Text
-  commissionRate Decimal    @default(15.00) @map("commission_rate") @db.Decimal(5, 2)
-  createdAt      DateTime   @default(now()) @map("created_at")
-  updatedAt      DateTime   @updatedAt @map("updated_at")
-  userId         BigInt     @unique   // mỗi supplier chỉ gắn với 1 user
-  user           User       @relation("UserSupplier", fields: [userId], references: [id])
-  status         UserStatus @default(active)
+  id             BigInt   @id @default(autoincrement())
+  companyName    String   @map("company_name") @db.VarChar(255)
+  email          String   @db.VarChar(255)
+  phone          String?  @db.VarChar(20)
+  address        String?  @db.Text
+  commissionRate Decimal  @default(15.00) @map("commission_rate") @db.Decimal(5, 2)
+  userId         BigInt   @unique @map("user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   activities Activity[]
   bookings   Booking[]
 
   @@map("suppliers")
 }
+
 
 model Country {
   code      String   @id @db.VarChar(2) // ISO code làm khóa chính
@@ -277,20 +276,19 @@ model Payment {
 // ===== REVIEW =====
 
 model Review {
-  id        BigInt   @id @default(autoincrement())
-  bookingId BigInt   @map("booking_id")
-  rating    Int      @db.SmallInt // 1-5
-  comment   String?  @db.Text
-  images    Json? // ["url1", "url2"]
-  createdAt DateTime @default(now()) @map("created_at")
+  id         BigInt   @id @default(autoincrement())
+  bookingId  BigInt   @unique @map("booking_id")
+  userId     BigInt   @map("user_id")
+  activityId BigInt   @map("activity_id")
+  rating     Int      @db.SmallInt
+  comment    String?  @db.Text
+  images     Json?
+  createdAt  DateTime @default(now()) @map("created_at")
 
-  booking    Booking   @relation(fields: [bookingId], references: [id])
-  User       User?     @relation(fields: [userId], references: [id])
-  userId     BigInt?
-  Activity   Activity? @relation(fields: [activityId], references: [id])
-  activityId BigInt?
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  activity Activity @relation(fields: [activityId], references: [id])
 
-  @@unique([bookingId])
   @@map("reviews")
 }
 
@@ -357,6 +355,8 @@ model Notification {
   type      String   @db.VarChar(50)
   isRead    Boolean  @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }
