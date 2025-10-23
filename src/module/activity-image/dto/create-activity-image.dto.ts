@@ -1,26 +1,18 @@
-import {
-  IsBoolean,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-} from 'class-validator';
+import { IsInt, IsString, IsBoolean, IsOptional, MaxLength } from 'class-validator';
 
 export class CreateActivityImageDto {
   @IsInt()
   activityId: number;
 
   @IsString()
-  @IsNotEmpty()
-  @IsUrl()
+  @MaxLength(500)
   imageUrl: string;
 
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   isPrimary?: boolean;
 
-  @IsInt()
   @IsOptional()
+  @IsInt()
   sortOrder?: number;
 }
