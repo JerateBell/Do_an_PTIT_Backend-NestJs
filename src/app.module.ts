@@ -8,11 +8,7 @@ import { CountriesModule } from './module/countries/countries.module';
 import { CitiesModule } from './module/cities/cities.module';
 import { ActivitiesModule } from './module/activities/activities.module';
 import { CategoriesModule } from './module/categories/categories.module';
-import { ToursModule } from './module/tours/tours.module';
-import { SuppliersModule } from './module/suppliers/suppliers.module';
-import { ActivityImageModule } from './module/activity-image/activity-image.module';
-import { ActivityScheduleModule } from './module/activity-schedule/activity-schedule.module';
-import { BookingModule } from './module/booking/booking.module';
+import { StatsModule } from './module/stats/stats.module';
 
 @Module({
   imports: [
@@ -24,11 +20,7 @@ import { BookingModule } from './module/booking/booking.module';
     ActivitiesModule,
     CategoriesModule,
     UsersModule,
-    ToursModule,
-    SuppliersModule,
-    ActivityImageModule,
-    ActivityScheduleModule,
-    BookingModule
+    StatsModule,
   ],
 })
 export class AppModule {}

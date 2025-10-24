@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 import { UserStatus } from '@prisma/client';
 
 export class FilterUsersDto {
@@ -13,6 +13,7 @@ export class FilterUsersDto {
 
   role?: string;
 
+  @IsOptional()
   @IsEnum(UserStatus)
-  status?: UserStatus = 'active';
+  status?: UserStatus;
 }

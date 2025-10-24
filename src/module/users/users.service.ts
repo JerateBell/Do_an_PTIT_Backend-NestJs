@@ -4,13 +4,39 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { FilterUsersDto } from './dto/filter-users.dto';
 import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    const { password, ...userData } = createUserDto;
+    
+    // Hash password or use default
+    const passwordHash = password 
+      ? await bcrypt.hash(password, 10)
+      : await bcrypt.hash('password123', 10); // Default password
+
+    const user = await this.prisma.user.create({
+      data: {
+        ...userData,
+        passwordHash,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        avatar: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+
+    return user;
   }
 
   async findByFilterAdmin(filter: FilterUsersDto) {
@@ -41,6 +67,8 @@ export class UsersService {
           firstName: true,
           lastName: true,
           email: true,
+          phone: true,
+          avatar: true,
           role: true,
           status: true,
           createdAt: true,
@@ -51,22 +79,60 @@ export class UsersService {
     ]);
 
     return {
-      data: { users },
+      users,
       total,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: bigint) {
+    return await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        avatar: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+    });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: bigint, updateUserDto: UpdateUserDto) {
+    const { password, ...userData } = updateUserDto;
+    
+    const updateData: any = { ...userData };
+    
+    // Hash password if provided
+    if (password) {
+      updateData.passwordHash = await bcrypt.hash(password, 10);
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        avatar: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+
+    return user;
   }
 
-  remove(id: number) {
-    this.prisma.user.delete({ where: { id } });
+  async remove(id: bigint) {
+    return await this.prisma.user.delete({ where: { id } });
   }
 }

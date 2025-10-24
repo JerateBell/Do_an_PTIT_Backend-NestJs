@@ -27,7 +27,6 @@ CREATE TABLE "public"."users" (
     "avatar" VARCHAR(500),
     "role" VARCHAR(20) NOT NULL DEFAULT 'customer',
     "status" "public"."UserStatus" NOT NULL DEFAULT 'active',
-    "supplier_id" BIGINT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -42,7 +41,7 @@ CREATE TABLE "public"."suppliers" (
     "phone" VARCHAR(20),
     "address" TEXT,
     "commission_rate" DECIMAL(5,2) NOT NULL DEFAULT 15.00,
-    "status" "public"."UserStatus" NOT NULL DEFAULT 'active',
+    "user_id" BIGINT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -187,12 +186,12 @@ CREATE TABLE "public"."payments" (
 CREATE TABLE "public"."reviews" (
     "id" BIGSERIAL NOT NULL,
     "booking_id" BIGINT NOT NULL,
+    "user_id" BIGINT NOT NULL,
+    "activity_id" BIGINT NOT NULL,
     "rating" SMALLINT NOT NULL,
     "comment" TEXT,
     "images" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId" BIGINT,
-    "activityId" BIGINT,
 
     CONSTRAINT "reviews_pkey" PRIMARY KEY ("id")
 );
@@ -280,6 +279,12 @@ CREATE TABLE "public"."search_history" (
 CREATE UNIQUE INDEX "users_email_key" ON "public"."users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "suppliers_user_id_key" ON "public"."suppliers"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "cities_name_country_code_key" ON "public"."cities"("name", "country_code");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "destinations_slug_key" ON "public"."destinations"("slug");
 
 -- CreateIndex
@@ -304,7 +309,7 @@ CREATE UNIQUE INDEX "coupons_code_key" ON "public"."coupons"("code");
 CREATE UNIQUE INDEX "wishlists_user_id_activity_id_key" ON "public"."wishlists"("user_id", "activity_id");
 
 -- AddForeignKey
-ALTER TABLE "public"."users" ADD CONSTRAINT "users_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "public"."suppliers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."suppliers" ADD CONSTRAINT "suppliers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."cities" ADD CONSTRAINT "cities_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "public"."countries"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -349,10 +354,10 @@ ALTER TABLE "public"."payments" ADD CONSTRAINT "payments_booking_id_fkey" FOREIG
 ALTER TABLE "public"."reviews" ADD CONSTRAINT "reviews_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "public"."bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."reviews" ADD CONSTRAINT "reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."reviews" ADD CONSTRAINT "reviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."reviews" ADD CONSTRAINT "reviews_activityId_fkey" FOREIGN KEY ("activityId") REFERENCES "public"."activities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."reviews" ADD CONSTRAINT "reviews_activity_id_fkey" FOREIGN KEY ("activity_id") REFERENCES "public"."activities"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."wishlists" ADD CONSTRAINT "wishlists_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -368,6 +373,9 @@ ALTER TABLE "public"."cart_items" ADD CONSTRAINT "cart_items_activity_id_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "public"."cart_items" ADD CONSTRAINT "cart_items_schedule_id_fkey" FOREIGN KEY ("schedule_id") REFERENCES "public"."activity_schedules"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."notifications" ADD CONSTRAINT "notifications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."user_behaviors" ADD CONSTRAINT "user_behaviors_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -27,12 +27,12 @@ export class DestinationsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.destinationsService.findOne(+id);
+    return this.destinationsService.findOne(BigInt(id));
   }
 
   @Get('by-city/:cityId')
-  findByCity(@Param('cityId') cityId: number) {
-    return this.destinationsService.findByCity(cityId);
+  findByCity(@Param('cityId') cityId: string) {
+    return this.destinationsService.findByCity(BigInt(cityId));
   }
 
   @Patch(':id')
@@ -40,11 +40,11 @@ export class DestinationsController {
     @Param('id') id: string,
     @Body() updateDestinationDto: UpdateDestinationDto,
   ) {
-    return this.destinationsService.update(+id, updateDestinationDto);
+    return this.destinationsService.update(BigInt(id), updateDestinationDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.destinationsService.remove(+id);
+    return this.destinationsService.remove(BigInt(id));
   }
 }
