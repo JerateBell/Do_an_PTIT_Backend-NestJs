@@ -7,29 +7,78 @@ import { PrismaService } from '../prisma/prisma.service';
 export class DestinationsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createDestinationDto: CreateDestinationDto) {
-    return 'This action adds a new destination';
+  async create(createDestinationDto: CreateDestinationDto) {
+    const destination = await this.prisma.destination.create({
+      data: createDestinationDto,
+      include: {
+        city: {
+          include: {
+            country: true,
+          },
+        },
+      },
+    });
+    return destination;
   }
 
-  findAll() {
-    return `This action returns all destinations`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} destination`;
-  }
-
-  findByCity(cityId: number) {
-    return this.prisma.destination.findMany({
-      where: { cityId: cityId },
+  async findAll() {
+    return await this.prisma.destination.findMany({
+      include: {
+        city: {
+          include: {
+            country: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
-  update(id: number, updateDestinationDto: UpdateDestinationDto) {
-    return `This action updates a #${id} destination`;
+  async findOne(id: bigint) {
+    return await this.prisma.destination.findUnique({
+      where: { id },
+      include: {
+        city: {
+          include: {
+            country: true,
+          },
+        },
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} destination`;
+  async findByCity(cityId: bigint) {
+    return await this.prisma.destination.findMany({
+      where: { cityId },
+      include: {
+        city: {
+          include: {
+            country: true,
+          },
+        },
+      },
+    });
+  }
+
+  async update(id: bigint, updateDestinationDto: UpdateDestinationDto) {
+    return await this.prisma.destination.update({
+      where: { id },
+      data: updateDestinationDto,
+      include: {
+        city: {
+          include: {
+            country: true,
+          },
+        },
+      },
+    });
+  }
+
+  async remove(id: bigint) {
+    return await this.prisma.destination.delete({
+      where: { id },
+    });
   }
 }

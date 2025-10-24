@@ -17,35 +17,35 @@ import { FilterUsersDto } from './dto/filter-users.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
+  @Post('admin')
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
   //Admin get all user
-  @Get('admin/all')
+  @Get('admin')
   findAll(@Query() filter: FilterUsersDto) {
     return this.usersService.findByFilterAdmin(filter);
   }
 
-  @Get(':id')
+  @Get('admin/:id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(BigInt(id));
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(BigInt(id), updateUserDto);
   }
 
   //Admin change status user
   @Patch('change-status/:id')
   changeStatus(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(BigInt(id), updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(BigInt(id));
   }
 }

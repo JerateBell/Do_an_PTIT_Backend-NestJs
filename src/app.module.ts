@@ -8,6 +8,7 @@ import { CountriesModule } from './module/countries/countries.module';
 import { CitiesModule } from './module/cities/cities.module';
 import { ActivitiesModule } from './module/activities/activities.module';
 import { CategoriesModule } from './module/categories/categories.module';
+import { StatsModule } from './module/stats/stats.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CategoriesModule } from './module/categories/categories.module';
     ActivitiesModule,
     CategoriesModule,
     UsersModule,
+    StatsModule,
   ],
 })
 export class AppModule {}

@@ -7,29 +7,49 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CitiesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createCityDto: CreateCityDto) {
-    return this.prisma.city.create({
+  async create(createCityDto: CreateCityDto) {
+    const city = await this.prisma.city.create({
       data: { ...createCityDto },
+      include: {
+        country: true,
+      },
     });
+    return city;
   }
 
   async findAll() {
-    return await this.prisma.city.findMany();
+    const cities = await this.prisma.city.findMany({
+      include: {
+        country: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return cities;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} city`;
-  }
-
-  update(id: number, updateCityDto: UpdateCityDto) {
-    return this.prisma.city.update({
+  async findOne(id: bigint) {
+    return await this.prisma.city.findUnique({
       where: { id },
-      data: { ...updateCityDto },
+      include: {
+        country: true,
+      },
     });
   }
 
-  remove(id: number) {
-    return this.prisma.city.delete({
+  async update(id: bigint, updateCityDto: UpdateCityDto) {
+    return await this.prisma.city.update({
+      where: { id },
+      data: { ...updateCityDto },
+      include: {
+        country: true,
+      },
+    });
+  }
+
+  async remove(id: bigint) {
+    return await this.prisma.city.delete({
       where: { id },
     });
   }

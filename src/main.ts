@@ -17,6 +17,11 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+    origin: 'http://localhost:5173', // FE domain
+    credentials: true, // cho phép gửi cookie/token dạng credential
+  });
+
   app.useGlobalFilters(new PrismaExceptionFilter());
 
   const config = new DocumentBuilder()
