@@ -8,16 +8,16 @@ import {
   Delete,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ActivitiesService } from './activities.service';
-import { CreateActivityDto } from './dto/create-activity.dto';
-import { UpdateActivityDto } from './dto/update-activity.dto';
+import { ActivityImageService } from './activity-image.service';
+import { CreateActivityImageDto } from './dto/create-activity-image.dto';
+import { UpdateActivityImageDto } from './dto/update-activity-image.dto';
 
-@Controller('activities')
-export class ActivitiesController {
-  constructor(private readonly service: ActivitiesService) {}
+@Controller('activity-images')
+export class ActivityImageController {
+  constructor(private readonly service: ActivityImageService) {}
 
   @Post()
-  create(@Body() dto: CreateActivityDto) {
+  create(@Body() dto: CreateActivityImageDto) {
     return this.service.create(dto);
   }
 
@@ -34,7 +34,7 @@ export class ActivitiesController {
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateActivityDto,
+    @Body() dto: UpdateActivityImageDto,
   ) {
     return this.service.update(BigInt(id), dto);
   }
