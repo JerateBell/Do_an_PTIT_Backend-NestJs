@@ -1,29 +1,68 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class SuppliersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {}
 
-  async createSupplier(data: CreateSupplierDto) {
-    return this.prisma.supplier.create({ data });
+  async create(dto: CreateSupplierDto) {
+    // ✅ Kiểm tra user đã có supplier chưa
+    const existing = await this.prisma.supplier.findUnique({
+      where: { userId: dto.userId },
+    });
+    if (existing) {
+      throw new ConflictException('Người dùng này đã là supplier');
+    }
+
+    return this.prisma.supplier.create({
+      data: {
+        companyName: dto.companyName,
+        email: dto.email,
+        phone: dto.phone,
+        address: dto.address,
+        commissionRate: dto.commissionRate ?? 15.0,
+        userId: dto.userId,
+      },
+    });
   }
 
-  async findAllSuppliers() {
-    return this.prisma.supplier.findMany();
+  findAll() {
+    return this.prisma.supplier.findMany({
+      include: {
+        user: true,
+        activities: true,
+        bookings: true,
+      },
+    });
   }
 
-  async findOneSupplier(id: number) {
-    return this.prisma.supplier.findUnique({ where: { id } });
+  async findOne(id: number) {
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        activities: true,
+        bookings: true,
+      },
+    });
+    if (!supplier) throw new NotFoundException('Không tìm thấy supplier');
+    return supplier;
   }
 
-  async updateSupplier(id: number, data: UpdateSupplierDto) {
-    return this.prisma.supplier.update({ where: { id }, data });
+  async update(id: number, dto: UpdateSupplierDto) {
+    await this.findOne(id);
+    return this.prisma.supplier.update({
+      where: { id },
+      data: { ...dto },
+    });
   }
 
-  async removeSupplier(id: number) {
-    return this.prisma.supplier.delete({ where: { id } });
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.supplier.delete({
+      where: { id },
+    });
   }
 }
