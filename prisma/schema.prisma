@@ -49,7 +49,7 @@ enum PaymentStatus {
 enum PaymentMethod {
   credit_card
   paypal
-  bank_transfer
+  bank_transfer 
 }
 
 // ===== CORE TABLES =====
@@ -61,7 +61,7 @@ model User {
   lastName     String?    @map("last_name") @db.VarChar(100)
   phone        String?    @db.VarChar(20)
   avatar       String?    @db.VarChar(500)
-  role         String     @default("customer") @db.VarChar(20)
+  role         UserRole   @default(customer)
   status       UserStatus @default(active)
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
@@ -81,7 +81,7 @@ model User {
 model Supplier {
   id             BigInt   @id @default(autoincrement())
   companyName    String   @map("company_name") @db.VarChar(255)
-  email          String   @db.VarChar(255)
+  businessEmail  String?  @map("business_email") @db.VarChar(255) // Email công ty (optional, khác với email cá nhân)
   phone          String?  @db.VarChar(20)
   address        String?  @db.Text
   commissionRate Decimal  @default(15.00) @map("commission_rate") @db.Decimal(5, 2)

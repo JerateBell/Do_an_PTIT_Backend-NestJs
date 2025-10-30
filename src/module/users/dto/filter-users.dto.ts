@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsEnum } from 'class-validator';
-import { UserStatus } from '@prisma/client';
+import { IsEnum, IsOptional } from 'class-validator';
+import { UserStatus, UserRole } from '@prisma/client';
 
 export class FilterUsersDto {
   @Type(() => Number)
@@ -11,8 +11,11 @@ export class FilterUsersDto {
 
   search?: string;
 
-  role?: string;
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 
+  @IsOptional()
   @IsEnum(UserStatus)
-  status?: UserStatus = 'active';
+  status?: UserStatus;
 }

@@ -58,6 +58,85 @@ export class SuppliersService {
       data: { ...dto },
     });
   }
+  
+  async createSupplier(data: CreateSupplierDto) {
+    return this.prisma.supplier.create({ 
+      data,
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            role: true,
+            status: true,
+          }
+        }
+      }
+    });
+  }
+
+  async findAllSuppliers() {
+    return this.prisma.supplier.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            role: true,
+            status: true,
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc',
+      }
+    });
+  }
+
+  async findOneSupplier(id: number) {
+    return this.prisma.supplier.findUnique({ 
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            role: true,
+            status: true,
+          }
+        }
+      }
+    });
+  }
+
+  async updateSupplier(id: number, data: UpdateSupplierDto) {
+    return this.prisma.supplier.update({ 
+      where: { id }, 
+      data,
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            role: true,
+            status: true,
+          }
+        }
+      }
+    });
+  }
 
   async remove(id: number) {
     await this.findOne(id);
