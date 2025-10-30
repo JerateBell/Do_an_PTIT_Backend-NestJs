@@ -209,7 +209,7 @@ async function main() {
     update: {},
     create: {
       companyName: 'Vietnam Adventures Co.',
-      email: 'contact@vnadventures.com',
+      businessEmail: 'contact@vnadventures.com',
       userId: supplierUser.id,
       phone: '+84 123456789',
       address: 'Hanoi, Vietnam',

@@ -9,5 +9,14 @@ export class StatsController {
   getStats() {
     return this.statsService.getOverallStats();
   }
-}
 
+  @Get('bookings')
+  getBookingStats() {
+    return this.statsService.getBookingStats();
+  }
+
+  @Get('activities')
+  getActivityStats() {
+    return this.statsService.getActivityStats();
+  }
+}
