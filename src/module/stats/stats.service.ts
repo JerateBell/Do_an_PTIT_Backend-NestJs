@@ -44,6 +44,31 @@ export class StatsService {
       },
     });
 
+    // Get booking statistics
+    const totalBookings = await this.prisma.booking.count();
+    const pendingBookings = await this.prisma.booking.count({
+      where: { status: 'pending' },
+    });
+    const confirmedBookings = await this.prisma.booking.count({
+      where: { status: 'confirmed' },
+    });
+    const completedBookings = await this.prisma.booking.count({
+      where: { status: 'completed' },
+    });
+    const cancelledBookings = await this.prisma.booking.count({
+      where: { status: 'cancelled' },
+    });
+
+    // Get total revenue
+    const revenueResult = await this.prisma.booking.aggregate({
+      where: {
+        status: { in: ['confirmed', 'completed'] },
+      },
+      _sum: {
+        total: true,
+      },
+    });
+
     return {
       users: {
         total: totalUsers,
@@ -63,7 +88,194 @@ export class StatsService {
         activities: totalActivities,
         categories: totalCategories,
       },
+      bookings: {
+        total: totalBookings,
+        pending: pendingBookings,
+        confirmed: confirmedBookings,
+        completed: completedBookings,
+        cancelled: cancelledBookings,
+        revenue: revenueResult._sum.total || 0,
+      },
+    };
+  }
+
+  async getBookingStats() {
+    // Get bookings by status
+    const bookingsByStatus = await this.prisma.booking.groupBy({
+      by: ['status'],
+      _count: {
+        id: true,
+      },
+    });
+
+    // Get bookings trend (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const bookingsTrend = await this.prisma.$queryRaw<
+      Array<{ date: string; count: number }>
+    >`
+      SELECT 
+        DATE(created_at) as date,
+        COUNT(*)::int as count
+      FROM bookings
+      WHERE created_at >= ${thirtyDaysAgo}
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `;
+
+    // Get revenue trend (last 30 days)
+    const revenueTrend = await this.prisma.$queryRaw<
+      Array<{ date: string; revenue: number }>
+    >`
+      SELECT 
+        DATE(created_at) as date,
+        SUM(total)::float as revenue
+      FROM bookings
+      WHERE created_at >= ${thirtyDaysAgo}
+        AND status IN ('confirmed', 'completed')
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `;
+
+    // Get bookings by month (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const bookingsByMonth = await this.prisma.$queryRaw<
+      Array<{ month: string; count: number; revenue: number }>
+    >`
+      SELECT 
+        TO_CHAR(created_at, 'YYYY-MM') as month,
+        COUNT(*)::int as count,
+        SUM(CASE WHEN status IN ('confirmed', 'completed') THEN total ELSE 0 END)::float as revenue
+      FROM bookings
+      WHERE created_at >= ${sixMonthsAgo}
+      GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+      ORDER BY month ASC
+    `;
+
+    return {
+      byStatus: bookingsByStatus.map((item) => ({
+        status: item.status,
+        count: item._count.id,
+      })),
+      trend: bookingsTrend,
+      revenueTrend: revenueTrend,
+      byMonth: bookingsByMonth,
+    };
+  }
+
+  async getActivityStats() {
+    // Get activities by status
+    const activitiesByStatus = await this.prisma.activity.groupBy({
+      by: ['status'],
+      _count: {
+        id: true,
+      },
+    });
+
+    // Get top activities by bookings
+    const topActivities = await this.prisma.activity.findMany({
+      take: 10,
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            bookings: true,
+          },
+        },
+      },
+      orderBy: {
+        bookings: {
+          _count: 'desc',
+        },
+      },
+    });
+
+    // Get activities by category
+    const activitiesByCategory = await this.prisma.activity.groupBy({
+      by: ['categoryId'],
+      _count: {
+        id: true,
+      },
+    });
+
+    // Fetch category names
+    const categoryIds = activitiesByCategory.map((item) => item.categoryId);
+    const categories = await this.prisma.category.findMany({
+      where: {
+        id: {
+          in: categoryIds,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+
+    const activitiesByCategoryWithNames = activitiesByCategory.map((item) => ({
+      categoryId: item.categoryId,
+      categoryName: categoryMap.get(item.categoryId) || 'Unknown',
+      count: item._count.id,
+    }));
+
+    // Get activities by destination
+    const activitiesByDestination = await this.prisma.activity.groupBy({
+      by: ['destinationId'],
+      _count: {
+        id: true,
+      },
+      take: 10,
+      orderBy: {
+        _count: {
+          id: 'desc',
+        },
+      },
+    });
+
+    // Fetch destination names
+    const destinationIds = activitiesByDestination.map(
+      (item) => item.destinationId,
+    );
+    const destinations = await this.prisma.destination.findMany({
+      where: {
+        id: {
+          in: destinationIds,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    const destinationMap = new Map(destinations.map((d) => [d.id, d.name]));
+
+    const activitiesByDestinationWithNames = activitiesByDestination.map(
+      (item) => ({
+        destinationId: item.destinationId,
+        destinationName: destinationMap.get(item.destinationId) || 'Unknown',
+        count: item._count.id,
+      }),
+    );
+
+    return {
+      byStatus: activitiesByStatus.map((item) => ({
+        status: item.status,
+        count: item._count.id,
+      })),
+      topActivities: topActivities.map((item) => ({
+        id: item.id,
+        name: item.name,
+        bookingCount: item._count.bookings,
+      })),
+      byCategory: activitiesByCategoryWithNames,
+      byDestination: activitiesByDestinationWithNames,
     };
   }
 }
-
