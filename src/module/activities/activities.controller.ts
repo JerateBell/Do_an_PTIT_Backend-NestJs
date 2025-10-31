@@ -1,46 +1,58 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Patch, Delete, Body, UseGuards } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
+import { CurrentSupplier } from '../../common/decorators/current-supplier.decorator';
+import { AuthGuard } from '@nestjs/passport';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Controller('activities')
+@UseGuards(AuthGuard('jwt'))
 export class ActivitiesController {
-  constructor(private readonly service: ActivitiesService) {}
+  constructor(private readonly activitiesService: ActivitiesService) {}
 
   @Post()
-  create(@Body() dto: CreateActivityDto) {
-    return this.service.create(dto);
+  async create(
+    @Body() data: CreateActivityDto,
+    @CurrentSupplier() supplier: any,
+  ) {
+    return this.activitiesService.createForSupplier(BigInt(supplier.id), data);
   }
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  async findAll(@CurrentSupplier() supplier: any) {
+    console.log('Supplier from JWT:', supplier);
+    return this.activitiesService.findAllByUser(BigInt(supplier.id));
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(BigInt(id));
+  async findOne(
+    @Param('id') id: string,
+    @CurrentSupplier() supplier: any,
+  ) {
+    return this.activitiesService.findOneByUser(
+      BigInt(id),
+      BigInt(supplier.id),
+    );
   }
 
   @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateActivityDto,
+  async update(
+    @Param('id') id: string,
+    @Body() data: UpdateActivityDto,
+    @CurrentSupplier() supplier: any,
   ) {
-    return this.service.update(BigInt(id), dto);
+    const activityId = BigInt(id);
+    const supplierId = BigInt(supplier.id);
+    return this.activitiesService.updateByUser(activityId, data, supplierId);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.service.remove(BigInt(id));
+  async remove(
+    @Param('id') id: string,
+    @CurrentSupplier() supplier: any,
+  ) {
+    const activityId = BigInt(id);
+    const supplierId = BigInt(supplier.id);
+    return this.activitiesService.deleteByUser(activityId, supplierId);
   }
 }

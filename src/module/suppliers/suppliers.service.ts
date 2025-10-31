@@ -19,7 +19,7 @@ export class SuppliersService {
     return this.prisma.supplier.create({
       data: {
         companyName: dto.companyName,
-        email: dto.email,
+        businessEmail: dto.businessEmail,
         phone: dto.phone,
         address: dto.address,
         commissionRate: dto.commissionRate ?? 15.0,
@@ -58,7 +58,7 @@ export class SuppliersService {
       data: { ...dto },
     });
   }
-  
+
   async createSupplier(data: CreateSupplierDto) {
     return this.prisma.supplier.create({ 
       data,

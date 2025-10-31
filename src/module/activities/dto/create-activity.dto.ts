@@ -1,12 +1,16 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsBoolean, IsEnum, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  IsEnum,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ActivityStatus } from '@prisma/client';
 
 export class CreateActivityDto {
-  @IsNumber()
-  @Type(() => Number)
-  supplierId: number;
-
   @IsNumber()
   @Type(() => Number)
   destinationId: number;
@@ -39,21 +43,13 @@ export class CreateActivityDto {
   @Type(() => Number)
   price: number;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   currency?: string;
 
   @IsOptional()
   @IsNumber()
   maxParticipants?: number;
-
-  @IsOptional()
-  @IsNumber()
-  rating?: number;
-
-  @IsOptional()
-  @IsNumber()
-  reviewCount?: number;
 
   @IsOptional()
   @IsBoolean()
@@ -63,7 +59,6 @@ export class CreateActivityDto {
   @IsBoolean()
   freeCancellation?: boolean;
 
-  // ✅ Sử dụng enum từ Prisma
   @IsOptional()
   @IsEnum(ActivityStatus)
   status?: ActivityStatus;

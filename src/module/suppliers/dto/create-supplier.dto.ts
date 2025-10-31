@@ -5,16 +5,12 @@ export class CreateSupplierDto {
   @IsString()
   @IsNotEmpty()
   companyName: string;
-<<<<<<< HEAD
 
   @IsEmail()
-  email: string;
+  businessEmail?: string;
 
   @IsOptional()
   @IsPhoneNumber('VN', { message: 'Số điện thoại không hợp lệ' })
-=======
-  businessEmail?: string;
->>>>>>> main
   phone?: string;
 
   @IsOptional()

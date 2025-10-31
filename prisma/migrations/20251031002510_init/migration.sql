@@ -25,7 +25,7 @@ CREATE TABLE "public"."users" (
     "last_name" VARCHAR(100),
     "phone" VARCHAR(20),
     "avatar" VARCHAR(500),
-    "role" VARCHAR(20) NOT NULL DEFAULT 'customer',
+    "role" "public"."UserRole" NOT NULL DEFAULT 'customer',
     "status" "public"."UserStatus" NOT NULL DEFAULT 'active',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE "public"."users" (
 CREATE TABLE "public"."suppliers" (
     "id" BIGSERIAL NOT NULL,
     "company_name" VARCHAR(255) NOT NULL,
-    "email" VARCHAR(255) NOT NULL,
+    "business_email" VARCHAR(255),
     "phone" VARCHAR(20),
     "address" TEXT,
     "commission_rate" DECIMAL(5,2) NOT NULL DEFAULT 15.00,
