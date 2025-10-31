@@ -20,7 +20,6 @@ export class ActivitiesController {
 
   @Get()
   async findAll(@CurrentSupplier() supplier: any) {
-    console.log('Supplier from JWT:', supplier);
     return this.activitiesService.findAllByUser(BigInt(supplier.id));
   }
 

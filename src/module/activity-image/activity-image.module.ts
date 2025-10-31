@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ActivityImageService } from './activity-image.service';
-import { ActivityImageController } from './activity-image.controller';
 import { PrismaService } from '../prisma/prisma.service';
+import { ActivityImagesController } from './activity-image.controller';
+import { ActivityImagesService } from './activity-image.service';
 
 @Module({
-  controllers: [ActivityImageController],
-  providers: [ActivityImageService, PrismaService],
+  controllers: [ActivityImagesController],
+  providers: [ActivityImagesService, PrismaService],
 })
 export class ActivityImageModule {}

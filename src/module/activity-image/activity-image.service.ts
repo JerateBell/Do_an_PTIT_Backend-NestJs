@@ -1,68 +1,94 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateActivityImageDto } from './dto/create-activity-image.dto';
 import { UpdateActivityImageDto } from './dto/update-activity-image.dto';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class ActivityImageService {
-  constructor(private readonly prisma: PrismaService) {}
+export class ActivityImagesService {
+  constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateActivityImageDto) {
-    // Nếu đánh dấu isPrimary = true thì bỏ isPrimary ở ảnh khác cùng activity
-    if (dto.isPrimary) {
-      await this.prisma.activityImage.updateMany({
-        where: { activityId: dto.activityId, isPrimary: true },
-        data: { isPrimary: false },
-      });
+  // Helper: lấy supplier và kiểm tra quyền sở hữu activity
+  private async verifySupplierOwnsActivity(activityId: bigint, userId: bigint) {
+    const supplier = await this.prisma.supplier.findUnique({ where: { userId } });
+    if (!supplier) throw new NotFoundException('Supplier not found');
+
+    const activity = await this.prisma.activity.findFirst({
+      where: { id: activityId, supplierId: supplier.id },
+    });
+    if (!activity) {
+      throw new NotFoundException('Activity not found or not owned by this supplier');
     }
+
+    return { supplier, activity };
+  }
+
+  // ------------------ CREATE ------------------
+  async create(activityId: bigint, data: CreateActivityImageDto, userId: bigint) {
+    await this.verifySupplierOwnsActivity(activityId, userId);
 
     return this.prisma.activityImage.create({
       data: {
-        activityId: dto.activityId,
-        imageUrl: dto.imageUrl,
-        isPrimary: dto.isPrimary ?? false,
-        sortOrder: dto.sortOrder ?? 0,
+        activityId,
+        imageUrl: data.imageUrl,
+        isPrimary: data.isPrimary ?? false,
+        sortOrder: data.sortOrder ?? 0,
       },
     });
   }
 
-  async findAll() {
+  // ------------------ FIND ALL ------------------
+  async findAll(activityId: bigint, userId: bigint) {
+    await this.verifySupplierOwnsActivity(activityId, userId);
+
     return this.prisma.activityImage.findMany({
-      include: { activity: true },
+      where: { activityId },
       orderBy: { sortOrder: 'asc' },
     });
   }
 
-  async findOne(id: bigint) {
-    const image = await this.prisma.activityImage.findUnique({
-      where: { id },
-      include: { activity: true },
+  // ------------------ FIND ONE ------------------
+  async findOne(id: bigint, activityId: bigint, userId: bigint) {
+    await this.verifySupplierOwnsActivity(activityId, userId);
+
+    const image = await this.prisma.activityImage.findFirst({
+      where: { id, activityId },
     });
+
     if (!image) throw new NotFoundException('Activity image not found');
     return image;
   }
 
-  async update(id: bigint, dto: UpdateActivityImageDto) {
-    const image = await this.findOne(id);
+  // ------------------ UPDATE ------------------
+  async update(id: bigint, activityId: bigint, data: UpdateActivityImageDto, userId: bigint) {
+    await this.verifySupplierOwnsActivity(activityId, userId);
 
-    if (dto.isPrimary) {
-      // bỏ isPrimary ở ảnh khác cùng activity
-      await this.prisma.activityImage.updateMany({
-        where: { activityId: image.activityId, isPrimary: true },
-        data: { isPrimary: false },
-      });
-    }
-
-    return this.prisma.activityImage.update({
-      where: { id },
-      data: {
-        ...dto,
-      },
+    const image = await this.prisma.activityImage.findFirst({
+      where: { id, activityId },
     });
+    if (!image) throw new NotFoundException('Activity image not found');
+
+    const updated = await this.prisma.activityImage.update({
+      where: { id },
+      data,
+    });
+
+    return {
+      message: 'Image updated successfully',
+      image: updated,
+    };
   }
 
-  async remove(id: bigint) {
-    await this.findOne(id);
-    return this.prisma.activityImage.delete({ where: { id } });
+  // ------------------ DELETE ------------------
+  async remove(id: bigint, activityId: bigint, userId: bigint) {
+    await this.verifySupplierOwnsActivity(activityId, userId);
+
+    const image = await this.prisma.activityImage.findFirst({
+      where: { id, activityId },
+    });
+    if (!image) throw new NotFoundException('Activity image not found');
+
+    await this.prisma.activityImage.delete({ where: { id } });
+
+    return { message: 'Image deleted successfully' };
   }
 }

@@ -1,38 +1,22 @@
-import {
-  IsInt,
-  IsOptional,
-  IsString,
-  IsDateString,
-  IsNumber,
-  Min,
-} from 'class-validator';
-import { BookedLessThanAvailable } from '../validators/booked-less-than-available.validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsDateString, IsInt, IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class CreateActivityScheduleDto {
-  @IsInt()
-  activityId: number;
-
+  @ApiProperty({ example: '2025-10-25', description: 'Ngày diễn ra hoạt động' })
   @IsDateString()
-  date: string; // ISO format: "2025-10-24"
+  date: string;
 
+  @ApiProperty({ example: '09:00', required: false })
   @IsOptional()
   @IsString()
-  timeSlot?: string; // e.g. "09:00"
+  timeSlot?: string;
 
+  @ApiProperty({ example: 20 })
   @IsInt()
-  @Min(1)
   availableSpots: number;
 
+  @ApiProperty({ example: 100.00, required: false })
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  @BookedLessThanAvailable({
-    message: 'bookedSpots cannot be greater than availableSpots',
-  })
-  bookedSpots?: number;
-
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
+  @IsNumber()
   price?: number;
 }
