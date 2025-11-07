@@ -84,4 +84,39 @@ export class ActivitySchedulesService {
 
     return { message: 'Schedule deleted successfully' };
   }
+
+  // 🟦🆕 [HÀM MỚI] — Lấy danh sách lịch + tính startTime & endTime
+  async findAllWithComputedTimes(activityId: bigint, userId: bigint) {
+    await this.verifySupplierOwnsActivity(activityId, userId);
+
+    // Lấy danh sách schedule cùng với thông tin duration (giờ)
+    const schedules = await this.prisma.activitySchedule.findMany({
+      where: { activityId },
+      include: {
+        activity: {
+          select: { duration: true },
+        },
+      },
+      orderBy: { date: 'asc' },
+    });
+
+    // 👉 Tính toán startTime & endTime cho từng schedule
+    return schedules.map((s) => {
+      // timeSlot là string "09:00"
+      const [hours, minutes] = s.timeSlot ? s.timeSlot.split(':').map(Number) : [0, 0];
+      const startTime = new Date(s.date);
+      startTime.setHours(hours, minutes, 0, 0);
+
+      const endTime = new Date(startTime);
+      // duration ở đây là số giờ
+      const durationHours = s.activity?.duration || 0;
+      endTime.setHours(startTime.getHours() + durationHours);
+
+      return {
+        ...s,
+        startTime,
+        endTime,
+      };
+    });
+  }
 }

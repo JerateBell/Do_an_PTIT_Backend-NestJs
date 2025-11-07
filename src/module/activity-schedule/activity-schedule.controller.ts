@@ -24,6 +24,17 @@ export class ActivitySchedulesController {
     return this.activitySchedulesService.findAll(BigInt(activityId), BigInt(user.id));
   }
 
+  @Get('with-times')
+  findAllWithComputedTimes(
+    @Param('activityId') activityId: string,
+    @CurrentSupplier() user: any,
+  ) {
+    return this.activitySchedulesService.findAllWithComputedTimes(
+      BigInt(activityId),
+      BigInt(user.id),
+    );
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

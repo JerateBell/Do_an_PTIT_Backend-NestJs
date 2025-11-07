@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { ActivityStatus } from '@prisma/client';
 
 @Injectable()
 export class ActivitiesService {
@@ -18,7 +17,6 @@ export class ActivitiesService {
       throw new Error('Supplier not found for this user');
     }
 
-    // Tạo activity gắn với supplier.id thật
     return this.prisma.activity.create({
       data: {
         ...data,
@@ -74,9 +72,6 @@ export class ActivitiesService {
     };
   }
 
-  // ----------------------
-  // Delete by user
-  // ----------------------
   async deleteByUser(id: bigint, userId: bigint) {
     const supplier = await this.prisma.supplier.findUnique({
       where: { userId },
