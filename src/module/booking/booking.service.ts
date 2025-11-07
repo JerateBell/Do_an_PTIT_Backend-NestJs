@@ -1,75 +1,81 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
-import { BookingStatus, PaymentStatus } from '@prisma/client';
-import { nanoid } from 'nanoid';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
 @Injectable()
 export class BookingsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateBookingDto) {
-    // ✅ Sinh mã bookingRef ngắn, duy nhất
-    const bookingRef = `BK${nanoid(8).toUpperCase()}`;
-
-    return this.prisma.booking.create({
-      data: {
-        bookingRef,
-        userId: dto.userId,
-        activityId: dto.activityId,
-        scheduleId: dto.scheduleId,
-        supplierId: dto.supplierId,
-        customerName: dto.customerName,
-        customerEmail: dto.customerEmail,
-        customerPhone: dto.customerPhone,
-        bookingDate: new Date(dto.bookingDate),
-        participants: dto.participants,
-        subtotal: dto.subtotal,
-        discount: dto.discount ?? 0,
-        total: dto.total,
-        currency: dto.currency ?? 'USD',
-        status: dto.status ?? BookingStatus.pending,
-        paymentStatus: dto.paymentStatus ?? PaymentStatus.pending,
-      },
+  // ✅ Helper: Lấy supplier theo userId
+  private async getSupplierByUserId(userId: bigint) {
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { userId },
     });
+    if (!supplier) throw new NotFoundException('Supplier not found');
+    return supplier;
   }
 
-  findAll() {
+  // 🟩 Lấy tất cả booking của supplier đang đăng nhập
+  async findAllForSupplier(userId: bigint) {
+    const supplier = await this.getSupplierByUserId(userId);
+
     return this.prisma.booking.findMany({
+      where: {
+        supplierId: supplier.id, // ✅ lọc trực tiếp theo supplierId
+      },
       include: {
+        user: true,
         activity: true,
         schedule: true,
-        supplier: true,
-        user: true,
+        payments: true,
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(id: number) {
+  // 🟦 Lấy chi tiết một booking
+  async findOneForSupplier(id: bigint, userId: bigint) {
+    const supplier = await this.getSupplierByUserId(userId);
+
     const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: {
+        user: true,
         activity: true,
         schedule: true,
-        supplier: true,
-        user: true,
+        payments: true,
       },
     });
-    if (!booking) throw new NotFoundException('Không tìm thấy booking');
+
+    if (!booking) throw new NotFoundException('Booking not found');
+    if (booking.supplierId !== supplier.id) {
+      throw new ForbiddenException('You do not have access to this booking');
+    }
+
     return booking;
   }
 
-  async update(id: number, dto: UpdateBookingDto) {
-    await this.findOne(id);
+  // 🟨 Cập nhật trạng thái booking
+  async updateStatus(id: bigint, userId: bigint, dto: UpdateBookingStatusDto) {
+    const booking = await this.findOneForSupplier(id, userId);
+
     return this.prisma.booking.update({
-      where: { id },
-      data: { ...dto },
+      where: { id: booking.id },
+      data: {
+        ...(dto.status && { status: dto.status }),
+        ...(dto.paymentStatus && { paymentStatus: dto.paymentStatus }),
+      },
+      include: {
+        activity: true,
+        schedule: true,
+      },
     });
   }
 
-  async remove(id: number) {
-    await this.findOne(id);
-    return this.prisma.booking.delete({ where: { id } });
+  // 🟥 Xóa booking (nếu cần)
+  async remove(id: bigint, userId: bigint) {
+    const booking = await this.findOneForSupplier(id, userId);
+    await this.prisma.booking.delete({ where: { id: booking.id } });
+    return { message: 'Booking deleted successfully' };
   }
 }

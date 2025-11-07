@@ -1,44 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
-import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
+import { Controller, Get, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { BookingsService } from './booking.service';
+import { CurrentSupplier } from 'src/common/decorators/current-supplier.decorator';
+import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
-@Controller('bookings')
+@Controller('supplier/bookings')
+@UseGuards(AuthGuard('jwt'))
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
-  @Post()
-  async create(@Body() dto: CreateBookingDto) {
-    if (dto.total < 0 || dto.subtotal < 0) {
-      throw new HttpException('Giá trị tiền không hợp lệ', HttpStatus.BAD_REQUEST);
-    }
-    if (dto.participants < 1) {
-      throw new HttpException('Số lượng người tham gia phải >= 1', HttpStatus.BAD_REQUEST);
-    }
-    if (dto.discount && dto.discount > dto.subtotal) {
-      throw new HttpException('Discount không thể lớn hơn subtotal', HttpStatus.BAD_REQUEST);
-    }
-
-    return this.bookingsService.create(dto);
-  }
-
+  // 🟩 GET all bookings của supplier
   @Get()
-  findAll() {
-    return this.bookingsService.findAll();
+  findAll(@CurrentSupplier() user: any) {
+    return this.bookingsService.findAllForSupplier(BigInt(user.id));
   }
 
+  // 🟦 GET chi tiết 1 booking
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bookingsService.findOne(+id);
+  findOne(@Param('id') id: string, @CurrentSupplier() user: any) {
+    return this.bookingsService.findOneForSupplier(BigInt(id), BigInt(user.id));
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateBookingDto) {
-    return this.bookingsService.update(+id, dto);
+  // 🟨 PATCH cập nhật trạng thái booking
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateBookingStatusDto,
+    @CurrentSupplier() user: any,
+  ) {
+    return this.bookingsService.updateStatus(BigInt(id), BigInt(user.id), dto);
   }
 
+  // 🟥 DELETE booking (nếu cần)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bookingsService.remove(+id);
+  remove(@Param('id') id: string, @CurrentSupplier() user: any) {
+    return this.bookingsService.remove(BigInt(id), BigInt(user.id));
   }
 }

@@ -12,6 +12,7 @@ import { StatsModule } from './module/stats/stats.module';
 import { SuppliersModule } from './module/suppliers/suppliers.module';
 import { ActivityImageModule } from './module/activity-image/activity-image.module';
 import { ActivityScheduleModule } from './module/activity-schedule/activity-schedule.module';
+import { BookingModule } from './module/booking/booking.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ActivityScheduleModule } from './module/activity-schedule/activity-sche
     UsersModule,
     StatsModule,
     SuppliersModule,
+    BookingModule,
   ],
 })
 export class AppModule {}
