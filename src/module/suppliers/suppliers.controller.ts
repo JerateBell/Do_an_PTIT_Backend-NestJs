@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Patch,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
 import { SuppliersService } from './suppliers.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
@@ -16,27 +8,31 @@ export class SuppliersController {
   constructor(private readonly suppliersService: SuppliersService) {}
 
   @Post()
-  createSupplier(@Body() dto: CreateSupplierDto) {
-    return this.suppliersService.createSupplier(dto);
+  async create(@Body() dto: CreateSupplierDto) {
+    if (dto.commissionRate && (dto.commissionRate < 0 || dto.commissionRate > 100)) {
+      throw new HttpException('Tỉ lệ hoa hồng phải nằm trong khoảng 0-100%', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.suppliersService.create(dto);
   }
 
   @Get()
-  findAllSuppliers() {
-    return this.suppliersService.findAllSuppliers();
+  findAll() {
+    return this.suppliersService.findAll();
   }
 
   @Get(':id')
-  findOneSupplier(@Param('id') id: string) {
-    return this.suppliersService.findOneSupplier(Number(id));
+  findOne(@Param('id') id: string) {
+    return this.suppliersService.findOne(+id);
   }
 
   @Patch(':id')
-  updateSupplier(@Param('id') id: string, @Body() dto: UpdateSupplierDto) {
-    return this.suppliersService.updateSupplier(Number(id), dto);
+  update(@Param('id') id: string, @Body() dto: UpdateSupplierDto) {
+    return this.suppliersService.update(+id, dto);
   }
 
   @Delete(':id')
-  removeSupplier(@Param('id') id: string) {
-    return this.suppliersService.removeSupplier(Number(id));
+  remove(@Param('id') id: string) {
+    return this.suppliersService.remove(+id);
   }
 }

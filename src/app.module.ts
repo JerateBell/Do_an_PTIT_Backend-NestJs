@@ -10,6 +10,8 @@ import { ActivitiesModule } from './module/activities/activities.module';
 import { CategoriesModule } from './module/categories/categories.module';
 import { StatsModule } from './module/stats/stats.module';
 import { SuppliersModule } from './module/suppliers/suppliers.module';
+import { ActivityImageModule } from './module/activity-image/activity-image.module';
+import { ActivityScheduleModule } from './module/activity-schedule/activity-schedule.module';
 import { NotificationsModule } from './module/notifications/notifications.module';
 
 @Module({
@@ -20,6 +22,8 @@ import { NotificationsModule } from './module/notifications/notifications.module
     CountriesModule,
     DestinationsModule,
     ActivitiesModule,
+    ActivityImageModule,
+    ActivityScheduleModule,
     CategoriesModule,
     UsersModule,
     StatsModule,

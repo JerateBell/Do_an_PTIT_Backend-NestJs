@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ActivityScheduleController } from './activity-schedule.controller';
-import { ActivityScheduleService } from './activity-schedule.service';
+import { ActivitySchedulesController } from './activity-schedule.controller';
+import { ActivitySchedulesService } from './activity-schedule.service';
 
 describe('ActivityScheduleController', () => {
-  let controller: ActivityScheduleController;
+  let controller: ActivitySchedulesController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ActivityScheduleController],
-      providers: [ActivityScheduleService],
+      controllers: [ActivitySchedulesController],
+      providers: [ActivitySchedulesService],
     }).compile();
 
-    controller = module.get<ActivityScheduleController>(ActivityScheduleController);
+    controller = module.get<ActivitySchedulesController>(ActivitySchedulesController);
   });
 
   it('should be defined', () => {
