@@ -574,6 +574,110 @@ async function main() {
     },
   });
 
+  // --- Notifications ---
+  const allUsers = await prisma.user.findMany({ select: { id: true, email: true } });
+  const someUsers = allUsers.slice(0, Math.min(10, allUsers.length));
+  for (const u of someUsers) {
+    await prisma.notification.createMany({
+      data: [
+        {
+          userId: u.id,
+          title: 'Welcome',
+          message: 'Chào mừng bạn đến với hệ thống!',
+          type: 'system',
+          isRead: false,
+        },
+        {
+          userId: u.id,
+          title: 'Khuyến mãi',
+          message: 'Giảm giá 20% cho tour tuần này.',
+          type: 'marketing',
+          isRead: Math.random() > 0.5,
+        },
+        {
+          userId: u.id,
+          title: 'Cập nhật đơn hàng',
+          message: 'Đơn đặt tour của bạn đã được cập nhật.',
+          type: 'booking',
+          isRead: Math.random() > 0.5,
+        },
+      ],
+    });
+  }
+
+  // --- Synthetic bookings for charts (last 90 days) ---
+  const statuses = ['pending', 'confirmed', 'completed', 'cancelled'] as const;
+  const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const pick = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
+
+  const baseUsers = await prisma.user.findMany({
+    where: { role: { in: ['customer', 'supplier'] } },
+    select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+    take: 20,
+  });
+
+  const schedules = await prisma.activitySchedule.findMany({ select: { id: true, activityId: true } });
+  const suppliersSeed = await prisma.supplier.findMany({ select: { id: true } });
+  const activitiesSeed = await prisma.activity.findMany({ select: { id: true, name: true } });
+
+  if (baseUsers.length && schedules.length && suppliersSeed.length && activitiesSeed.length) {
+    const start = new Date();
+    start.setDate(start.getDate() - 89);
+    let refCounter = 1000;
+
+    for (let d = 0; d < 90; d++) {
+      const day = new Date(start);
+      day.setDate(start.getDate() + d);
+      const dayCount = rand(1, 6);
+      for (let i = 0; i < dayCount; i++) {
+        const user = pick(baseUsers);
+        const schedule = pick(schedules);
+        const supplierPick = pick(suppliersSeed);
+        const activityPick = activitiesSeed.find((a) => a.id === schedule.activityId)!;
+        const status = pick(statuses);
+        const participants = rand(1, 5);
+        const price = rand(20, 300);
+        const discount = Math.random() < 0.2 ? rand(0, 30) : 0;
+        const subtotal = participants * price;
+        const total = Math.max(subtotal - discount, 0);
+
+        refCounter += 1;
+        const bookingRef = `BK${refCounter}`;
+
+        await prisma.booking.create({
+          data: {
+            bookingRef,
+            userId: user.id,
+            activityId: activityPick.id,
+            scheduleId: schedule.id,
+            supplierId: supplierPick.id,
+            customerName: `${user.firstName ?? 'Guest'} ${user.lastName ?? ''}`.trim(),
+            customerEmail: user.email,
+            customerPhone: user.phone ?? null,
+            bookingDate: day,
+            participants,
+            subtotal,
+            discount,
+            total,
+            currency: 'USD',
+            status: status as any,
+            paymentStatus: (status === 'completed' || status === 'confirmed') ? 'paid' : (status === 'cancelled' ? 'refunded' : 'pending'),
+            createdAt: day,
+            updatedAt: day,
+          }
+        });
+      }
+    }
+  }
+
+  // --- Backfill user createdAt over last 60 days for newLast7Days metric ---
+  const allUsersForDates = await prisma.user.findMany({ select: { id: true } });
+  for (const u of allUsersForDates) {
+    const created = new Date();
+    created.setDate(created.getDate() - rand(0, 60));
+    await prisma.user.update({ where: { id: u.id }, data: { createdAt: created } });
+  }
+
   console.log('✅ Seed completed successfully!');
 }
 

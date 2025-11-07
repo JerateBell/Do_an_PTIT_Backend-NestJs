@@ -10,6 +10,7 @@ import { ActivitiesModule } from './module/activities/activities.module';
 import { CategoriesModule } from './module/categories/categories.module';
 import { StatsModule } from './module/stats/stats.module';
 import { SuppliersModule } from './module/suppliers/suppliers.module';
+import { NotificationsModule } from './module/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SuppliersModule } from './module/suppliers/suppliers.module';
     UsersModule,
     StatsModule,
     SuppliersModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
