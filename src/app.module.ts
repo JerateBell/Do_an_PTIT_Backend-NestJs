@@ -13,6 +13,7 @@ import { SuppliersModule } from './module/suppliers/suppliers.module';
 import { ActivityImageModule } from './module/activity-image/activity-image.module';
 import { ActivityScheduleModule } from './module/activity-schedule/activity-schedule.module';
 import { BookingModule } from './module/booking/booking.module';
+import { ToursModule } from './module/tours/tours.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BookingModule } from './module/booking/booking.module';
     StatsModule,
     SuppliersModule,
     BookingModule,
+    ToursModule,
   ],
 })
 export class AppModule {}
