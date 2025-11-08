@@ -12,11 +12,34 @@ export class ToursService {
   }
 
   async findAllActivities() {
-    return this.prisma.activity.findMany();
+    return this.prisma.activity.findMany({
+      include: {
+        supplier: true,
+        category: true,
+        destination: true,
+        images: true,
+        schedules: true,
+        bookings: true,
+        reviews: true,
+        wishlists: true,
+      }
+    });
   }
 
   async findOneActivity(id: number) {
-    return this.prisma.activity.findUnique({ where: { id } });
+    return this.prisma.activity.findUnique({ 
+      where: { id },
+      include: {
+        supplier: true,
+        category: true,
+        destination: true,
+        images: true,
+        schedules: true,
+        bookings: true,
+        reviews: true,
+        wishlists: true,
+      }
+    });
   }
 
   async updateActivity(id: number, data: UpdateActivityDto) {
