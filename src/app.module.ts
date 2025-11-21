@@ -31,6 +31,7 @@ import { ToursModule } from './module/tours/tours.module';
     SuppliersModule,
     BookingModule,
     ToursModule,
+    GiftCardModule,
   ],
 })
 export class AppModule {}
