@@ -1,8 +1,9 @@
-import { Controller, Get, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Delete, Param, Body, UseGuards, Post, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { BookingsService } from './booking.service';
 import { CurrentSupplier } from 'src/common/decorators/current-supplier.decorator';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { CreateBookingDto } from './dto/create-booking.dto';
 
 @Controller('supplier/bookings')
 @UseGuards(AuthGuard('jwt'))
@@ -35,5 +36,11 @@ export class BookingsController {
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentSupplier() user: any) {
     return this.bookingsService.remove(BigInt(id), BigInt(user.id));
+  }
+
+  @Post()
+  create(@Body() dto: CreateBookingDto, @Req() req) {
+    const userId = req.user.id; // userId lấy từ token
+    return this.bookingsService.createBooking(dto, userId);
   }
 }

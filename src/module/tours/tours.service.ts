@@ -20,8 +20,12 @@ export class ToursService {
         images: true,
         schedules: true,
         bookings: true,
-        reviews: true,
         wishlists: true,
+        reviews: {
+          include: {
+            user: true,
+          },
+        },
       }
     });
   }
@@ -36,8 +40,12 @@ export class ToursService {
         images: true,
         schedules: true,
         bookings: true,
-        reviews: true,
         wishlists: true,
+        reviews: {
+          include: {
+            user: true,
+          },
+        },
       }
     });
   }
