@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { FilterUsersDto } from './dto/filter-users.dto';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-
+import {BadRequestException, UnauthorizedException } from '@nestjs/common';
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -86,9 +86,48 @@ export class UsersService {
     };
   }
 
-  async findOne(id: bigint) {
-    return await this.prisma.user.findUnique({
-      where: { id },
+  async updatePassword(userId: number, dto: UpdatePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Không tìm thấy người dùng');
+    }
+
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        'Tài khoản này không có mật khẩu. Vui lòng đăng nhập bằng Google hoặc thiết lập mật khẩu trước.',
+      );
+    }
+
+    const isMatch: boolean = await bcrypt.compare(
+      dto.oldPassword,
+      user.passwordHash,
+    );
+    if (!isMatch) {
+      throw new UnauthorizedException('Mật khẩu cũ không chính xác');
+    }
+
+    const hashed = await bcrypt.hash(dto.newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: hashed },
+    });
+
+    return { message: 'Đổi mật khẩu thành công' };
+  }
+
+  async updateAvatar(userId: number, avatarPath: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatar: avatarPath },
+    });
+  }
+
+  async getProfile(userId: number) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
         email: true,

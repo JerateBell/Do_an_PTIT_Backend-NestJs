@@ -32,6 +32,7 @@ import { ReviewsModule } from './module/reviews/reviews.module';
     SuppliersModule,
     BookingModule,
     ToursModule,
+    GiftCardModule,
     ReviewsModule,
   ],
 })
