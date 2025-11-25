@@ -362,6 +362,10 @@ enum PaymentMethod {
   bank_transfer 
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 5ee9d36 ( use .env for Google OAuth)
 
 // ===== CORE TABLES =====
 model User {
@@ -697,5 +701,9 @@ model SearchHistory {
 
   @@map("search_history")
 }
+<<<<<<< HEAD
 =======
 >>>>>>> e44d60a (phan login/register/profile)
+=======
+>>>>>>> 67b91729ac7d267225607894cc40a3e9823cb7c1
+>>>>>>> 5ee9d36 ( use .env for Google OAuth)

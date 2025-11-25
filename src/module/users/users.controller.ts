@@ -95,18 +95,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(BigInt(id));
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(BigInt(id), updateUserDto);
-  }
-
-  //Admin change status user
-  @Patch('change-status/:id')
-  changeStatus(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(BigInt(id), updateUserDto);
+    return this.usersService.findOne(+id);
   }
 
   @Delete(':id')

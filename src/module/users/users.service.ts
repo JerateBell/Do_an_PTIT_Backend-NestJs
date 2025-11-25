@@ -5,12 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { FilterUsersDto } from './dto/filter-users.dto';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-<<<<<<< HEAD
-
-=======
-import { UpdatePasswordDto } from './dto/update-password.dto';
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
->>>>>>> e44d60a (phan login/register/profile)
+import {BadRequestException, UnauthorizedException } from '@nestjs/common';
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -91,11 +86,6 @@ export class UsersService {
     };
   }
 
-<<<<<<< HEAD
-  async findOne(id: bigint) {
-    return await this.prisma.user.findUnique({
-      where: { id },
-=======
   async updatePassword(userId: number, dto: UpdatePasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -138,7 +128,6 @@ export class UsersService {
   async getProfile(userId: number) {
     return this.prisma.user.findUnique({
       where: { id: userId },
->>>>>>> e44d60a (phan login/register/profile)
       select: {
         id: true,
         email: true,
@@ -147,33 +136,10 @@ export class UsersService {
         phone: true,
         avatar: true,
         role: true,
-<<<<<<< HEAD
         status: true,
         createdAt: true,
       },
     });
-=======
-        createdAt: true,
-        balance: true,
-      },
-    });
-  }
-
-  async updateProfile(userId: number, data: any) {
-    const { firstName, lastName, phone } = data;
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        firstName,
-        lastName,
-        phone,
-      },
-    });
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
->>>>>>> e44d60a (phan login/register/profile)
   }
 
   async update(id: bigint, updateUserDto: UpdateUserDto) {
