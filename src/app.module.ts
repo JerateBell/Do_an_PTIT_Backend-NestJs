@@ -14,6 +14,7 @@ import { ActivityImageModule } from './module/activity-image/activity-image.modu
 import { ActivityScheduleModule } from './module/activity-schedule/activity-schedule.module';
 import { BookingModule } from './module/booking/booking.module';
 import { ToursModule } from './module/tours/tours.module';
+import { ReviewsModule } from './module/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ToursModule } from './module/tours/tours.module';
     BookingModule,
     ToursModule,
     GiftCardModule,
+    ReviewsModule,
   ],
 })
 export class AppModule {}

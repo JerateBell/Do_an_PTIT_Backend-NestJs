@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { randomBytes } from 'crypto';
+import { CreateBookingDto } from './dto/create-booking.dto';
 
 @Injectable()
 export class BookingsService {
@@ -77,5 +79,57 @@ export class BookingsService {
     const booking = await this.findOneForSupplier(id, userId);
     await this.prisma.booking.delete({ where: { id: booking.id } });
     return { message: 'Booking deleted successfully' };
+  }
+
+  private generateBookingRef() {
+    const rand = Math.floor(1000 + Math.random() * 9000); // 4 số
+    return `BK${Date.now().toString().slice(-8)}${rand}`; // tổng < 20 ký tự
+  }
+
+  async createBooking(dto: CreateBookingDto, userId: number) {
+    // Kiểm tra activity có tồn tại không
+    const activity = await this.prisma.activity.findUnique({
+      where: { id: dto.activityId }
+    });
+
+    if (!activity) {
+      throw new NotFoundException("Activity not found");
+    }
+
+    // Kiểm tra schedule có hợp lệ
+    const schedule = await this.prisma.activitySchedule.findUnique({
+      where: { id: dto.scheduleId }
+    });
+
+    if (!schedule) {
+      throw new NotFoundException("Schedule not found");
+    }
+
+    const bookingRef = this.generateBookingRef();
+
+    return this.prisma.booking.create({
+      data: {
+        bookingRef,
+        userId,
+        activityId: dto.activityId,
+        supplierId: dto.supplierId,
+        scheduleId: dto.scheduleId,
+
+        customerName: dto.customerName,
+        customerEmail: dto.customerEmail,
+        customerPhone: dto.customerPhone,
+
+        bookingDate: new Date(dto.bookingDate),
+        participants: dto.participants,
+
+        subtotal: dto.subtotal,
+        discount: dto.discount,
+        total: dto.total,
+        currency: dto.currency,
+
+        status: "pending",
+        paymentStatus: "pending",
+      }
+    });
   }
 }
