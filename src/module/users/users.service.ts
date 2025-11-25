@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { FilterUsersDto } from './dto/filter-users.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import {BadRequestException, UnauthorizedException } from '@nestjs/common';
@@ -12,9 +13,8 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const { password, ...userData } = createUserDto;
-    
     // Hash password or use default
-    const passwordHash = password 
+    const passwordHash = password
       ? await bcrypt.hash(password, 10)
       : await bcrypt.hash('password123', 10); // Default password
 
@@ -85,7 +85,22 @@ export class UsersService {
       currentPage: page,
     };
   }
-
+  async findOne(id: bigint) {
+    return await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        avatar: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+  }
   async updatePassword(userId: number, dto: UpdatePasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -142,16 +157,13 @@ export class UsersService {
     });
   }
 
-  async update(id: bigint, updateUserDto: UpdateUserDto) {
+  async updateProfile(id: bigint, updateUserDto: UpdateUserDto) {
     const { password, ...userData } = updateUserDto;
-    
     const updateData: any = { ...userData };
-    
     // Hash password if provided
     if (password) {
       updateData.passwordHash = await bcrypt.hash(password, 10);
     }
-
     const user = await this.prisma.user.update({
       where: { id },
       data: updateData,

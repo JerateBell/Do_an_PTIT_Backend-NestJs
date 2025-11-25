@@ -15,7 +15,8 @@ import { ActivityScheduleModule } from './module/activity-schedule/activity-sche
 import { BookingModule } from './module/booking/booking.module';
 import { ToursModule } from './module/tours/tours.module';
 import { ReviewsModule } from './module/reviews/reviews.module';
-
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 @Module({
   imports: [
     PrismaModule,
@@ -32,8 +33,11 @@ import { ReviewsModule } from './module/reviews/reviews.module';
     SuppliersModule,
     BookingModule,
     ToursModule,
-    GiftCardModule,
     ReviewsModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads', // URL truy cập file
+    }),
   ],
 })
 export class AppModule {}

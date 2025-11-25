@@ -93,7 +93,7 @@ export class AuthService {
           firstName,
           lastName,
           avatar,
-          passwordHash: null,
+          passwordHash: '',
         },
       });
     } else if (!user.googleId) {

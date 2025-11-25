@@ -13,11 +13,9 @@ async function bootstrap() {
     return this.toString();
   };
 
-<<<<<<< HEAD
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
-  
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // ✅ tự động ép kiểu theo DTO
@@ -29,22 +27,7 @@ async function bootstrap() {
     credentials: true, // cho phép gửi cookie/token dạng credential
   });
 
-=======
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  app.enableCors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  });
-
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
->>>>>>> e44d60a (phan login/register/profile)
   app.useGlobalFilters(new PrismaExceptionFilter());
-
-  // Cho phép truy cập ảnh tĩnh
-  app.useStaticAssets(join(process.cwd(), 'uploads'), {
-    prefix: '/uploads/',
-  });
 
   const config = new DocumentBuilder()
     .setTitle('Travoloke API')

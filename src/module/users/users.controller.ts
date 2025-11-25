@@ -95,7 +95,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(BigInt(id));
   }
 
   @Delete(':id')
@@ -103,8 +103,8 @@ export class UsersController {
     return this.usersService.remove(BigInt(id));
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  //   return this.usersService.update(BigInt(id), updateUserDto);
+  // }
 }
