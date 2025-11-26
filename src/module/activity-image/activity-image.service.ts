@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateActivityImageDto } from './dto/create-activity-image.dto';
 import { UpdateActivityImageDto } from './dto/update-activity-image.dto';
+import cloudinary from 'src/config/cloudinary.config';
+import streamifier from 'streamifier';
 
 @Injectable()
 export class ActivityImagesService {
@@ -91,4 +93,21 @@ export class ActivityImagesService {
 
     return { message: 'Image deleted successfully' };
   }
+
+  // upload image to cloudinary
+  async uploadImg(file: Express.Multer.File): Promise<{ url: string; public_id: string }> {
+      if (!file) throw new BadRequestException("No file provided");
+  
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "activity_image" },
+          (error, result) => {
+            if (error) return reject(error);
+            if (!result) return reject(new Error("Upload failed"));
+            resolve({ url: result.secure_url, public_id: result.public_id });
+          }
+        );
+        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+      });
+    }
 }
