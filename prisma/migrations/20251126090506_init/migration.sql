@@ -29,6 +29,7 @@ CREATE TABLE "public"."users" (
     "status" "public"."UserStatus" NOT NULL DEFAULT 'active',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "google_id" VARCHAR(255),
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -171,6 +172,7 @@ CREATE TABLE "public"."bookings" (
 -- CreateTable
 CREATE TABLE "public"."payments" (
     "id" BIGSERIAL NOT NULL,
+    "user_id" BIGINT NOT NULL,
     "booking_id" BIGINT NOT NULL,
     "method" "public"."PaymentMethod" NOT NULL,
     "amount" DECIMAL(10,2) NOT NULL,
@@ -180,6 +182,19 @@ CREATE TABLE "public"."payments" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."admin_bank_accounts" (
+    "id" SERIAL NOT NULL,
+    "bankName" VARCHAR(100) NOT NULL,
+    "accountNo" VARCHAR(50) NOT NULL,
+    "ownerName" VARCHAR(100) NOT NULL,
+    "qrCode" VARCHAR(255),
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "admin_bank_accounts_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -279,6 +294,9 @@ CREATE TABLE "public"."search_history" (
 CREATE UNIQUE INDEX "users_email_key" ON "public"."users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "users_google_id_key" ON "public"."users"("google_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "suppliers_user_id_key" ON "public"."suppliers"("user_id");
 
 -- CreateIndex
@@ -346,6 +364,9 @@ ALTER TABLE "public"."bookings" ADD CONSTRAINT "bookings_schedule_id_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "public"."bookings" ADD CONSTRAINT "bookings_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "public"."suppliers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."payments" ADD CONSTRAINT "payments_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."payments" ADD CONSTRAINT "payments_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "public"."bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
