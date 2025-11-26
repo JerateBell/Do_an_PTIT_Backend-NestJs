@@ -15,6 +15,8 @@ import { ActivityScheduleModule } from './module/activity-schedule/activity-sche
 import { BookingModule } from './module/booking/booking.module';
 import { ToursModule } from './module/tours/tours.module';
 import { ReviewsModule } from './module/reviews/reviews.module';
+import { PaymentsModule } from './module/payments/payments.module';
+import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-account.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { ReviewsModule } from './module/reviews/reviews.module';
     BookingModule,
     ToursModule,
     ReviewsModule,
+    PaymentsModule,
+    AdminBankAccountModule,
   ],
 })
 export class AppModule {}

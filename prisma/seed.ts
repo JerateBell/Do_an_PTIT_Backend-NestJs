@@ -490,6 +490,7 @@ async function main() {
     update: {},
     create: {
       bookingId: booking1.id,
+      userId: customer1!.id,
       method: 'credit_card',
       amount: 240.0,
       currency: 'USD',
@@ -503,6 +504,7 @@ async function main() {
     update: {},
     create: {
       bookingId: booking2.id,
+      userId: customer1!.id,
       method: 'paypal',
       amount: 340.0,
       currency: 'USD',
@@ -516,6 +518,7 @@ async function main() {
     update: {},
     create: {
       bookingId: booking4.id,
+      userId: customer1!.id,
       method: 'credit_card',
       amount: 45.0,
       currency: 'USD',
@@ -529,6 +532,7 @@ async function main() {
     update: {},
     create: {
       bookingId: booking5.id,
+      userId: customer1!.id,
       method: 'credit_card',
       amount: 40.0,
       currency: 'USD',
@@ -571,6 +575,17 @@ async function main() {
       activityId: cultureActivity.id,
       rating: 5,
       comment: 'Loved the walking tour! The guide was very knowledgeable about Hanoi history.',
+    },
+  });
+
+  // ===== Seed Admin Bank Account =====
+  const bank = await prisma.adminBankAccount.create({
+    data: {
+      bankName: "Vietcombank",
+      accountNo: "0123456789",
+      ownerName: "TRAVEL COMPANY LTD",
+      qrCode: "https://your-cdn.com/qr/vietqr-admin.png",
+      isActive: true,
     },
   });
 

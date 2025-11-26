@@ -68,6 +68,7 @@ model User {
 
   supplierProfile Supplier?
   bookings        Booking[]
+  payments        Payment[]
   reviews         Review[]
   wishlists       Wishlist[]
   cartItems       CartItem[]
@@ -260,6 +261,7 @@ model Booking {
 
 model Payment {
   id            BigInt        @id @default(autoincrement())
+  userId        BigInt        @map("user_id")
   bookingId     BigInt        @map("booking_id")
   method        PaymentMethod
   amount        Decimal       @db.Decimal(10, 2)
@@ -268,9 +270,22 @@ model Payment {
   status        PaymentStatus @default(pending)
   createdAt     DateTime      @default(now()) @map("created_at")
 
-  booking Booking @relation(fields: [bookingId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+  booking       Booking       @relation(fields: [bookingId], references: [id])
 
   @@map("payments")
+}
+
+model AdminBankAccount {
+  id        Int      @id @default(autoincrement())
+  bankName  String   @db.VarChar(100)
+  accountNo String   @db.VarChar(50)
+  ownerName String   @db.VarChar(100)
+  qrCode    String?  @db.VarChar(255)    // URL QR code
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("admin_bank_accounts")
 }
 
 // ===== REVIEW =====
