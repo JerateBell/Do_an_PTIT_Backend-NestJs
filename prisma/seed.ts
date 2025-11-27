@@ -681,16 +681,6 @@ async function main() {
     },
   });
 
-  const bank = await prisma.adminBankAccount.create({
-    data: {
-      bankName: "Vietcombank",
-      accountNo: "0123456789",
-      ownerName: "TRAVEL COMPANY LTD",
-      qrCode: "https://your-cdn.com/qr/vietqr-admin.png",
-      isActive: true,
-    },
-  });
-
   // ===== Seed Admin Bank Account =====
   const bank = await prisma.adminBankAccount.create({
     data: {
