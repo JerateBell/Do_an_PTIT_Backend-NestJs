@@ -1,14 +1,19 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CreateActivityImageDto } from './dto/create-activity-image.dto';
 import { UpdateActivityImageDto } from './dto/update-activity-image.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ActivityImagesService } from './activity-image.service';
 import { CurrentSupplier } from 'src/common/decorators/current-supplier.decorator';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('activities/:activityId/images')
 @UseGuards(AuthGuard('jwt'))
 export class ActivityImagesController {
-  constructor(private readonly activityImagesService: ActivityImagesService) {}
+  constructor(
+    private readonly activityImagesService: ActivityImagesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post()
   create(
@@ -51,4 +56,13 @@ export class ActivityImagesController {
   ) {
     return this.activityImagesService.remove(BigInt(id), BigInt(activityId), BigInt(user.id));
   }
+
+  @Post('upload')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadImg(
+      @UploadedFile() file: Express.Multer.File,
+    ) {
+      const upload = await this.cloudinaryService.uploadImage(file);
+      return { url: upload.secure_url };
+    }
 }

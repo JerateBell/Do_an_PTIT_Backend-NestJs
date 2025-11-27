@@ -17,6 +17,9 @@ import { ToursModule } from './module/tours/tours.module';
 import { ReviewsModule } from './module/reviews/reviews.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { PaymentsModule } from './module/payments/payments.module';
+import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-account.module';
+
 @Module({
   imports: [
     PrismaModule,
@@ -38,6 +41,8 @@ import { join } from 'path';
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads', // URL truy cập file
     }),
+    PaymentsModule,
+    AdminBankAccountModule,
   ],
 })
 export class AppModule {}
