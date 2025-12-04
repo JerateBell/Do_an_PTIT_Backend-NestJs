@@ -19,6 +19,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PaymentsModule } from './module/payments/payments.module';
 import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-account.module';
+import { WishlistModule } from './module/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-a
     }),
     PaymentsModule,
     AdminBankAccountModule,
+    WishlistModule,
   ],
 })
 export class AppModule {}

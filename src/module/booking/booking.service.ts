@@ -86,6 +86,7 @@ export class BookingsService {
     return `BK${Date.now().toString().slice(-8)}${rand}`; // tổng < 20 ký tự
   }
 
+  //  Tạo booking mới (cho user)
   async createBooking(dto: CreateBookingDto, userId: number) {
     // Kiểm tra activity có tồn tại không
     const activity = await this.prisma.activity.findUnique({
