@@ -15,10 +15,13 @@ import { ActivityScheduleModule } from './module/activity-schedule/activity-sche
 import { BookingModule } from './module/booking/booking.module';
 import { ToursModule } from './module/tours/tours.module';
 import { ReviewsModule } from './module/reviews/reviews.module';
+import { RecommendationsModule } from './module/recommendations/recommendations.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PaymentsModule } from './module/payments/payments.module';
 import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-account.module';
+import { NotificationsModule } from './module/notifications/notifications.module';
+import { SupplierRequestsModule } from './module/supplier-requests/supplier-requests.module';
 
 @Module({
   imports: [
@@ -37,6 +40,9 @@ import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-a
     BookingModule,
     ToursModule,
     ReviewsModule,
+    RecommendationsModule,
+    NotificationsModule,
+    SupplierRequestsModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads', // URL truy cập file
