@@ -8,7 +8,7 @@ export class CloudinaryService {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: 'admin-bank-account',
+          folder: 'images',
         },
         (error, result) => {
           if (error) return reject(error);
