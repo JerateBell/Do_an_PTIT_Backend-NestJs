@@ -33,6 +33,13 @@ export class ReviewsService {
     });
   }
 
+  // GET review by bookingID
+  async findByBooking(bookingId: number) {
+    return this.prisma.review.findUnique({
+      where: { bookingId },
+    })
+  }
+
   // UPDATE review
   async update(id: number, dto: UpdateReviewDto, userId: number) {
     const review = await this.prisma.review.findUnique({ where: { id } });

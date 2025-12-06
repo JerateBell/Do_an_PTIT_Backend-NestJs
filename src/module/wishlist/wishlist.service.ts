@@ -6,7 +6,6 @@ export class WishlistService {
   constructor(private prisma: PrismaService) {}
 
   async addToWishlist(userId: number, activityId: number) {
-    // Check activity tồn tại
     const activity = await this.prisma.activity.findUnique({
       where: { id: activityId },
     });
@@ -14,7 +13,6 @@ export class WishlistService {
       throw new NotFoundException('Activity not found');
     }
 
-    // Create wishlist (unique(userId, activityId) sẽ tự check)
     try {
       const wishlist = await this.prisma.wishlist.create({
         data: {
@@ -29,7 +27,6 @@ export class WishlistService {
   }
 
   async removeFromWishlist(userId: number, activityId: number) {
-    // Check tồn tại trong wishlist
     const exist = await this.prisma.wishlist.findUnique({
       where: {
         userId_activityId: { userId, activityId },
@@ -50,7 +47,7 @@ export class WishlistService {
     return this.prisma.wishlist.findMany({
       where: { userId },
       include: {
-        activity: true, // nếu muốn lấy thông tin activity
+        activity: true, 
       },
       orderBy: { createdAt: 'desc' },
     });

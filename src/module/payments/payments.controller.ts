@@ -15,7 +15,6 @@ export class PaymentsController {
 
   @Post()
   create(@Req() req, @Body() dto: CreatePaymentDto) {
-    // userId lấy từ JWT, ví dụ req.user.id
     const userId = BigInt(req.user.id);
     return this.paymentsService.create(userId, dto);
   }

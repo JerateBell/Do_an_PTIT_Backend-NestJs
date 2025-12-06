@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
-import { randomBytes } from 'crypto';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
 @Injectable()
 export class BookingsService {
   constructor(private prisma: PrismaService) {}
 
+  // SUPPLIER METHODS
   // ✅ Helper: Lấy supplier theo userId
   private async getSupplierByUserId(userId: bigint) {
     const supplier = await this.prisma.supplier.findUnique({
@@ -86,7 +86,8 @@ export class BookingsService {
     return `BK${Date.now().toString().slice(-8)}${rand}`; // tổng < 20 ký tự
   }
 
-  //  Tạo booking mới (cho user)
+  // USER METHODS
+  //  Tạo booking mới 
   async createBooking(dto: CreateBookingDto, userId: number) {
     // Kiểm tra activity có tồn tại không
     const activity = await this.prisma.activity.findUnique({
@@ -115,21 +116,32 @@ export class BookingsService {
         activityId: dto.activityId,
         supplierId: dto.supplierId,
         scheduleId: dto.scheduleId,
-
         customerName: dto.customerName,
         customerEmail: dto.customerEmail,
         customerPhone: dto.customerPhone,
-
         bookingDate: new Date(dto.bookingDate),
         participants: dto.participants,
-
         subtotal: dto.subtotal,
         discount: dto.discount,
         total: dto.total,
         currency: dto.currency,
-
         status: "pending",
         paymentStatus: "pending",
+      }
+    });
+  }
+
+  // Lấy tất cả booking của 1 user
+  async getBooking(userId: number) {
+    return this.prisma.booking.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        activity: {
+          include: {
+            images: true,
+          },
+        },
       }
     });
   }

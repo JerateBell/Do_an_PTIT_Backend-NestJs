@@ -16,6 +16,12 @@ export class BookingsController {
     return this.bookingsService.findAllForSupplier(BigInt(user.id));
   }
 
+  @Get('my-booking')
+  getMyBooking(@Req() req) {
+    const userId = req.user.id; 
+    return this.bookingsService.getBooking(userId);
+  }
+
   // 🟦 GET chi tiết 1 booking
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentSupplier() user: any) {
@@ -40,7 +46,7 @@ export class BookingsController {
 
   @Post()
   create(@Body() dto: CreateBookingDto, @Req() req) {
-    const userId = req.user.id; // userId lấy từ token
+    const userId = req.user.id; 
     return this.bookingsService.createBooking(dto, userId);
   }
 }
