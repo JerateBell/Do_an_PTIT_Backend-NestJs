@@ -248,7 +248,7 @@ model Booking {
   supplier Supplier         @relation(fields: [supplierId], references: [id])
   payments Payment[]
   reviews  Review[]
-
+  couponCode  String? @map("coupon_code") @db.VarChar(50)
   @@map("bookings")
 }
 

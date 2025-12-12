@@ -19,7 +19,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PaymentsModule } from './module/payments/payments.module';
 import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-account.module';
-
+import { CouponsModule } from './module/coupons/coupons.module';
 @Module({
   imports: [
     PrismaModule,
@@ -37,6 +37,7 @@ import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-a
     BookingModule,
     ToursModule,
     ReviewsModule,
+    CouponsModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads', // URL truy cập file

@@ -40,7 +40,7 @@ export class BookingsController {
 
   @Post()
   create(@Body() dto: CreateBookingDto, @Req() req) {
-    const userId = req.user.id; // userId lấy từ token
-    return this.bookingsService.createBooking(dto, userId);
+    const userId = BigInt(req.user.id);
+    return this.bookingsService.createBooking(userId, dto);
   }
 }

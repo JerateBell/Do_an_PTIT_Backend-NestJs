@@ -3,10 +3,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 import { randomBytes } from 'crypto';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { BadRequestException } from '@nestjs/common';
+import { CouponsService } from '../coupons/coupons.service';
+import { Coupon } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class BookingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private couponsService: CouponsService,
+  ) {}
 
   // ✅ Helper: Lấy supplier theo userId
   private async getSupplierByUserId(userId: bigint) {
@@ -86,50 +93,97 @@ export class BookingsService {
     return `BK${Date.now().toString().slice(-8)}${rand}`; // tổng < 20 ký tự
   }
 
-  async createBooking(dto: CreateBookingDto, userId: number) {
-    // Kiểm tra activity có tồn tại không
-    const activity = await this.prisma.activity.findUnique({
-      where: { id: dto.activityId }
-    });
-
-    if (!activity) {
-      throw new NotFoundException("Activity not found");
+  async createBooking(userId: bigint, dto: CreateBookingDto) {
+    const subtotal = Number(dto.subtotal);
+    if (isNaN(subtotal)) {
+      throw new BadRequestException('Subtotal không hợp lệ');
     }
 
-    // Kiểm tra schedule có hợp lệ
-    const schedule = await this.prisma.activitySchedule.findUnique({
-      where: { id: dto.scheduleId }
-    });
+    let discount = 0;
+    let appliedCoupon: Coupon | null = null;
 
-    if (!schedule) {
-      throw new NotFoundException("Schedule not found");
+    // ====== CHECK COUPON ======
+    if (dto.couponCode) {
+      appliedCoupon = await this.prisma.coupon.findUnique({
+        where: { code: dto.couponCode },
+      });
+
+      if (!appliedCoupon) {
+        throw new BadRequestException('Coupon không tồn tại');
+      }
+
+      const now = new Date();
+      if (
+        !appliedCoupon.isActive ||
+        appliedCoupon.validFrom > now ||
+        appliedCoupon.validTo < now
+      ) {
+        throw new BadRequestException('Coupon không hợp lệ hoặc đã hết hạn');
+      }
+
+      if (
+        appliedCoupon.usageLimit &&
+        appliedCoupon.usedCount >= appliedCoupon.usageLimit
+      ) {
+        throw new BadRequestException('Coupon đã hết lượt sử dụng');
+      }
+
+      const minAmount = Number(appliedCoupon.minAmount);
+      if (subtotal < minAmount) {
+        throw new BadRequestException(
+          `Tổng tiền tối thiểu để dùng coupon là ${appliedCoupon.minAmount}`,
+        );
+      }
+
+      // Tính discount
+      if (appliedCoupon.discountType === 'percentage') {
+        discount = (subtotal * Number(appliedCoupon.discountValue)) / 100;
+
+        if (appliedCoupon.maxDiscount) {
+          discount = Math.min(discount, Number(appliedCoupon.maxDiscount));
+        }
+      } else {
+        discount = Number(appliedCoupon.discountValue);
+      }
     }
+
+    const total = Math.max(0, subtotal - discount);
 
     const bookingRef = this.generateBookingRef();
 
-    return this.prisma.booking.create({
-      data: {
-        bookingRef,
-        userId,
-        activityId: dto.activityId,
-        supplierId: dto.supplierId,
-        scheduleId: dto.scheduleId,
+    const result = await this.prisma.$transaction(async (tx) => {
+      const booking = await tx.booking.create({
+        data: {
+          bookingRef,
+          userId,
+          activityId: dto.activityId,
+          scheduleId: dto.scheduleId,
+          supplierId: dto.supplierId,
+          customerName: dto.customerName,
+          customerEmail: dto.customerEmail,
+          customerPhone: dto.customerPhone || '',
+          bookingDate: new Date(dto.bookingDate),
+          participants: dto.participants,
+          subtotal,
+          discount,
+          total,
+          couponCode: dto.couponCode || null,
+          currency: dto.currency || 'VND',
+          status: 'pending',
+          paymentStatus: 'pending',
+        },
+      });
 
-        customerName: dto.customerName,
-        customerEmail: dto.customerEmail,
-        customerPhone: dto.customerPhone,
-
-        bookingDate: new Date(dto.bookingDate),
-        participants: dto.participants,
-
-        subtotal: dto.subtotal,
-        discount: dto.discount,
-        total: dto.total,
-        currency: dto.currency,
-
-        status: "pending",
-        paymentStatus: "pending",
+      if (appliedCoupon) {
+        await tx.coupon.update({
+          where: { id: appliedCoupon.id },
+          data: { usedCount: appliedCoupon.usedCount + 1 },
+        });
       }
+
+      return booking;
     });
+
+    return result;
   }
 }
