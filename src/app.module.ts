@@ -20,6 +20,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PaymentsModule } from './module/payments/payments.module';
 import { AdminBankAccountModule } from './module/admin-bank-account/admin-bank-account.module';
+import { CouponsModule } from './module/coupons/coupons.module';
 import { WishlistModule } from './module/wishlist/wishlist.module';
 import { NotificationsModule } from './module/notifications/notifications.module';
 import { SupplierRequestsModule } from './module/supplier-requests/supplier-requests.module';
@@ -41,6 +42,7 @@ import { SupplierRequestsModule } from './module/supplier-requests/supplier-requ
     BookingModule,
     ToursModule,
     ReviewsModule,
+    CouponsModule,
     RecommendationsModule,
     NotificationsModule,
     SupplierRequestsModule,

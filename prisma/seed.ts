@@ -687,6 +687,7 @@ async function main() {
       currency: 'USD',
       status: 'confirmed',
       paymentStatus: 'paid',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -710,6 +711,7 @@ async function main() {
       currency: 'USD',
       status: 'confirmed',
       paymentStatus: 'paid',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -733,6 +735,7 @@ async function main() {
       currency: 'USD',
       status: 'pending',
       paymentStatus: 'pending',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -756,6 +759,7 @@ async function main() {
       currency: 'USD',
       status: 'completed',
       paymentStatus: 'paid',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -779,6 +783,7 @@ async function main() {
       currency: 'USD',
       status: 'cancelled',
       paymentStatus: 'refunded',
+      couponCode: 'SAVE50',
     },
   });
 
