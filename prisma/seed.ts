@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { VALID_CATEGORY_NAMES } from '../src/module/categories/constants/category-names.constants';
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -90,17 +92,213 @@ async function main() {
   });
 
   // --- Categories ---
-  const adventure = await prisma.category.upsert({
-    where: { slug: 'adventure' },
+  console.log('📁 Seeding categories...');
+
+  // Helper function to create slug from category name
+  const createSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  // Create all valid categories
+  const categoryMap = new Map<string, any>();
+
+  for (let i = 0; i < VALID_CATEGORY_NAMES.length; i++) {
+    const categoryName = VALID_CATEGORY_NAMES[i];
+    const slug = createSlug(categoryName);
+
+    const category = await prisma.category.upsert({
+      where: { slug },
+      update: {
+        name: categoryName, // Update name in case it changed
+      },
+      create: {
+        name: categoryName,
+        slug,
+        sortOrder: i + 1,
+      },
+    });
+
+    categoryMap.set(categoryName, category);
+    console.log(`  ✓ Created category: ${categoryName} (${slug})`);
+  }
+
+  // Get main categories for later use
+  const adventure = categoryMap.get('Adventure');
+  const culture = categoryMap.get('Culture');
+  const food = categoryMap.get('Food');
+  const nature = categoryMap.get('Nature');
+  const beachWaterSports = categoryMap.get('Beach & Water Sports');
+  const wellnessSpa = categoryMap.get('Wellness & Spa');
+  const nightlife = categoryMap.get('Nightlife & Entertainment');
+  const shopping = categoryMap.get('Shopping');
+  const photography = categoryMap.get('Photography');
+  const wildlife = categoryMap.get('Wildlife & Safari');
+  const religious = categoryMap.get('Religious & Spiritual');
+  const sports = categoryMap.get('Sports & Fitness');
+  const family = categoryMap.get('Family & Kids');
+  const romantic = categoryMap.get('Romantic');
+  const educational = categoryMap.get('Educational');
+  const transportation = categoryMap.get('Transportation');
+  const accommodation = categoryMap.get('Accommodation');
+  const festivals = categoryMap.get('Festivals & Events');
+  const extremeSports = categoryMap.get('Extreme Sports');
+  const artCraft = categoryMap.get('Art & Craft');
+
+  // Create some sub-categories (examples)
+  console.log('📁 Creating sub-categories...');
+
+  // Adventure sub-categories
+  const hiking = await prisma.category.upsert({
+    where: { slug: 'adventure-hiking' },
     update: {},
-    create: { name: 'Adventure', slug: 'adventure' },
+    create: {
+      name: 'Hiking',
+      slug: 'adventure-hiking',
+      parentId: adventure.id,
+      sortOrder: 1,
+    },
   });
 
-  const culture = await prisma.category.upsert({
-    where: { slug: 'culture' },
+  const rockClimbing = await prisma.category.upsert({
+    where: { slug: 'adventure-rock-climbing' },
     update: {},
-    create: { name: 'Culture', slug: 'culture' },
+    create: {
+      name: 'Rock Climbing',
+      slug: 'adventure-rock-climbing',
+      parentId: adventure.id,
+      sortOrder: 2,
+    },
   });
+
+  const kayaking = await prisma.category.upsert({
+    where: { slug: 'adventure-kayaking' },
+    update: {},
+    create: {
+      name: 'Kayaking',
+      slug: 'adventure-kayaking',
+      parentId: adventure.id,
+      sortOrder: 3,
+    },
+  });
+
+  // Culture sub-categories
+  const museums = await prisma.category.upsert({
+    where: { slug: 'culture-museums' },
+    update: {},
+    create: {
+      name: 'Museums',
+      slug: 'culture-museums',
+      parentId: culture.id,
+      sortOrder: 1,
+    },
+  });
+
+  const temples = await prisma.category.upsert({
+    where: { slug: 'culture-temples' },
+    update: {},
+    create: {
+      name: 'Temples & Pagodas',
+      slug: 'culture-temples',
+      parentId: culture.id,
+      sortOrder: 2,
+    },
+  });
+
+  const historicalSites = await prisma.category.upsert({
+    where: { slug: 'culture-historical-sites' },
+    update: {},
+    create: {
+      name: 'Historical Sites',
+      slug: 'culture-historical-sites',
+      parentId: culture.id,
+      sortOrder: 3,
+    },
+  });
+
+  // Food sub-categories
+  const streetFood = await prisma.category.upsert({
+    where: { slug: 'food-street-food' },
+    update: {},
+    create: {
+      name: 'Street Food Tour',
+      slug: 'food-street-food',
+      parentId: food.id,
+      sortOrder: 1,
+    },
+  });
+
+  const cookingClass = await prisma.category.upsert({
+    where: { slug: 'food-cooking-class' },
+    update: {},
+    create: {
+      name: 'Cooking Class',
+      slug: 'food-cooking-class',
+      parentId: food.id,
+      sortOrder: 2,
+    },
+  });
+
+  const foodTour = await prisma.category.upsert({
+    where: { slug: 'food-tour' },
+    update: {},
+    create: {
+      name: 'Food Tour',
+      slug: 'food-tour',
+      parentId: food.id,
+      sortOrder: 3,
+    },
+  });
+
+  // Nature sub-categories
+  const nationalParks = await prisma.category.upsert({
+    where: { slug: 'nature-national-parks' },
+    update: {},
+    create: {
+      name: 'National Parks',
+      slug: 'nature-national-parks',
+      parentId: nature.id,
+      sortOrder: 1,
+    },
+  });
+
+  const waterfalls = await prisma.category.upsert({
+    where: { slug: 'nature-waterfalls' },
+    update: {},
+    create: {
+      name: 'Waterfalls',
+      slug: 'nature-waterfalls',
+      parentId: nature.id,
+      sortOrder: 2,
+    },
+  });
+
+  // Beach & Water Sports sub-categories
+  const diving = await prisma.category.upsert({
+    where: { slug: 'beach-water-sports-diving' },
+    update: {},
+    create: {
+      name: 'Diving & Snorkeling',
+      slug: 'beach-water-sports-diving',
+      parentId: beachWaterSports.id,
+      sortOrder: 1,
+    },
+  });
+
+  const surfing = await prisma.category.upsert({
+    where: { slug: 'beach-water-sports-surfing' },
+    update: {},
+    create: {
+      name: 'Surfing',
+      slug: 'beach-water-sports-surfing',
+      parentId: beachWaterSports.id,
+      sortOrder: 2,
+    },
+  });
+
+  console.log('  ✓ Created sub-categories');
 
   // --- Admin Users ---
   await prisma.user.upsert({
@@ -489,6 +687,7 @@ async function main() {
       currency: 'USD',
       status: 'confirmed',
       paymentStatus: 'paid',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -512,6 +711,7 @@ async function main() {
       currency: 'USD',
       status: 'confirmed',
       paymentStatus: 'paid',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -535,6 +735,7 @@ async function main() {
       currency: 'USD',
       status: 'pending',
       paymentStatus: 'pending',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -558,6 +759,7 @@ async function main() {
       currency: 'USD',
       status: 'completed',
       paymentStatus: 'paid',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -581,6 +783,7 @@ async function main() {
       currency: 'USD',
       status: 'cancelled',
       paymentStatus: 'refunded',
+      couponCode: 'SAVE50',
     },
   });
 
@@ -691,6 +894,111 @@ async function main() {
       isActive: true,
     },
   });
+
+
+   // --- Notifications ---
+   const allUsers = await prisma.user.findMany({ select: { id: true, email: true } });
+   const someUsers = allUsers.slice(0, Math.min(10, allUsers.length));
+   for (const u of someUsers) {
+     await prisma.notification.createMany({
+       data: [
+         {
+           userId: u.id,
+           title: 'Welcome',
+           message: 'Chào mừng bạn đến với hệ thống!',
+           type: 'system',
+           isRead: false,
+         },
+         {
+           userId: u.id,
+           title: 'Khuyến mãi',
+           message: 'Giảm giá 20% cho tour tuần này.',
+           type: 'marketing',
+           isRead: Math.random() > 0.5,
+         },
+         {
+           userId: u.id,
+           title: 'Cập nhật đơn hàng',
+           message: 'Đơn đặt tour của bạn đã được cập nhật.',
+           type: 'booking',
+           isRead: Math.random() > 0.5,
+         },
+       ],
+     });
+   }
+ 
+   // --- Synthetic bookings for charts (last 90 days) ---
+   const statuses = ['pending', 'confirmed', 'completed', 'cancelled'] as const;
+   const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+   const pick = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
+ 
+   const baseUsers = await prisma.user.findMany({
+     where: { role: { in: ['customer', 'supplier'] } },
+     select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+     take: 20,
+   });
+ 
+   const schedules = await prisma.activitySchedule.findMany({ select: { id: true, activityId: true } });
+   const suppliersSeed = await prisma.supplier.findMany({ select: { id: true } });
+   const activitiesSeed = await prisma.activity.findMany({ select: { id: true, name: true } });
+ 
+   if (baseUsers.length && schedules.length && suppliersSeed.length && activitiesSeed.length) {
+     const start = new Date();
+     start.setDate(start.getDate() - 89);
+     let refCounter = 1000;
+ 
+     for (let d = 0; d < 90; d++) {
+       const day = new Date(start);
+       day.setDate(start.getDate() + d);
+       const dayCount = rand(1, 6);
+       for (let i = 0; i < dayCount; i++) {
+         const user = pick(baseUsers);
+         const schedule = pick(schedules);
+         const supplierPick = pick(suppliersSeed);
+         const activityPick = activitiesSeed.find((a) => a.id === schedule.activityId)!;
+         const status = pick(statuses);
+         const participants = rand(1, 5);
+         const price = rand(20, 300);
+         const discount = Math.random() < 0.2 ? rand(0, 30) : 0;
+         const subtotal = participants * price;
+         const total = Math.max(subtotal - discount, 0);
+ 
+         refCounter += 1;
+         const bookingRef = `BK${refCounter}`;
+ 
+         await prisma.booking.create({
+           data: {
+             bookingRef,
+             userId: user.id,
+             activityId: activityPick.id,
+             scheduleId: schedule.id,
+             supplierId: supplierPick.id,
+             customerName: `${user.firstName ?? 'Guest'} ${user.lastName ?? ''}`.trim(),
+             customerEmail: user.email,
+             customerPhone: user.phone ?? null,
+             bookingDate: day,
+             participants,
+             subtotal,
+             discount,
+             total,
+             currency: 'USD',
+             status: status as any,
+             paymentStatus: (status === 'completed' || status === 'confirmed') ? 'paid' : (status === 'cancelled' ? 'refunded' : 'pending'),
+             createdAt: day,
+             updatedAt: day,
+           }
+         });
+       }
+     }
+   }
+ 
+   // --- Backfill user createdAt over last 60 days for newLast7Days metric ---
+   const allUsersForDates = await prisma.user.findMany({ select: { id: true } });
+   for (const u of allUsersForDates) {
+     const created = new Date();
+     created.setDate(created.getDate() - rand(0, 60));
+     await prisma.user.update({ where: { id: u.id }, data: { createdAt: created } });
+   }
 
   console.log('✅ Seed completed successfully!');
 }

@@ -46,6 +46,19 @@ enum PaymentMethod {
   bank_transfer 
 }
 
+enum RequestType {
+  become_supplier
+  add_country
+  add_city
+  add_destination
+}
+
+enum RequestStatus {
+  pending
+  approved
+  rejected
+}
+
 
 // ===== CORE TABLES =====
 model User {
@@ -70,6 +83,8 @@ model User {
   searchHistory   SearchHistory[]
   userBehaviors   UserBehavior[]
   notifications   Notification[]
+  recommendations Recommendation[]
+  requests        SupplierRequest[]
 
   @@map("users")
 }
@@ -123,7 +138,7 @@ model Destination {
   cityId    BigInt   @map("city_id")
   imageUrl  String?  @map("image_url") @db.VarChar(500)
   createdAt DateTime @default(now()) @map("created_at")
-
+  
   city       City       @relation(fields: [cityId], references: [id])
   activities Activity[]
 
@@ -176,10 +191,11 @@ model Activity {
   images       ActivityImage[]
   schedules    ActivitySchedule[]
   bookings     Booking[]
-  reviews      Review[]
-  wishlists    Wishlist[]
-  cartItems    CartItem[]
-  UserBehavior UserBehavior[]
+  reviews         Review[]
+  wishlists       Wishlist[]
+  cartItems       CartItem[]
+  UserBehavior    UserBehavior[]
+  recommendations Recommendation[]
 
   @@map("activities")
 }
@@ -395,4 +411,55 @@ model SearchHistory {
   user User? @relation(fields: [userId], references: [id])
 
   @@map("search_history")
+}
+
+// ===== RECOMMENDATIONS =====
+
+model Recommendation {
+  id              BigInt   @id @default(autoincrement())
+  userId          BigInt   @map("user_id")
+  activityId      BigInt   @map("activity_id")
+  predictedRating Decimal  @db.Decimal(3, 2)
+  rank            Int      // Thứ tự từ 1-10 (top 10 recommendations)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
+  @@map("recommendations")
+}
+
+// ===== SUPPLIER REQUESTS =====
+
+model SupplierRequest {
+  id          BigInt       @id @default(autoincrement())
+  userId      BigInt       @map("user_id")
+  type        RequestType  // become_supplier, add_country, add_city, add_destination
+  status      RequestStatus @default(pending)
+  
+  // Thông tin request (JSON format)
+  // Với become_supplier: { companyName, businessEmail, phone, address, commissionRate }
+  // Với add_location: { name, code (cho country), countryCode (cho city), cityId (cho destination), imageUrl, slug }
+  requestData Json         @map("request_data")
+  
+  // Ghi chú từ admin khi xử lý
+  adminNotes  String?      @map("admin_notes") @db.Text
+  
+  // Admin xử lý request (nullable nếu chưa được xử lý)
+  processedBy BigInt?      @map("processed_by")
+  
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  processedAt DateTime?    @map("processed_at")
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@map("supplier_requests")
 }

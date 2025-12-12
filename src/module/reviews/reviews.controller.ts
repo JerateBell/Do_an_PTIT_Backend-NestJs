@@ -8,27 +8,34 @@ import { AuthGuard } from '@nestjs/passport';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewsService) {}
 
-  // CREATE (require login)
+  // CREATE 
   @UseGuards(AuthGuard('jwt'))
   @Post()
   create(@Body() dto: CreateReviewDto, @Req() req) {
     return this.reviewService.create(dto, req.user.id);
   }
 
-  // GET reviews by activityId (public)
+  // GET reviews by activityId 
   @Get('activity/:activityId')
   getByActivity(@Param('activityId') activityId: string) {
     return this.reviewService.findByActivity(Number(activityId));
   }
 
-  // UPDATE (require login)
+  // GET review by bookingId 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('booking/:bookingId')
+  getByBooking(@Param('bookingId') bookingId: string) {
+    return this.reviewService.findByBooking(Number(bookingId));
+  }
+
+  // UPDATE 
   @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateReviewDto, @Req() req) {
     return this.reviewService.update(Number(id), dto, req.user.id);
   }
 
-  // DELETE (require login)
+  // DELETE 
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req) {

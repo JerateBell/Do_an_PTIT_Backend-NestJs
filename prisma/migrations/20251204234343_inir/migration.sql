@@ -290,6 +290,19 @@ CREATE TABLE "public"."search_history" (
     CONSTRAINT "search_history_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."recommendations" (
+    "id" BIGSERIAL NOT NULL,
+    "user_id" BIGINT NOT NULL,
+    "activity_id" BIGINT NOT NULL,
+    "predictedRating" DECIMAL(3,2) NOT NULL,
+    "rank" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "recommendations_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "public"."users"("email");
 
@@ -325,6 +338,15 @@ CREATE UNIQUE INDEX "coupons_code_key" ON "public"."coupons"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "wishlists_user_id_activity_id_key" ON "public"."wishlists"("user_id", "activity_id");
+
+-- CreateIndex
+CREATE INDEX "recommendations_user_id_idx" ON "public"."recommendations"("user_id");
+
+-- CreateIndex
+CREATE INDEX "recommendations_activity_id_idx" ON "public"."recommendations"("activity_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "recommendations_user_id_activity_id_key" ON "public"."recommendations"("user_id", "activity_id");
 
 -- AddForeignKey
 ALTER TABLE "public"."suppliers" ADD CONSTRAINT "suppliers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -406,3 +428,9 @@ ALTER TABLE "public"."user_behaviors" ADD CONSTRAINT "user_behaviors_activity_id
 
 -- AddForeignKey
 ALTER TABLE "public"."search_history" ADD CONSTRAINT "search_history_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."recommendations" ADD CONSTRAINT "recommendations_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."recommendations" ADD CONSTRAINT "recommendations_activity_id_fkey" FOREIGN KEY ("activity_id") REFERENCES "public"."activities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
