@@ -14,11 +14,15 @@ import { RegisterDto } from './dtos/register.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from './guard/jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { UsersService } from '../users/users.service';
 import type { Response, Request as ExpressRequest } from 'express';
 @Controller('auth')
 @ApiTags('Authentication')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
@@ -45,7 +49,8 @@ export class AuthController {
 
   @UseGuards(JwtGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    return 'This is a protected route. User info: ';
+  async getProfile(@Request() req) {
+    const userId = req.user.sub || req.user.id;
+    return this.usersService.getProfile(userId);
   }
 }
