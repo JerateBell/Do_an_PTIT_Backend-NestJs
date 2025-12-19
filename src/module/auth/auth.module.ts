@@ -6,12 +6,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { UsersModule } from '../users/users.module';
 @Module({
   providers: [AuthService, JwtStrategy, GoogleStrategy],
   controllers: [AuthController],
   imports: [
     PrismaModule,
     PassportModule,
+    UsersModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'secretKey',
       signOptions: { expiresIn: '60m' },

@@ -6,5 +6,6 @@ import { PrismaService } from '../prisma/prisma.service';
 @Module({
   controllers: [UsersController],
   providers: [UsersService, PrismaService],
+  exports: [UsersService], // Export UsersService để các module khác có thể sử dụng
 })
 export class UsersModule {}
