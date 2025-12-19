@@ -11,31 +11,47 @@ export class CouponsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: any) {
-    return await this.prisma.coupon.create({
-      data: {
-        code: dto.code,
+    // 1. LOG: Dữ liệu đầu vào DTO
+    console.log('LOG [Create Coupon]: DTO nhận được:', dto);
 
-        name: dto.name,
+    // Biến đổi DTO thành dữ liệu DB (để debug)
+    const dataToCreate = {
+      code: dto.code,
+      name: dto.name,
+      discountType: dto.discountType,
+      discountValue: dto.discountValue,
+      minAmount: dto.minAmount ?? 0,
+      maxDiscount: dto.maxDiscount ?? null,
+      usageLimit: dto.usageLimit ?? null,
+      usedCount: 0,
+      validFrom: new Date(dto.validFrom),
+      validTo: new Date(dto.validTo),
+      isActive: dto.isActive ?? true,
+    };
 
-        discountType: dto.discountType,
+    // 2. LOG: Dữ liệu sau khi xử lý (chuẩn bị gửi đến Prisma)
+    console.log('LOG [Create Coupon]: Dữ liệu chuẩn bị gửi:', dataToCreate);
 
-        discountValue: dto.discountValue,
+    try {
+      const result = await this.prisma.coupon.create({
+        data: dataToCreate,
+      });
 
-        minAmount: dto.minAmount ?? 0,
+      // 3. LOG: Kết quả thành công
+      console.log('LOG [Create Coupon]: Coupon tạo thành công:', result);
+      return result;
+    } catch (error) {
+      // 4. LOG/BẮT LỖI: Xử lý lỗi
+      console.error('LOG [Create Coupon]: LỖI KHI TẠO:', error);
 
-        maxDiscount: dto.maxDiscount ?? null,
+      // Nếu là lỗi P2002 (Unique constraint failed), ném BadRequest rõ ràng
+      if (error.code === 'P2002') {
+        throw new BadRequestException(`Mã ${dto.code} đã tồn tại.`);
+      }
 
-        usageLimit: dto.usageLimit ?? null,
-
-        usedCount: 0,
-
-        validFrom: new Date(dto.validFrom),
-
-        validTo: new Date(dto.validTo),
-
-        isActive: dto.isActive ?? true,
-      },
-    });
+      // Ném lỗi khác lên Controller để NestJS xử lý
+      throw error;
+    }
   }
 
   async list(onlyActive?: boolean) {
@@ -58,7 +74,30 @@ export class CouponsService {
     return coupon;
   }
 
-  // validate and compute discount (does NOT increment usedCount)
+  async listActive() {
+    const coupons = await this.prisma.coupon.findMany({
+      where: {
+        isActive: true,
+      },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        discountType: true,
+        discountValue: true,
+        maxDiscount: true,
+        minAmount: true,
+        validTo: true,
+        isActive: true,
+      },
+      orderBy: { validTo: 'asc' },
+    });
+
+    return coupons.map((c) => ({
+      ...c,
+      id: Number(c.id),
+    }));
+  }
 
   async apply(code: string, amount: number) {
     const coupon = await this.prisma.coupon.findUnique({ where: { code } });
@@ -97,9 +136,9 @@ export class CouponsService {
       discount = Number(coupon.discountValue);
     }
 
-    discount = Math.min(discount, amount); // không vượt quá amount
+    discount = Math.min(discount, amount);
 
-    const finalAmount = Math.max(0, amount - discount); // không âm!
+    const finalAmount = Math.max(0, amount - discount);
 
     return {
       valid: true,
@@ -131,5 +170,27 @@ export class CouponsService {
         data: { usedCount: { increment: 1 } },
       });
     });
+  }
+  async delete(code: string) {
+    try {
+      // Tìm kiếm và xóa Coupon dựa trên code duy nhất
+      const deletedCoupon = await this.prisma.coupon.delete({
+        where: { code: code }, // Sử dụng unique field 'code'
+      });
+      console.log(`LOG: Coupon ${code} đã được xóa thành công.`);
+      return deletedCoupon;
+    } catch (error) {
+      // Prisma sẽ ném lỗi P2025 nếu không tìm thấy bản ghi để xóa
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Không tìm thấy Coupon với mã: ${code}`);
+      } // Xử lý các lỗi khác (ví dụ: lỗi Foreign Key nếu Coupon đang được sử dụng)
+      if (error.code === 'P2003') {
+        throw new BadRequestException(
+          `Không thể xóa Coupon ${code} vì nó đang được sử dụng trong các Booking.`,
+        );
+      }
+
+      throw error;
+    }
   }
 }
