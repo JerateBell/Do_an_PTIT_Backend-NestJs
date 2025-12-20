@@ -24,6 +24,7 @@ import { CouponsModule } from './module/coupons/coupons.module';
 import { WishlistModule } from './module/wishlist/wishlist.module';
 import { NotificationsModule } from './module/notifications/notifications.module';
 import { SupplierRequestsModule } from './module/supplier-requests/supplier-requests.module';
+import { RecommendationSchedulerModule } from './module/recommendation-scheduler/recommendation-scheduler.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { SupplierRequestsModule } from './module/supplier-requests/supplier-requ
     ReviewsModule,
     CouponsModule,
     RecommendationsModule,
+    RecommendationSchedulerModule,
     NotificationsModule,
     SupplierRequestsModule,
     ServeStaticModule.forRoot({

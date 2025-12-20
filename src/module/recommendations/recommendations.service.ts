@@ -92,29 +92,30 @@ export class RecommendationsService {
   }
 
   /**
-   * Xuất activities với category features ra CSV
-   * Format: activity_id, category_id, và 20 binary category columns
+   * Xuất activities ra CSV
+   * Format: item_id,category,destination,price,duration,description
    */
   async exportActivitiesToCSV(outputPath?: string): Promise<string> {
     console.log('📤 Đang xuất activities ra CSV...');
 
-    // Lấy tất cả categories để tạo mapping
-    const categories = await this.prisma.category.findMany({
-      orderBy: {
-        sortOrder: 'asc',
-      },
-    });
-
-    const categoryMap = new Map<bigint, number>();
-    categories.forEach((cat, index) => {
-      categoryMap.set(cat.id, index);
-    });
-
-    // Lấy tất cả activities
+    // Lấy tất cả activities với thông tin liên quan
     const activities = await this.prisma.activity.findMany({
-      select: {
-        id: true,
-        categoryId: true,
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        destination: {
+          select: {
+            name: true,
+            city: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         id: 'asc',
@@ -126,7 +127,7 @@ export class RecommendationsService {
     }
 
     // Tạo file path
-    const filePath = outputPath || path.join(process.cwd(), 'exports', 'activities.csv');
+    const filePath = outputPath || path.join(process.cwd(), 'exports', 'items.csv');
 
     // Đảm bảo thư mục tồn tại
     const dir = path.dirname(filePath);
@@ -134,27 +135,24 @@ export class RecommendationsService {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    // Tạo CSV header: activity_id, category_id, cat0, cat1, ..., cat19
-    let csvContent = 'activity_id,category_id';
-    for (let i = 0; i < 20; i++) {
-      csvContent += `,cat${i}`;
-    }
-    csvContent += '\n';
+    // Tạo CSV header
+    let csvContent = 'item_id,category,destination,price,duration,description\n';
 
-    // Tạo category binary features cho mỗi activity
+    // Tạo data rows
     for (const activity of activities) {
-      const activityId = Number(activity.id);
-      const categoryIndex = categoryMap.get(activity.categoryId) ?? 0;
-
-      // Binary vector: 1 tại vị trí category của activity, 0 ở các vị trí khác
-      const categoryVector = Array(20).fill(0);
-      categoryVector[categoryIndex] = 1;
-
-      csvContent += `${activityId},${categoryIndex}`;
-      for (const val of categoryVector) {
-        csvContent += `,${val}`;
+      const itemId = Number(activity.id);
+      const category = activity.category?.name || '';
+      // Ưu tiên city name (theo format mẫu)
+      const destination = activity.destination?.city?.name || activity.destination?.name || '';
+      const price = Number(activity.price) || 0;
+      const duration = activity.duration || 0;
+      // Escape description (thêm quotes nếu có dấu phẩy hoặc xuống dòng)
+      let description = (activity.description || '').replace(/"/g, '""');
+      if (description.includes(',') || description.includes('\n') || description.includes('"')) {
+        description = `"${description}"`;
       }
-      csvContent += '\n';
+
+      csvContent += `${itemId},${category},${destination},${price},${duration},${description}\n`;
     }
 
     // Ghi file

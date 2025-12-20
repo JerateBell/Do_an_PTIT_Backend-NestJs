@@ -1,0 +1,505 @@
+item_id,category,destination,price,duration,description
+1,Adventure,Hanoi,1,360,A relaxing cruise through the stunning landscape of Ha Long Bay.
+2,Adventure,Hanoi,129.99,480,A premium cruise with luxury cabins and top-tier services.
+3,Adventure,Hanoi,120,180,A breathtaking cruise through Ha Long Bay.
+4,Culture,Hanoi,45,120,Explore the historic Old Quarter of Hanoi with a local guide.
+5,Wellness & Spa,Ho Chi Minh City,145.25,180,An amazing wellness & spa experience at Ngoc Son Temple.
+6,Beach & Water Sports,New York,270.13,180,An amazing beach & water sports experience at Ngoc Son Temple.
+7,Food,Hanoi,252.23,480,An amazing food experience at Water Puppet Theater.
+8,Adventure,Hanoi,254.13,60,An amazing adventure experience at Ben Thanh Market.
+9,Wellness & Spa,Hanoi,224.46,480,An amazing wellness & spa experience at Hoan Kiem Lake.
+10,Food,Hanoi,246.1,240,An amazing food experience at Hoan Kiem Lake.
+11,Adventure,Hanoi,192.16,60,An amazing adventure experience at Statue of Liberty.
+12,Adventure,New York,288.76,300,An amazing adventure experience at Ben Thanh Market.
+13,Nightlife & Entertainment,Ho Chi Minh City,169.06,60,An amazing nightlife & entertainment experience at Old Quarter.
+14,Adventure,Ho Chi Minh City,87.3,240,An amazing adventure experience at Ben Thanh Market.
+15,Culture,Hanoi,218.48,120,An amazing culture experience at Statue of Liberty.
+16,Nightlife & Entertainment,New York,197.09,300,An amazing nightlife & entertainment experience at Old Quarter.
+17,Food,Hanoi,33.48,60,An amazing food experience at Ha Long Bay.
+18,Food,New York,245.74,300,An amazing food experience at Temple of Literature.
+19,Adventure,Hanoi,142.98,120,An amazing adventure experience at Old Quarter.
+20,Culture,Hanoi,128.05,180,An amazing culture experience at Hoan Kiem Lake.
+21,Nature,Ho Chi Minh City,98.54,480,An amazing nature experience at Statue of Liberty.
+22,Culture,New York,288.46,60,An amazing culture experience at Statue of Liberty.
+23,Nature,Ho Chi Minh City,186.84,60,An amazing nature experience at Water Puppet Theater.
+24,Adventure,Ho Chi Minh City,28.24,480,An amazing adventure experience at Ha Long Bay.
+25,Culture,New York,235.86,300,An amazing culture experience at Ngoc Son Temple.
+26,Wellness & Spa,Ho Chi Minh City,196.67,180,An amazing wellness & spa experience at Statue of Liberty.
+27,Beach & Water Sports,Hanoi,208.6,60,An amazing beach & water sports experience at Ben Thanh Market.
+28,Adventure,Hanoi,265.87,120,An amazing adventure experience at Ben Thanh Market.
+29,Wellness & Spa,Hanoi,191.18,300,An amazing wellness & spa experience at Ngoc Son Temple.
+30,Beach & Water Sports,Ho Chi Minh City,62.91,300,An amazing beach & water sports experience at Statue of Liberty.
+31,Nature,Hanoi,183.73,240,An amazing nature experience at Statue of Liberty.
+32,Wellness & Spa,Hanoi,22.92,300,An amazing wellness & spa experience at Hoan Kiem Lake.
+33,Nightlife & Entertainment,New York,39.34,300,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+34,Nature,Hanoi,132.94,180,An amazing nature experience at Temple of Literature.
+35,Nightlife & Entertainment,New York,82.37,180,An amazing nightlife & entertainment experience at Statue of Liberty.
+36,Adventure,New York,235.44,180,An amazing adventure experience at Ha Long Bay.
+37,Nightlife & Entertainment,Ho Chi Minh City,86.25,240,An amazing nightlife & entertainment experience at Old Quarter.
+38,Wellness & Spa,Hanoi,147.24,300,An amazing wellness & spa experience at Ben Thanh Market.
+39,Wellness & Spa,Ho Chi Minh City,141.1,60,An amazing wellness & spa experience at Ha Long Bay.
+40,Food,Hanoi,52.18,60,An amazing food experience at Water Puppet Theater.
+41,Wellness & Spa,Hanoi,148.5,60,An amazing wellness & spa experience at Ha Long Bay.
+42,Nature,Ho Chi Minh City,112.73,480,An amazing nature experience at Ben Thanh Market.
+43,Beach & Water Sports,Ho Chi Minh City,61.78,60,An amazing beach & water sports experience at Ngoc Son Temple.
+44,Nightlife & Entertainment,New York,244.92,300,An amazing nightlife & entertainment experience at Water Puppet Theater.
+45,Wellness & Spa,Hanoi,73.92,180,An amazing wellness & spa experience at Temple of Literature.
+46,Food,Hanoi,22.64,60,An amazing food experience at Statue of Liberty.
+47,Beach & Water Sports,Ho Chi Minh City,268.56,120,An amazing beach & water sports experience at Ben Thanh Market.
+48,Nightlife & Entertainment,Hanoi,294.39,180,An amazing nightlife & entertainment experience at Water Puppet Theater.
+49,Nightlife & Entertainment,Ho Chi Minh City,266.98,180,An amazing nightlife & entertainment experience at Old Quarter.
+50,Wellness & Spa,New York,74.55,180,An amazing wellness & spa experience at Temple of Literature.
+51,Nightlife & Entertainment,Ho Chi Minh City,198.72,480,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+52,Food,Hanoi,180.36,60,An amazing food experience at Old Quarter.
+53,Culture,Ho Chi Minh City,286.84,180,An amazing culture experience at Ngoc Son Temple.
+54,Wellness & Spa,New York,90.47,480,An amazing wellness & spa experience at Ha Long Bay.
+55,Adventure,Ho Chi Minh City,297.28,60,An amazing adventure experience at Statue of Liberty.
+56,Food,New York,129.91,60,An amazing food experience at Ha Long Bay.
+57,Food,Hanoi,206.21,300,An amazing food experience at Temple of Literature.
+58,Wellness & Spa,Ho Chi Minh City,167.9,480,An amazing wellness & spa experience at Water Puppet Theater.
+59,Culture,Hanoi,33.8,120,An amazing culture experience at Hoan Kiem Lake.
+60,Food,New York,44.5,240,An amazing food experience at Ngoc Son Temple.
+61,Nature,Hanoi,121.19,480,An amazing nature experience at Ngoc Son Temple.
+62,Food,Hanoi,228.79,480,An amazing food experience at Old Quarter.
+63,Beach & Water Sports,Hanoi,282.24,480,An amazing beach & water sports experience at Hoan Kiem Lake.
+64,Culture,Hanoi,84.32,480,An amazing culture experience at Water Puppet Theater.
+65,Beach & Water Sports,New York,275.37,480,An amazing beach & water sports experience at Hoan Kiem Lake.
+66,Nature,Ho Chi Minh City,182.02,300,An amazing nature experience at Temple of Literature.
+67,Culture,Ho Chi Minh City,258.05,120,An amazing culture experience at Water Puppet Theater.
+68,Nightlife & Entertainment,Hanoi,143.8,240,An amazing nightlife & entertainment experience at Statue of Liberty.
+69,Beach & Water Sports,Hanoi,71.45,180,An amazing beach & water sports experience at Statue of Liberty.
+70,Food,Hanoi,61.22,60,An amazing food experience at Water Puppet Theater.
+71,Nightlife & Entertainment,Hanoi,39.3,120,An amazing nightlife & entertainment experience at Ha Long Bay.
+72,Culture,New York,128.07,60,An amazing culture experience at Ngoc Son Temple.
+73,Wellness & Spa,Ho Chi Minh City,230.33,300,An amazing wellness & spa experience at Statue of Liberty.
+74,Adventure,Hanoi,142.47,300,An amazing adventure experience at Ben Thanh Market.
+75,Adventure,Hanoi,102.51,240,An amazing adventure experience at Ben Thanh Market.
+76,Beach & Water Sports,Ho Chi Minh City,55.37,240,An amazing beach & water sports experience at Old Quarter.
+77,Nature,New York,92.25,60,An amazing nature experience at Ha Long Bay.
+78,Nightlife & Entertainment,Ho Chi Minh City,159.67,180,An amazing nightlife & entertainment experience at Ha Long Bay.
+79,Culture,Hanoi,176.16,180,An amazing culture experience at Statue of Liberty.
+80,Nightlife & Entertainment,Hanoi,90.39,480,An amazing nightlife & entertainment experience at Temple of Literature.
+81,Nightlife & Entertainment,Hanoi,30.9,480,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+82,Culture,Ho Chi Minh City,266.05,180,An amazing culture experience at Statue of Liberty.
+83,Nightlife & Entertainment,New York,294.13,480,An amazing nightlife & entertainment experience at Ben Thanh Market.
+84,Nightlife & Entertainment,Hanoi,152.19,120,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+85,Food,Ho Chi Minh City,88.51,120,An amazing food experience at Old Quarter.
+86,Nightlife & Entertainment,Ho Chi Minh City,29.3,300,An amazing nightlife & entertainment experience at Ben Thanh Market.
+87,Food,Ho Chi Minh City,43.3,120,An amazing food experience at Ben Thanh Market.
+88,Culture,New York,196.41,480,An amazing culture experience at Hoan Kiem Lake.
+89,Wellness & Spa,New York,46.5,180,An amazing wellness & spa experience at Ben Thanh Market.
+90,Adventure,Hanoi,37.79,60,An amazing adventure experience at Ben Thanh Market.
+91,Food,Hanoi,278.4,300,An amazing food experience at Water Puppet Theater.
+92,Food,Hanoi,159.56,300,An amazing food experience at Ngoc Son Temple.
+93,Beach & Water Sports,Hanoi,137.81,240,An amazing beach & water sports experience at Ben Thanh Market.
+94,Food,Ho Chi Minh City,79.28,480,An amazing food experience at Ben Thanh Market.
+95,Food,Hanoi,59.77,60,An amazing food experience at Hoan Kiem Lake.
+96,Adventure,Ho Chi Minh City,133.65,240,An amazing adventure experience at Statue of Liberty.
+97,Nature,New York,256.42,60,An amazing nature experience at Ha Long Bay.
+98,Culture,New York,79.99,60,An amazing culture experience at Hoan Kiem Lake.
+99,Food,Ho Chi Minh City,85.22,120,An amazing food experience at Water Puppet Theater.
+100,Nightlife & Entertainment,Hanoi,90.44,60,An amazing nightlife & entertainment experience at Ha Long Bay.
+101,Nightlife & Entertainment,Ho Chi Minh City,96.71,300,An amazing nightlife & entertainment experience at Temple of Literature.
+102,Wellness & Spa,Ho Chi Minh City,154.39,60,An amazing wellness & spa experience at Water Puppet Theater.
+103,Beach & Water Sports,Hanoi,254.93,120,An amazing beach & water sports experience at Ha Long Bay.
+104,Adventure,Hanoi,193.55,120,An amazing adventure experience at Water Puppet Theater.
+105,Culture,New York,205.62,240,An amazing culture experience at Old Quarter.
+106,Beach & Water Sports,Hanoi,184.52,480,An amazing beach & water sports experience at Hoan Kiem Lake.
+107,Wellness & Spa,Hanoi,50.23,240,An amazing wellness & spa experience at Water Puppet Theater.
+108,Food,New York,96.63,300,An amazing food experience at Water Puppet Theater.
+109,Culture,Hanoi,127.14,480,An amazing culture experience at Statue of Liberty.
+110,Adventure,Ho Chi Minh City,224.78,60,An amazing adventure experience at Ben Thanh Market.
+111,Wellness & Spa,Hanoi,231.84,300,An amazing wellness & spa experience at Hoan Kiem Lake.
+112,Culture,Hanoi,137.08,120,An amazing culture experience at Water Puppet Theater.
+113,Adventure,Ho Chi Minh City,242.29,60,An amazing adventure experience at Ha Long Bay.
+114,Nightlife & Entertainment,New York,234.6,240,An amazing nightlife & entertainment experience at Old Quarter.
+115,Nightlife & Entertainment,Hanoi,252.01,180,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+116,Beach & Water Sports,Ho Chi Minh City,222.85,60,An amazing beach & water sports experience at Ben Thanh Market.
+117,Beach & Water Sports,Hanoi,166.26,480,An amazing beach & water sports experience at Ha Long Bay.
+118,Wellness & Spa,Hanoi,51.65,60,An amazing wellness & spa experience at Statue of Liberty.
+119,Culture,Hanoi,198.33,180,An amazing culture experience at Water Puppet Theater.
+120,Wellness & Spa,Hanoi,80.78,60,An amazing wellness & spa experience at Ben Thanh Market.
+121,Wellness & Spa,New York,186.91,480,An amazing wellness & spa experience at Ben Thanh Market.
+122,Nightlife & Entertainment,Hanoi,223.17,60,An amazing nightlife & entertainment experience at Old Quarter.
+123,Beach & Water Sports,New York,211.08,300,An amazing beach & water sports experience at Ben Thanh Market.
+124,Nature,Hanoi,96.57,240,An amazing nature experience at Temple of Literature.
+125,Food,Hanoi,146.22,300,An amazing food experience at Hoan Kiem Lake.
+126,Nature,Ho Chi Minh City,293.57,240,An amazing nature experience at Ngoc Son Temple.
+127,Beach & Water Sports,Ho Chi Minh City,83.15,240,An amazing beach & water sports experience at Water Puppet Theater.
+128,Wellness & Spa,Ho Chi Minh City,116.53,480,An amazing wellness & spa experience at Old Quarter.
+129,Adventure,Hanoi,197.33,480,An amazing adventure experience at Ben Thanh Market.
+130,Food,Hanoi,155.57,180,An amazing food experience at Temple of Literature.
+131,Nature,Hanoi,47.17,120,An amazing nature experience at Ngoc Son Temple.
+132,Nightlife & Entertainment,New York,79.15,480,An amazing nightlife & entertainment experience at Temple of Literature.
+133,Nightlife & Entertainment,Ho Chi Minh City,104.79,180,An amazing nightlife & entertainment experience at Ben Thanh Market.
+134,Culture,Ho Chi Minh City,261.14,120,An amazing culture experience at Ngoc Son Temple.
+135,Adventure,Ho Chi Minh City,154.97,60,An amazing adventure experience at Old Quarter.
+136,Culture,Hanoi,219.91,240,An amazing culture experience at Hoan Kiem Lake.
+137,Nature,Hanoi,81.6,60,An amazing nature experience at Hoan Kiem Lake.
+138,Nightlife & Entertainment,Ho Chi Minh City,229.98,480,An amazing nightlife & entertainment experience at Ben Thanh Market.
+139,Wellness & Spa,Hanoi,146.16,480,An amazing wellness & spa experience at Temple of Literature.
+140,Nature,Hanoi,244.29,240,An amazing nature experience at Water Puppet Theater.
+141,Food,Ho Chi Minh City,44.33,60,An amazing food experience at Temple of Literature.
+142,Food,Hanoi,65.6,180,An amazing food experience at Old Quarter.
+143,Nightlife & Entertainment,Hanoi,149.68,240,An amazing nightlife & entertainment experience at Water Puppet Theater.
+144,Beach & Water Sports,Ho Chi Minh City,243.36,240,An amazing beach & water sports experience at Hoan Kiem Lake.
+145,Nightlife & Entertainment,New York,32.64,480,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+146,Wellness & Spa,Hanoi,83.7,300,An amazing wellness & spa experience at Hoan Kiem Lake.
+147,Wellness & Spa,Ho Chi Minh City,208.82,300,An amazing wellness & spa experience at Ha Long Bay.
+148,Wellness & Spa,Hanoi,258.1,60,An amazing wellness & spa experience at Ben Thanh Market.
+149,Food,Ho Chi Minh City,140.29,240,An amazing food experience at Ha Long Bay.
+150,Wellness & Spa,Hanoi,293.47,60,An amazing wellness & spa experience at Water Puppet Theater.
+151,Wellness & Spa,Hanoi,88,60,An amazing wellness & spa experience at Temple of Literature.
+152,Beach & Water Sports,New York,270.52,240,An amazing beach & water sports experience at Ngoc Son Temple.
+153,Culture,Hanoi,191.5,120,An amazing culture experience at Ben Thanh Market.
+154,Nightlife & Entertainment,Hanoi,64.96,120,An amazing nightlife & entertainment experience at Old Quarter.
+155,Nightlife & Entertainment,New York,214.86,60,An amazing nightlife & entertainment experience at Water Puppet Theater.
+156,Beach & Water Sports,Hanoi,295.99,120,An amazing beach & water sports experience at Old Quarter.
+157,Culture,Ho Chi Minh City,278.54,480,An amazing culture experience at Hoan Kiem Lake.
+158,Food,Hanoi,279.54,60,An amazing food experience at Old Quarter.
+159,Nightlife & Entertainment,Hanoi,181.18,300,An amazing nightlife & entertainment experience at Ha Long Bay.
+160,Culture,New York,164.41,60,An amazing culture experience at Hoan Kiem Lake.
+161,Adventure,Hanoi,34.29,120,An amazing adventure experience at Ngoc Son Temple.
+162,Food,Hanoi,103.16,480,An amazing food experience at Ngoc Son Temple.
+163,Culture,Hanoi,52.78,60,An amazing culture experience at Statue of Liberty.
+164,Nature,Hanoi,297.52,240,An amazing nature experience at Ben Thanh Market.
+165,Nature,Hanoi,266.45,120,An amazing nature experience at Ben Thanh Market.
+166,Nature,Ho Chi Minh City,49.17,300,An amazing nature experience at Hoan Kiem Lake.
+167,Nature,Hanoi,25.31,120,An amazing nature experience at Statue of Liberty.
+168,Beach & Water Sports,Hanoi,81.7,300,An amazing beach & water sports experience at Ha Long Bay.
+169,Food,Hanoi,40.08,180,An amazing food experience at Old Quarter.
+170,Wellness & Spa,Hanoi,186.47,60,An amazing wellness & spa experience at Ben Thanh Market.
+171,Beach & Water Sports,Hanoi,206.61,60,An amazing beach & water sports experience at Old Quarter.
+172,Wellness & Spa,New York,142.9,180,An amazing wellness & spa experience at Old Quarter.
+173,Nature,Hanoi,39.33,120,An amazing nature experience at Ha Long Bay.
+174,Wellness & Spa,New York,98.01,240,An amazing wellness & spa experience at Ha Long Bay.
+175,Adventure,New York,146.25,240,An amazing adventure experience at Hoan Kiem Lake.
+176,Beach & Water Sports,Ho Chi Minh City,27.79,180,An amazing beach & water sports experience at Ngoc Son Temple.
+177,Nature,Ho Chi Minh City,168.45,60,An amazing nature experience at Statue of Liberty.
+178,Nightlife & Entertainment,New York,286.47,60,An amazing nightlife & entertainment experience at Statue of Liberty.
+179,Culture,Hanoi,55.07,300,An amazing culture experience at Water Puppet Theater.
+180,Beach & Water Sports,Hanoi,200.86,480,An amazing beach & water sports experience at Hoan Kiem Lake.
+181,Adventure,New York,136.48,480,An amazing adventure experience at Temple of Literature.
+182,Nature,Hanoi,221.62,480,An amazing nature experience at Ngoc Son Temple.
+183,Nightlife & Entertainment,Hanoi,248.11,120,An amazing nightlife & entertainment experience at Statue of Liberty.
+184,Beach & Water Sports,New York,66.79,120,An amazing beach & water sports experience at Ha Long Bay.
+185,Nightlife & Entertainment,New York,47.02,180,An amazing nightlife & entertainment experience at Ben Thanh Market.
+186,Nature,Ho Chi Minh City,269.99,180,An amazing nature experience at Temple of Literature.
+187,Adventure,Hanoi,244.89,240,An amazing adventure experience at Statue of Liberty.
+188,Nightlife & Entertainment,Hanoi,182.41,120,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+189,Adventure,Ho Chi Minh City,275.82,180,An amazing adventure experience at Water Puppet Theater.
+190,Food,Hanoi,216.65,120,An amazing food experience at Hoan Kiem Lake.
+191,Beach & Water Sports,Ho Chi Minh City,114.88,480,An amazing beach & water sports experience at Ngoc Son Temple.
+192,Nightlife & Entertainment,New York,195.47,240,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+193,Adventure,New York,42.17,300,An amazing adventure experience at Old Quarter.
+194,Nightlife & Entertainment,Hanoi,203.78,60,An amazing nightlife & entertainment experience at Water Puppet Theater.
+195,Adventure,Hanoi,162.91,240,An amazing adventure experience at Ben Thanh Market.
+196,Culture,Hanoi,135.23,300,An amazing culture experience at Ben Thanh Market.
+197,Beach & Water Sports,Ho Chi Minh City,134.66,180,An amazing beach & water sports experience at Ben Thanh Market.
+198,Nature,Hanoi,94.14,480,An amazing nature experience at Ha Long Bay.
+199,Nightlife & Entertainment,Hanoi,226.4,180,An amazing nightlife & entertainment experience at Ben Thanh Market.
+200,Wellness & Spa,Ho Chi Minh City,254.96,480,An amazing wellness & spa experience at Ha Long Bay.
+201,Culture,Hanoi,33.72,120,An amazing culture experience at Old Quarter.
+202,Wellness & Spa,Hanoi,142.35,300,An amazing wellness & spa experience at Water Puppet Theater.
+203,Culture,New York,155.8,180,An amazing culture experience at Hoan Kiem Lake.
+204,Adventure,Ho Chi Minh City,167.36,300,An amazing adventure experience at Water Puppet Theater.
+205,Culture,Ho Chi Minh City,122.61,120,An amazing culture experience at Old Quarter.
+206,Adventure,Hanoi,196.15,300,An amazing adventure experience at Ngoc Son Temple.
+207,Adventure,Ho Chi Minh City,271.34,180,An amazing adventure experience at Water Puppet Theater.
+208,Nature,Hanoi,89.11,480,An amazing nature experience at Temple of Literature.
+209,Food,New York,276.33,300,An amazing food experience at Temple of Literature.
+210,Adventure,New York,177.15,180,An amazing adventure experience at Hoan Kiem Lake.
+211,Culture,New York,280.06,300,An amazing culture experience at Hoan Kiem Lake.
+212,Adventure,Ho Chi Minh City,270.95,480,An amazing adventure experience at Old Quarter.
+213,Adventure,New York,199.47,60,An amazing adventure experience at Ben Thanh Market.
+214,Culture,Ho Chi Minh City,129.23,180,An amazing culture experience at Ben Thanh Market.
+215,Nature,New York,277.07,300,An amazing nature experience at Hoan Kiem Lake.
+216,Adventure,Hanoi,160.26,480,An amazing adventure experience at Ha Long Bay.
+217,Culture,Hanoi,150.51,300,An amazing culture experience at Ben Thanh Market.
+218,Nature,Hanoi,87.22,300,An amazing nature experience at Ben Thanh Market.
+219,Nightlife & Entertainment,Hanoi,137.74,240,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+220,Culture,Hanoi,24.85,120,An amazing culture experience at Statue of Liberty.
+221,Culture,Hanoi,143.92,120,An amazing culture experience at Statue of Liberty.
+222,Beach & Water Sports,New York,230.08,180,An amazing beach & water sports experience at Hoan Kiem Lake.
+223,Nightlife & Entertainment,Hanoi,283.69,60,An amazing nightlife & entertainment experience at Statue of Liberty.
+224,Wellness & Spa,Hanoi,151.18,300,An amazing wellness & spa experience at Ben Thanh Market.
+225,Adventure,Hanoi,278.42,480,An amazing adventure experience at Hoan Kiem Lake.
+226,Nightlife & Entertainment,New York,230.32,240,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+227,Nature,Hanoi,262.01,480,An amazing nature experience at Ha Long Bay.
+228,Beach & Water Sports,Ho Chi Minh City,215.6,60,An amazing beach & water sports experience at Ngoc Son Temple.
+229,Adventure,Hanoi,186.95,60,An amazing adventure experience at Statue of Liberty.
+230,Adventure,Hanoi,142.61,120,An amazing adventure experience at Ha Long Bay.
+231,Adventure,Hanoi,188.52,300,An amazing adventure experience at Hoan Kiem Lake.
+232,Adventure,Hanoi,171.51,240,An amazing adventure experience at Hoan Kiem Lake.
+233,Culture,Hanoi,133.75,60,An amazing culture experience at Ngoc Son Temple.
+234,Wellness & Spa,New York,227.39,120,An amazing wellness & spa experience at Water Puppet Theater.
+235,Culture,Hanoi,116.14,60,An amazing culture experience at Water Puppet Theater.
+236,Adventure,New York,70.05,480,An amazing adventure experience at Statue of Liberty.
+237,Culture,New York,48.28,480,An amazing culture experience at Temple of Literature.
+238,Adventure,Hanoi,200.53,180,An amazing adventure experience at Temple of Literature.
+239,Nature,Hanoi,124.25,300,An amazing nature experience at Hoan Kiem Lake.
+240,Wellness & Spa,Hanoi,97.47,120,An amazing wellness & spa experience at Ben Thanh Market.
+241,Culture,Hanoi,270.07,180,An amazing culture experience at Ngoc Son Temple.
+242,Nature,Hanoi,263.24,120,An amazing nature experience at Ha Long Bay.
+243,Wellness & Spa,Hanoi,42.87,480,An amazing wellness & spa experience at Hoan Kiem Lake.
+244,Nature,Ho Chi Minh City,139.31,300,An amazing nature experience at Ngoc Son Temple.
+245,Culture,Ho Chi Minh City,293.37,240,An amazing culture experience at Ha Long Bay.
+246,Wellness & Spa,Hanoi,98.09,300,An amazing wellness & spa experience at Hoan Kiem Lake.
+247,Beach & Water Sports,Hanoi,163.87,120,An amazing beach & water sports experience at Hoan Kiem Lake.
+248,Beach & Water Sports,New York,162.93,240,An amazing beach & water sports experience at Ben Thanh Market.
+249,Adventure,New York,198.83,240,An amazing adventure experience at Hoan Kiem Lake.
+250,Beach & Water Sports,Hanoi,241.33,120,An amazing beach & water sports experience at Ben Thanh Market.
+251,Wellness & Spa,Ho Chi Minh City,36.55,300,An amazing wellness & spa experience at Old Quarter.
+252,Beach & Water Sports,New York,188.82,240,An amazing beach & water sports experience at Hoan Kiem Lake.
+253,Culture,Hanoi,140.19,180,An amazing culture experience at Statue of Liberty.
+254,Nature,Hanoi,121.84,300,An amazing nature experience at Ben Thanh Market.
+255,Nature,Hanoi,199.19,60,An amazing nature experience at Old Quarter.
+256,Nature,Ho Chi Minh City,241.02,120,An amazing nature experience at Temple of Literature.
+257,Adventure,Ho Chi Minh City,278.64,240,An amazing adventure experience at Statue of Liberty.
+258,Food,New York,220.9,180,An amazing food experience at Statue of Liberty.
+259,Nightlife & Entertainment,Hanoi,279.92,240,An amazing nightlife & entertainment experience at Statue of Liberty.
+260,Food,Ho Chi Minh City,294.75,480,An amazing food experience at Ngoc Son Temple.
+261,Food,Hanoi,98.29,120,An amazing food experience at Old Quarter.
+262,Beach & Water Sports,Hanoi,60.21,240,An amazing beach & water sports experience at Water Puppet Theater.
+263,Nature,Hanoi,294.99,60,An amazing nature experience at Temple of Literature.
+264,Wellness & Spa,Hanoi,247.84,480,An amazing wellness & spa experience at Temple of Literature.
+265,Culture,Hanoi,96.34,180,An amazing culture experience at Temple of Literature.
+266,Nightlife & Entertainment,Ho Chi Minh City,99.17,240,An amazing nightlife & entertainment experience at Water Puppet Theater.
+267,Wellness & Spa,New York,234.66,180,An amazing wellness & spa experience at Ben Thanh Market.
+268,Wellness & Spa,Hanoi,248.55,180,An amazing wellness & spa experience at Old Quarter.
+269,Wellness & Spa,Hanoi,61.54,480,An amazing wellness & spa experience at Old Quarter.
+270,Adventure,Hanoi,66.03,300,An amazing adventure experience at Ngoc Son Temple.
+271,Food,New York,261.73,60,An amazing food experience at Water Puppet Theater.
+272,Culture,New York,80.21,240,An amazing culture experience at Ben Thanh Market.
+273,Nightlife & Entertainment,Hanoi,126.8,240,An amazing nightlife & entertainment experience at Statue of Liberty.
+274,Nightlife & Entertainment,Ho Chi Minh City,297.06,120,An amazing nightlife & entertainment experience at Ben Thanh Market.
+275,Beach & Water Sports,Hanoi,274.41,300,An amazing beach & water sports experience at Ha Long Bay.
+276,Food,Hanoi,23.54,180,An amazing food experience at Water Puppet Theater.
+277,Nature,Ho Chi Minh City,25.73,480,An amazing nature experience at Hoan Kiem Lake.
+278,Wellness & Spa,Hanoi,196.32,300,An amazing wellness & spa experience at Ha Long Bay.
+279,Beach & Water Sports,Ho Chi Minh City,215.92,300,An amazing beach & water sports experience at Old Quarter.
+280,Beach & Water Sports,Hanoi,214.76,60,An amazing beach & water sports experience at Hoan Kiem Lake.
+281,Nature,New York,110.23,180,An amazing nature experience at Ha Long Bay.
+282,Culture,Hanoi,99.59,180,An amazing culture experience at Water Puppet Theater.
+283,Nightlife & Entertainment,Hanoi,37.99,120,An amazing nightlife & entertainment experience at Water Puppet Theater.
+284,Culture,New York,159.27,120,An amazing culture experience at Temple of Literature.
+285,Adventure,Hanoi,153.85,60,An amazing adventure experience at Ngoc Son Temple.
+286,Beach & Water Sports,Hanoi,126.59,300,An amazing beach & water sports experience at Temple of Literature.
+287,Food,New York,260.27,60,An amazing food experience at Hoan Kiem Lake.
+288,Beach & Water Sports,Ho Chi Minh City,294.94,240,An amazing beach & water sports experience at Ha Long Bay.
+289,Nature,New York,52.77,120,An amazing nature experience at Water Puppet Theater.
+290,Nightlife & Entertainment,Hanoi,29.57,240,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+291,Culture,Hanoi,169.46,180,An amazing culture experience at Water Puppet Theater.
+292,Adventure,Hanoi,137.84,180,An amazing adventure experience at Ben Thanh Market.
+293,Food,Ho Chi Minh City,130.57,300,An amazing food experience at Ha Long Bay.
+294,Food,New York,141.54,240,An amazing food experience at Old Quarter.
+295,Culture,Ho Chi Minh City,63,480,An amazing culture experience at Statue of Liberty.
+296,Nightlife & Entertainment,New York,252.8,180,An amazing nightlife & entertainment experience at Temple of Literature.
+297,Culture,Hanoi,130.83,300,An amazing culture experience at Hoan Kiem Lake.
+298,Wellness & Spa,Hanoi,49.3,480,An amazing wellness & spa experience at Ha Long Bay.
+299,Culture,Hanoi,45.97,300,An amazing culture experience at Ben Thanh Market.
+300,Beach & Water Sports,Hanoi,190.97,180,An amazing beach & water sports experience at Hoan Kiem Lake.
+301,Nightlife & Entertainment,Ho Chi Minh City,249.59,480,An amazing nightlife & entertainment experience at Water Puppet Theater.
+302,Nature,Hanoi,266.92,120,An amazing nature experience at Old Quarter.
+303,Culture,Hanoi,172.15,240,An amazing culture experience at Hoan Kiem Lake.
+304,Culture,Hanoi,154.65,180,An amazing culture experience at Ha Long Bay.
+305,Culture,Ho Chi Minh City,129.56,180,An amazing culture experience at Statue of Liberty.
+306,Food,Ho Chi Minh City,208.99,120,An amazing food experience at Water Puppet Theater.
+307,Nightlife & Entertainment,Hanoi,227.57,180,An amazing nightlife & entertainment experience at Water Puppet Theater.
+308,Beach & Water Sports,Hanoi,275.18,240,An amazing beach & water sports experience at Hoan Kiem Lake.
+309,Nature,Hanoi,39.63,180,An amazing nature experience at Hoan Kiem Lake.
+310,Beach & Water Sports,Ho Chi Minh City,129.25,120,An amazing beach & water sports experience at Ha Long Bay.
+311,Adventure,Ho Chi Minh City,147.22,60,An amazing adventure experience at Old Quarter.
+312,Nature,Hanoi,135.34,120,An amazing nature experience at Water Puppet Theater.
+313,Beach & Water Sports,Ho Chi Minh City,107.71,300,An amazing beach & water sports experience at Water Puppet Theater.
+314,Adventure,Ho Chi Minh City,206.04,60,An amazing adventure experience at Temple of Literature.
+315,Nature,Hanoi,132.89,60,An amazing nature experience at Old Quarter.
+316,Adventure,Ho Chi Minh City,73.44,120,An amazing adventure experience at Ngoc Son Temple.
+317,Nightlife & Entertainment,Hanoi,39.02,300,An amazing nightlife & entertainment experience at Ha Long Bay.
+318,Adventure,Hanoi,265.17,240,An amazing adventure experience at Water Puppet Theater.
+319,Adventure,Hanoi,119.96,60,An amazing adventure experience at Ngoc Son Temple.
+320,Wellness & Spa,New York,76.7,480,An amazing wellness & spa experience at Statue of Liberty.
+321,Nature,New York,244.7,240,An amazing nature experience at Water Puppet Theater.
+322,Beach & Water Sports,Ho Chi Minh City,162.92,180,An amazing beach & water sports experience at Water Puppet Theater.
+323,Nature,New York,79.81,300,An amazing nature experience at Temple of Literature.
+324,Beach & Water Sports,Ho Chi Minh City,191.05,60,An amazing beach & water sports experience at Statue of Liberty.
+325,Nightlife & Entertainment,Ho Chi Minh City,67.46,240,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+326,Nature,Ho Chi Minh City,104.17,120,An amazing nature experience at Statue of Liberty.
+327,Nature,Ho Chi Minh City,230.85,120,An amazing nature experience at Hoan Kiem Lake.
+328,Nightlife & Entertainment,New York,55.44,120,An amazing nightlife & entertainment experience at Temple of Literature.
+329,Wellness & Spa,Ho Chi Minh City,210.27,300,An amazing wellness & spa experience at Hoan Kiem Lake.
+330,Adventure,Ho Chi Minh City,256.89,120,An amazing adventure experience at Ben Thanh Market.
+331,Nightlife & Entertainment,Hanoi,183.25,120,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+332,Nightlife & Entertainment,New York,109.06,120,An amazing nightlife & entertainment experience at Ben Thanh Market.
+333,Food,Hanoi,185.79,180,An amazing food experience at Old Quarter.
+334,Culture,New York,209.54,300,An amazing culture experience at Ngoc Son Temple.
+335,Food,New York,44.28,180,An amazing food experience at Temple of Literature.
+336,Culture,Ho Chi Minh City,227.89,240,An amazing culture experience at Water Puppet Theater.
+337,Food,Hanoi,212.51,300,An amazing food experience at Old Quarter.
+338,Nature,Hanoi,284.44,60,An amazing nature experience at Ngoc Son Temple.
+339,Food,Hanoi,297.42,300,An amazing food experience at Water Puppet Theater.
+340,Adventure,Hanoi,107.79,480,An amazing adventure experience at Old Quarter.
+341,Culture,Ho Chi Minh City,197.8,120,An amazing culture experience at Ngoc Son Temple.
+342,Adventure,Hanoi,207.07,180,An amazing adventure experience at Water Puppet Theater.
+343,Nature,Hanoi,58.22,60,An amazing nature experience at Ngoc Son Temple.
+344,Adventure,Ho Chi Minh City,272.16,240,An amazing adventure experience at Temple of Literature.
+345,Food,New York,111.43,120,An amazing food experience at Temple of Literature.
+346,Nightlife & Entertainment,Hanoi,191.81,240,An amazing nightlife & entertainment experience at Statue of Liberty.
+347,Adventure,Ho Chi Minh City,128.32,120,An amazing adventure experience at Ngoc Son Temple.
+348,Food,New York,243.32,300,An amazing food experience at Temple of Literature.
+349,Culture,Hanoi,202.52,480,An amazing culture experience at Ngoc Son Temple.
+350,Nature,New York,139.76,480,An amazing nature experience at Statue of Liberty.
+351,Nightlife & Entertainment,New York,151.59,120,An amazing nightlife & entertainment experience at Temple of Literature.
+352,Food,Hanoi,215.28,480,An amazing food experience at Old Quarter.
+353,Nature,Ho Chi Minh City,216.57,120,An amazing nature experience at Temple of Literature.
+354,Adventure,Hanoi,257.18,480,An amazing adventure experience at Hoan Kiem Lake.
+355,Adventure,Hanoi,265.23,300,An amazing adventure experience at Water Puppet Theater.
+356,Nature,New York,116.12,120,An amazing nature experience at Hoan Kiem Lake.
+357,Adventure,Ho Chi Minh City,240.05,480,An amazing adventure experience at Ben Thanh Market.
+358,Nightlife & Entertainment,Ho Chi Minh City,23.39,60,An amazing nightlife & entertainment experience at Water Puppet Theater.
+359,Wellness & Spa,Ho Chi Minh City,70.04,120,An amazing wellness & spa experience at Ben Thanh Market.
+360,Nature,Hanoi,274.28,480,An amazing nature experience at Hoan Kiem Lake.
+361,Culture,Ho Chi Minh City,67.82,300,An amazing culture experience at Ngoc Son Temple.
+362,Nature,Ho Chi Minh City,110.71,120,An amazing nature experience at Ngoc Son Temple.
+363,Beach & Water Sports,Hanoi,265.89,300,An amazing beach & water sports experience at Ngoc Son Temple.
+364,Beach & Water Sports,Hanoi,289.02,120,An amazing beach & water sports experience at Water Puppet Theater.
+365,Culture,Hanoi,283.23,120,An amazing culture experience at Hoan Kiem Lake.
+366,Nature,Hanoi,187.13,120,An amazing nature experience at Ha Long Bay.
+367,Culture,New York,68.4,240,An amazing culture experience at Water Puppet Theater.
+368,Culture,New York,106.16,180,An amazing culture experience at Water Puppet Theater.
+369,Culture,Hanoi,59.6,120,An amazing culture experience at Hoan Kiem Lake.
+370,Nightlife & Entertainment,Ho Chi Minh City,144.96,180,An amazing nightlife & entertainment experience at Statue of Liberty.
+371,Adventure,Hanoi,184.51,300,An amazing adventure experience at Ben Thanh Market.
+372,Culture,Ho Chi Minh City,199.29,480,An amazing culture experience at Water Puppet Theater.
+373,Beach & Water Sports,Hanoi,271.76,240,An amazing beach & water sports experience at Hoan Kiem Lake.
+374,Wellness & Spa,Hanoi,253.69,480,An amazing wellness & spa experience at Hoan Kiem Lake.
+375,Food,New York,20.76,120,An amazing food experience at Ha Long Bay.
+376,Wellness & Spa,Hanoi,99.29,300,An amazing wellness & spa experience at Statue of Liberty.
+377,Nightlife & Entertainment,New York,151.11,180,An amazing nightlife & entertainment experience at Ben Thanh Market.
+378,Culture,Hanoi,216.69,480,An amazing culture experience at Hoan Kiem Lake.
+379,Food,Ho Chi Minh City,114.34,180,An amazing food experience at Hoan Kiem Lake.
+380,Culture,Ho Chi Minh City,205.13,300,An amazing culture experience at Hoan Kiem Lake.
+381,Nightlife & Entertainment,New York,58.35,120,An amazing nightlife & entertainment experience at Old Quarter.
+382,Adventure,Hanoi,130.03,180,An amazing adventure experience at Hoan Kiem Lake.
+383,Wellness & Spa,Ho Chi Minh City,39.92,120,An amazing wellness & spa experience at Water Puppet Theater.
+384,Culture,New York,218.27,480,An amazing culture experience at Temple of Literature.
+385,Nightlife & Entertainment,Hanoi,109.7,480,An amazing nightlife & entertainment experience at Ha Long Bay.
+386,Culture,New York,252.06,240,An amazing culture experience at Ben Thanh Market.
+387,Nature,Hanoi,137.95,300,An amazing nature experience at Old Quarter.
+388,Nightlife & Entertainment,Hanoi,183.73,60,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+389,Wellness & Spa,Hanoi,82.67,300,An amazing wellness & spa experience at Hoan Kiem Lake.
+390,Adventure,Hanoi,202.7,60,An amazing adventure experience at Old Quarter.
+391,Wellness & Spa,Ho Chi Minh City,294.35,240,An amazing wellness & spa experience at Old Quarter.
+392,Culture,Ho Chi Minh City,52.15,480,An amazing culture experience at Water Puppet Theater.
+393,Nature,Hanoi,90.25,480,An amazing nature experience at Temple of Literature.
+394,Adventure,Hanoi,170.25,300,An amazing adventure experience at Temple of Literature.
+395,Adventure,Hanoi,252.89,120,An amazing adventure experience at Ngoc Son Temple.
+396,Wellness & Spa,New York,212.91,240,An amazing wellness & spa experience at Ngoc Son Temple.
+397,Nightlife & Entertainment,Hanoi,145.87,120,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+398,Food,New York,200.67,120,An amazing food experience at Statue of Liberty.
+399,Nightlife & Entertainment,Hanoi,162.59,60,An amazing nightlife & entertainment experience at Statue of Liberty.
+400,Nightlife & Entertainment,Hanoi,221.71,120,An amazing nightlife & entertainment experience at Old Quarter.
+401,Nature,New York,48.56,480,An amazing nature experience at Old Quarter.
+402,Adventure,New York,169.83,480,An amazing adventure experience at Water Puppet Theater.
+403,Nature,Ho Chi Minh City,41.5,180,An amazing nature experience at Old Quarter.
+404,Food,Hanoi,175.98,300,An amazing food experience at Old Quarter.
+405,Culture,Ho Chi Minh City,64.02,60,An amazing culture experience at Statue of Liberty.
+406,Nature,Hanoi,194.42,300,An amazing nature experience at Statue of Liberty.
+407,Adventure,Hanoi,106.49,480,An amazing adventure experience at Ha Long Bay.
+408,Wellness & Spa,New York,89.03,480,An amazing wellness & spa experience at Water Puppet Theater.
+409,Wellness & Spa,Ho Chi Minh City,174.29,120,An amazing wellness & spa experience at Statue of Liberty.
+410,Culture,Ho Chi Minh City,57.71,240,An amazing culture experience at Ha Long Bay.
+411,Adventure,New York,156.54,120,An amazing adventure experience at Ben Thanh Market.
+412,Wellness & Spa,Ho Chi Minh City,272.56,180,An amazing wellness & spa experience at Hoan Kiem Lake.
+413,Food,New York,219.88,180,An amazing food experience at Temple of Literature.
+414,Nature,Ho Chi Minh City,127.31,300,An amazing nature experience at Hoan Kiem Lake.
+415,Nature,Ho Chi Minh City,162.23,300,An amazing nature experience at Old Quarter.
+416,Nature,Ho Chi Minh City,266.03,480,An amazing nature experience at Hoan Kiem Lake.
+417,Beach & Water Sports,New York,265.86,60,An amazing beach & water sports experience at Ha Long Bay.
+418,Nature,Hanoi,276.92,180,An amazing nature experience at Ngoc Son Temple.
+419,Adventure,New York,179.78,120,An amazing adventure experience at Hoan Kiem Lake.
+420,Wellness & Spa,Hanoi,178.33,480,An amazing wellness & spa experience at Water Puppet Theater.
+421,Beach & Water Sports,Hanoi,167.5,240,An amazing beach & water sports experience at Water Puppet Theater.
+422,Wellness & Spa,New York,122.36,120,An amazing wellness & spa experience at Ngoc Son Temple.
+423,Nightlife & Entertainment,Hanoi,218,480,An amazing nightlife & entertainment experience at Old Quarter.
+424,Wellness & Spa,Hanoi,117.65,480,An amazing wellness & spa experience at Old Quarter.
+425,Food,New York,189.52,480,An amazing food experience at Ha Long Bay.
+426,Nightlife & Entertainment,Hanoi,239.62,60,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+427,Wellness & Spa,Hanoi,170.36,120,An amazing wellness & spa experience at Hoan Kiem Lake.
+428,Adventure,Hanoi,107.26,300,An amazing adventure experience at Water Puppet Theater.
+429,Wellness & Spa,Hanoi,229.86,60,An amazing wellness & spa experience at Old Quarter.
+430,Adventure,Hanoi,72.82,240,An amazing adventure experience at Old Quarter.
+431,Nature,Hanoi,32.71,60,An amazing nature experience at Ben Thanh Market.
+432,Adventure,Hanoi,170.96,60,An amazing adventure experience at Old Quarter.
+433,Nightlife & Entertainment,Ho Chi Minh City,152.92,180,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+434,Beach & Water Sports,New York,64.08,480,An amazing beach & water sports experience at Ngoc Son Temple.
+435,Nature,Ho Chi Minh City,113.85,180,An amazing nature experience at Statue of Liberty.
+436,Nature,Hanoi,119.38,240,An amazing nature experience at Statue of Liberty.
+437,Adventure,New York,23.44,60,An amazing adventure experience at Statue of Liberty.
+438,Beach & Water Sports,New York,161.57,240,An amazing beach & water sports experience at Ngoc Son Temple.
+439,Food,Hanoi,136.64,240,An amazing food experience at Ben Thanh Market.
+440,Adventure,New York,77.97,60,An amazing adventure experience at Ngoc Son Temple.
+441,Food,Hanoi,238.09,60,An amazing food experience at Ngoc Son Temple.
+442,Adventure,New York,31.96,240,An amazing adventure experience at Temple of Literature.
+443,Adventure,Hanoi,146.44,180,An amazing adventure experience at Ha Long Bay.
+444,Nightlife & Entertainment,New York,255.1,480,An amazing nightlife & entertainment experience at Statue of Liberty.
+445,Nightlife & Entertainment,New York,158.96,180,An amazing nightlife & entertainment experience at Water Puppet Theater.
+446,Beach & Water Sports,Hanoi,246.43,60,An amazing beach & water sports experience at Ha Long Bay.
+447,Beach & Water Sports,Ho Chi Minh City,144.87,240,An amazing beach & water sports experience at Old Quarter.
+448,Culture,New York,267.97,480,An amazing culture experience at Water Puppet Theater.
+449,Nightlife & Entertainment,Ho Chi Minh City,67.53,60,An amazing nightlife & entertainment experience at Old Quarter.
+450,Nightlife & Entertainment,Hanoi,270.23,60,An amazing nightlife & entertainment experience at Ha Long Bay.
+451,Nightlife & Entertainment,Hanoi,216.74,180,An amazing nightlife & entertainment experience at Ngoc Son Temple.
+452,Nightlife & Entertainment,Ho Chi Minh City,91.67,480,An amazing nightlife & entertainment experience at Old Quarter.
+453,Nature,Hanoi,159.98,180,An amazing nature experience at Statue of Liberty.
+454,Wellness & Spa,Hanoi,299.63,480,An amazing wellness & spa experience at Hoan Kiem Lake.
+455,Food,Ho Chi Minh City,187.29,240,An amazing food experience at Water Puppet Theater.
+456,Adventure,Ho Chi Minh City,82.58,240,An amazing adventure experience at Old Quarter.
+457,Wellness & Spa,New York,275.53,240,An amazing wellness & spa experience at Temple of Literature.
+458,Culture,Hanoi,209.68,480,An amazing culture experience at Water Puppet Theater.
+459,Beach & Water Sports,Ho Chi Minh City,51.58,480,An amazing beach & water sports experience at Hoan Kiem Lake.
+460,Food,New York,30.34,300,An amazing food experience at Ngoc Son Temple.
+461,Food,New York,158.23,480,An amazing food experience at Temple of Literature.
+462,Wellness & Spa,Ho Chi Minh City,143.15,60,An amazing wellness & spa experience at Hoan Kiem Lake.
+463,Adventure,Hanoi,223.81,120,An amazing adventure experience at Ben Thanh Market.
+464,Beach & Water Sports,New York,112.78,120,An amazing beach & water sports experience at Hoan Kiem Lake.
+465,Beach & Water Sports,Ho Chi Minh City,80.67,180,An amazing beach & water sports experience at Hoan Kiem Lake.
+466,Food,Hanoi,44.74,300,An amazing food experience at Old Quarter.
+467,Nightlife & Entertainment,Hanoi,257.52,60,An amazing nightlife & entertainment experience at Statue of Liberty.
+468,Beach & Water Sports,Hanoi,175.05,480,An amazing beach & water sports experience at Ha Long Bay.
+469,Nature,Hanoi,30.06,300,An amazing nature experience at Old Quarter.
+470,Nightlife & Entertainment,New York,115.51,240,An amazing nightlife & entertainment experience at Temple of Literature.
+471,Nature,Ho Chi Minh City,93.81,180,An amazing nature experience at Ben Thanh Market.
+472,Beach & Water Sports,Ho Chi Minh City,243.39,480,An amazing beach & water sports experience at Old Quarter.
+473,Culture,Hanoi,206.98,240,An amazing culture experience at Ngoc Son Temple.
+474,Nature,New York,243.41,240,An amazing nature experience at Water Puppet Theater.
+475,Culture,Hanoi,48.66,180,An amazing culture experience at Old Quarter.
+476,Nature,Hanoi,288.47,180,An amazing nature experience at Water Puppet Theater.
+477,Beach & Water Sports,Ho Chi Minh City,189.42,480,An amazing beach & water sports experience at Old Quarter.
+478,Culture,Hanoi,255.48,180,An amazing culture experience at Ben Thanh Market.
+479,Beach & Water Sports,New York,55.4,180,An amazing beach & water sports experience at Old Quarter.
+480,Culture,Ho Chi Minh City,57.78,60,An amazing culture experience at Old Quarter.
+481,Nightlife & Entertainment,Hanoi,246.54,180,An amazing nightlife & entertainment experience at Hoan Kiem Lake.
+482,Nature,Hanoi,298.19,60,An amazing nature experience at Statue of Liberty.
+483,Food,Hanoi,84.94,480,An amazing food experience at Ngoc Son Temple.
+484,Culture,New York,134.75,180,An amazing culture experience at Ngoc Son Temple.
+485,Nature,Hanoi,131.91,300,An amazing nature experience at Hoan Kiem Lake.
+486,Adventure,Hanoi,265.83,240,An amazing adventure experience at Ben Thanh Market.
+487,Wellness & Spa,Ho Chi Minh City,197.95,480,An amazing wellness & spa experience at Water Puppet Theater.
+488,Culture,Hanoi,192.66,240,An amazing culture experience at Ha Long Bay.
+489,Food,New York,282.94,60,An amazing food experience at Ben Thanh Market.
+490,Nature,New York,78.17,240,An amazing nature experience at Statue of Liberty.
+491,Nightlife & Entertainment,Hanoi,261.2,480,An amazing nightlife & entertainment experience at Old Quarter.
+492,Wellness & Spa,New York,149.66,480,An amazing wellness & spa experience at Ngoc Son Temple.
+493,Adventure,Hanoi,272.85,120,An amazing adventure experience at Hoan Kiem Lake.
+494,Adventure,New York,58.52,480,An amazing adventure experience at Hoan Kiem Lake.
+495,Culture,Hanoi,67.08,300,An amazing culture experience at Statue of Liberty.
+496,Culture,Hanoi,126.83,120,An amazing culture experience at Water Puppet Theater.
+497,Beach & Water Sports,Ho Chi Minh City,217.43,180,An amazing beach & water sports experience at Ben Thanh Market.
+498,Food,Hanoi,133.22,120,An amazing food experience at Water Puppet Theater.
+499,Nature,Hanoi,187.88,300,An amazing nature experience at Ha Long Bay.
+500,Food,Hanoi,274.82,180,An amazing food experience at Statue of Liberty.
+501,Beach & Water Sports,Hanoi,201.94,60,An amazing beach & water sports experience at Old Quarter.
+502,Nature,New York,77.15,120,An amazing nature experience at Temple of Literature.
+503,Nightlife & Entertainment,Hanoi,269.08,120,An amazing nightlife & entertainment experience at Ben Thanh Market.
+504,Nature,Ho Chi Minh City,213.8,240,An amazing nature experience at Ha Long Bay.

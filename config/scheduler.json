@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "cronExpression": "37 13 * * *",
+  "lastRun": "2025-12-20T06:37:00.053Z",
+  "lastStatus": "success",
+  "lastMessage": "Pipeline completed in 2.49s. Imported 1080 recommendations."
+}
