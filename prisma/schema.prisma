@@ -85,6 +85,7 @@ model User {
   notifications   Notification[]
   recommendations Recommendation[]
   requests        SupplierRequest[]
+  coupons         Coupon[]
 
   @@map("users")
 }
@@ -334,6 +335,10 @@ model Coupon {
   validTo       DateTime @map("valid_to")
   isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
+
+  // null = public coupon (ai cũng dùng được), có userId = coupon riêng cho user đó
+  userId        BigInt?  @map("user_id")
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("coupons")
 }

@@ -27,6 +27,8 @@ export class CouponsService {
       validFrom: new Date(dto.validFrom),
       validTo: new Date(dto.validTo),
       isActive: dto.isActive ?? true,
+      // null = public coupon, có userId = coupon riêng cho user đó
+      userId: dto.userId ? BigInt(dto.userId) : null,
     };
 
     // 2. LOG: Dữ liệu sau khi xử lý (chuẩn bị gửi đến Prisma)
@@ -74,10 +76,19 @@ export class CouponsService {
     return coupon;
   }
 
-  async listActive() {
+  /**
+   * Get active coupons for a user
+   * - If userId provided: return public coupons + user's private coupons
+   * - If no userId: return only public coupons
+   */
+  async listActive(userId?: bigint) {
     const coupons = await this.prisma.coupon.findMany({
       where: {
         isActive: true,
+        OR: [
+          { userId: null }, // Public coupons
+          ...(userId ? [{ userId: userId }] : []), // User's private coupons (if logged in)
+        ],
       },
       select: {
         id: true,
@@ -89,6 +100,7 @@ export class CouponsService {
         minAmount: true,
         validTo: true,
         isActive: true,
+        userId: true,
       },
       orderBy: { validTo: 'asc' },
     });
@@ -96,15 +108,31 @@ export class CouponsService {
     return coupons.map((c) => ({
       ...c,
       id: Number(c.id),
+      userId: c.userId ? Number(c.userId) : null,
     }));
   }
 
-  async apply(code: string, amount: number) {
+  /**
+   * Apply a coupon to an amount
+   * - Public coupon (userId = null): anyone can use
+   * - Private coupon (userId != null): only that user can use
+   */
+  async apply(code: string, amount: number, userId?: bigint) {
     const coupon = await this.prisma.coupon.findUnique({ where: { code } });
 
     if (!coupon) throw new NotFoundException('Coupon not found');
 
     if (!coupon.isActive) throw new BadRequestException('Coupon is not active');
+
+    // Check if coupon is private and belongs to the current user
+    if (coupon.userId !== null) {
+      if (!userId) {
+        throw new BadRequestException('Bạn cần đăng nhập để sử dụng mã giảm giá này');
+      }
+      if (coupon.userId !== userId) {
+        throw new BadRequestException('Mã giảm giá này không dành cho bạn');
+      }
+    }
 
     const now = new Date();
 
@@ -142,13 +170,9 @@ export class CouponsService {
 
     return {
       valid: true,
-
       code: coupon.code,
-
       discount,
-
       finalAmount,
-
       coupon,
     };
   }

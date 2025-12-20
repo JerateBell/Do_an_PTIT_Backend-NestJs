@@ -58,4 +58,9 @@ export class CreateCouponDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  // null = public coupon, có userId = coupon riêng cho user đó
+  @IsNumber()
+  @IsOptional()
+  userId?: number;
 }

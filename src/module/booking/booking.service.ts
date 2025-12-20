@@ -8,8 +8,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
-import { randomBytes } from 'crypto';
-
 import { CreateBookingDto } from './dto/create-booking.dto';
 
 import { BadRequestException } from '@nestjs/common';
@@ -17,8 +15,6 @@ import { BadRequestException } from '@nestjs/common';
 import { CouponsService } from '../coupons/coupons.service';
 
 import { Coupon } from '@prisma/client';
-
-import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class BookingsService {
@@ -152,6 +148,13 @@ export class BookingsService {
         throw new BadRequestException('Coupon không tồn tại');
       }
 
+      // Check if coupon is private and belongs to the current user
+      if (appliedCoupon.userId !== null) {
+        if (appliedCoupon.userId !== userId) {
+          throw new BadRequestException('Mã giảm giá này không dành cho bạn');
+        }
+      }
+
       const now = new Date();
 
       if (
@@ -173,7 +176,7 @@ export class BookingsService {
 
       if (subtotal < minAmount) {
         throw new BadRequestException(
-          `Tổng tiền tối thiểu để dùng coupon là ${appliedCoupon.minAmount}`,
+          `Tổng tiền tối thiểu để dùng coupon là ${minAmount}`,
         );
       }
 
