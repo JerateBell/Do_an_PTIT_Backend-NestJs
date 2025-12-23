@@ -247,6 +247,13 @@ export class StatsService {
         id: {
           in: destinationIds,
         },
+        deletedAt: null, // Soft delete filter for destination
+        city: {
+          deletedAt: null, // Soft delete filter for city
+          country: {
+            deletedAt: null, // Soft delete filter for country
+          },
+        },
       },
       select: {
         id: true,

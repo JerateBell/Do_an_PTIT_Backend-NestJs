@@ -9,8 +9,11 @@ export class ActivitiesService {
 
   async createForSupplier(userId: bigint, data: any) {
     // Tìm supplier thật dựa vào userId trong bảng suppliers
-    const supplier = await this.prisma.supplier.findUnique({
-      where: { userId },
+    const supplier = await this.prisma.supplier.findFirst({
+      where: { 
+        userId,
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!supplier) {
@@ -26,27 +29,47 @@ export class ActivitiesService {
   }
 
   async findAllByUser(userId: bigint) {
-    const supplier = await this.prisma.supplier.findUnique({ where: { userId } });
+    const supplier = await this.prisma.supplier.findFirst({ 
+      where: { 
+        userId,
+        deletedAt: null, // Soft delete filter
+      },
+    });
     if (!supplier) throw new Error('Supplier not found');
     
     return this.prisma.activity.findMany({
-      where: { supplierId: supplier.id },
+      where: { 
+        supplierId: supplier.id,
+        deletedAt: null, // Soft delete filter
+      },
     });
   }
 
   async findOneByUser(id: bigint, userId: bigint) {
-    const supplier = await this.prisma.supplier.findUnique({ where: { userId } });
+    const supplier = await this.prisma.supplier.findFirst({ 
+      where: { 
+        userId,
+        deletedAt: null, // Soft delete filter
+      },
+    });
     if (!supplier) throw new Error('Supplier not found');
 
     return this.prisma.activity.findFirst({
-      where: { id, supplierId: supplier.id },
+      where: { 
+        id, 
+        supplierId: supplier.id,
+        deletedAt: null, // Soft delete filter
+      },
     });
   }
 
 
   async updateByUser(id: bigint, data: UpdateActivityDto, userId: bigint) {
-    const supplier = await this.prisma.supplier.findUnique({
-      where: { userId },
+    const supplier = await this.prisma.supplier.findFirst({
+      where: { 
+        userId,
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!supplier) {
@@ -54,7 +77,11 @@ export class ActivitiesService {
     }
 
     const existing = await this.prisma.activity.findFirst({
-      where: { id, supplierId: supplier.id },
+      where: { 
+        id, 
+        supplierId: supplier.id,
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!existing) {
@@ -73,8 +100,11 @@ export class ActivitiesService {
   }
 
   async deleteByUser(id: bigint, userId: bigint) {
-    const supplier = await this.prisma.supplier.findUnique({
-      where: { userId },
+    const supplier = await this.prisma.supplier.findFirst({
+      where: { 
+        userId,
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!supplier) {
@@ -82,15 +112,20 @@ export class ActivitiesService {
     }
 
     const existing = await this.prisma.activity.findFirst({
-      where: { id, supplierId: supplier.id },
+      where: { 
+        id, 
+        supplierId: supplier.id,
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!existing) {
       throw new NotFoundException('Activity not found or not owned by this supplier');
     }
 
-    await this.prisma.activity.delete({
+    await this.prisma.activity.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
     return { message: 'Activity deleted successfully' };

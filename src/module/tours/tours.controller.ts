@@ -6,10 +6,15 @@ import {
   Param,
   Patch,
   Delete,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../auth/guard/admin.guard';
 import { ToursService } from './tours.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import { FilterActivitiesDto } from './dto/filter-activities.dto';
 
 @Controller('tours')
 export class ToursController {
@@ -20,9 +25,11 @@ export class ToursController {
     return this.toursService.createActivity(dto);
   }
 
-  @Get('activity')
-  findAllActivities() {
-    return this.toursService.findAllActivities();
+  // Admin only endpoint with pagination
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Get('activity/admin/all')
+  findAllActivities(@Query() filter: FilterActivitiesDto) {
+    return this.toursService.findAllActivities(filter);
   }
 
   @Get('activity/:id')

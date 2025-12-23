@@ -9,8 +9,11 @@ export class SuppliersService {
 
   async create(dto: CreateSupplierDto) {
     // ✅ Kiểm tra user đã có supplier chưa
-    const existing = await this.prisma.supplier.findUnique({
-      where: { userId: dto.userId },
+    const existing = await this.prisma.supplier.findFirst({
+      where: { 
+        userId: dto.userId,
+        deletedAt: null, // Soft delete filter
+      },
     });
     if (existing) {
       throw new ConflictException('Người dùng này đã là supplier');
@@ -28,19 +31,45 @@ export class SuppliersService {
     });
   }
 
-  findAll() {
-    return this.prisma.supplier.findMany({
-      include: {
-        user: true,
-        activities: true,
-        bookings: true,
-      },
-    });
+  async findAll(filter?: { page?: number; limit?: number }) {
+    const { page = 1, limit = 10 } = filter || {};
+    const skip = (page - 1) * limit;
+
+    const where = {
+      deletedAt: null, // Soft delete filter
+    };
+
+    const [suppliers, total] = await Promise.all([
+      this.prisma.supplier.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          user: true,
+          activities: true,
+          bookings: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.supplier.count({ where }),
+    ]);
+
+    return {
+      suppliers,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
   async findOne(id: number) {
-    const supplier = await this.prisma.supplier.findUnique({
-      where: { id },
+    const supplier = await this.prisma.supplier.findFirst({
+      where: { 
+        id,
+        deletedAt: null, // Soft delete filter
+      },
       include: {
         user: true,
         activities: true,
@@ -80,6 +109,9 @@ export class SuppliersService {
 
   async findAllSuppliers() {
     return this.prisma.supplier.findMany({
+      where: {
+        deletedAt: null, // Soft delete filter
+      },
       include: {
         user: {
           select: {
@@ -100,8 +132,11 @@ export class SuppliersService {
   }
 
   async findOneSupplier(id: number) {
-    return this.prisma.supplier.findUnique({ 
-      where: { id },
+    return this.prisma.supplier.findFirst({ 
+      where: { 
+        id,
+        deletedAt: null, // Soft delete filter
+      },
       include: {
         user: {
           select: {
@@ -140,8 +175,9 @@ export class SuppliersService {
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.supplier.delete({
+    return this.prisma.supplier.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 }

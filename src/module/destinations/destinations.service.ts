@@ -23,6 +23,15 @@ export class DestinationsService {
 
   async findAll() {
     return await this.prisma.destination.findMany({
+      where: {
+        deletedAt: null, // Soft delete filter for destination
+        city: {
+          deletedAt: null, // Soft delete filter for city
+          country: {
+            deletedAt: null, // Soft delete filter for country
+          },
+        },
+      },
       include: {
         city: {
           include: {
@@ -37,8 +46,17 @@ export class DestinationsService {
   }
 
   async findOne(id: bigint) {
-    return await this.prisma.destination.findUnique({
-      where: { id },
+    return await this.prisma.destination.findFirst({
+      where: { 
+        id,
+        deletedAt: null, // Soft delete filter for destination
+        city: {
+          deletedAt: null, // Soft delete filter for city
+          country: {
+            deletedAt: null, // Soft delete filter for country
+          },
+        },
+      },
       include: {
         city: {
           include: {
@@ -51,7 +69,16 @@ export class DestinationsService {
 
   async findByCity(cityId: bigint) {
     return await this.prisma.destination.findMany({
-      where: { cityId },
+      where: { 
+        cityId,
+        deletedAt: null, // Soft delete filter for destination
+        city: {
+          deletedAt: null, // Soft delete filter for city
+          country: {
+            deletedAt: null, // Soft delete filter for country
+          },
+        },
+      },
       include: {
         city: {
           include: {
@@ -77,8 +104,45 @@ export class DestinationsService {
   }
 
   async remove(id: bigint) {
-    return await this.prisma.destination.delete({
+    return await this.prisma.destination.update({
       where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  /**
+   * Restore destination (set deletedAt to null)
+   */
+  async restore(id: bigint) {
+    return await this.prisma.destination.update({
+      where: { id },
+      data: { deletedAt: null },
+      include: {
+        city: {
+          include: {
+            country: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Find destination by slug (including deleted ones)
+   * Used for duplicate checking
+   */
+  async findBySlug(slug: string) {
+    return await this.prisma.destination.findFirst({
+      where: {
+        slug,
+      },
+      include: {
+        city: {
+          include: {
+            country: true,
+          },
+        },
+      },
     });
   }
 }

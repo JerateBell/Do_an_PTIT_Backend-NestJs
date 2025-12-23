@@ -27,8 +27,11 @@ export class BookingsService {
   // ✅ Helper: Lấy supplier theo userId
 
   private async getSupplierByUserId(userId: bigint) {
-    const supplier = await this.prisma.supplier.findUnique({
-      where: { userId },
+    const supplier = await this.prisma.supplier.findFirst({
+      where: { 
+        userId,
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!supplier) throw new NotFoundException('Supplier not found');
@@ -44,6 +47,7 @@ export class BookingsService {
     return this.prisma.booking.findMany({
       where: {
         supplierId: supplier.id, // ✅ lọc trực tiếp theo supplierId
+        deletedAt: null, // Soft delete filter
       },
 
       include: {
@@ -65,8 +69,11 @@ export class BookingsService {
   async findOneForSupplier(id: bigint, userId: bigint) {
     const supplier = await this.getSupplierByUserId(userId);
 
-    const booking = await this.prisma.booking.findUnique({
-      where: { id },
+    const booking = await this.prisma.booking.findFirst({
+      where: { 
+        id,
+        deletedAt: null, // Soft delete filter
+      },
 
       include: {
         user: true,
@@ -115,7 +122,10 @@ export class BookingsService {
   async remove(id: bigint, userId: bigint) {
     const booking = await this.findOneForSupplier(id, userId);
 
-    await this.prisma.booking.delete({ where: { id: booking.id } });
+    await this.prisma.booking.update({ 
+      where: { id: booking.id },
+      data: { deletedAt: new Date() },
+    });
 
     return { message: 'Booking deleted successfully' };
   }
@@ -140,8 +150,11 @@ export class BookingsService {
     // ====== CHECK COUPON ======
 
     if (dto.couponCode) {
-      appliedCoupon = await this.prisma.coupon.findUnique({
-        where: { code: dto.couponCode },
+      appliedCoupon = await this.prisma.coupon.findFirst({
+        where: { 
+          code: dto.couponCode,
+          deletedAt: null, // Soft delete filter
+        },
       });
 
       if (!appliedCoupon) {

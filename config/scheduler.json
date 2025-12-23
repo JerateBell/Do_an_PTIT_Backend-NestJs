@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "cronExpression": "37 13 * * *",
-  "lastRun": "2025-12-20T06:37:00.053Z",
-  "lastStatus": "success",
-  "lastMessage": "Pipeline completed in 2.49s. Imported 1080 recommendations."
+  "lastRun": "2025-12-23T06:37:00.019Z",
+  "lastStatus": "error",
+  "lastMessage": "Python script not found: C:\\Users\\dungdt\\Desktop\\do an\\Recommendation-for-BookTour-Website\\final_algorithm\\hybrid_cf_cb.py"
 }

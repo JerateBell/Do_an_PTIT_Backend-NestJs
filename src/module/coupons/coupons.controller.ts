@@ -4,6 +4,7 @@ import { CouponsService } from './coupons.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { ApplyCouponDto } from './dto/apply-coupon.dto';
 import { OptionalJwtGuard } from '../auth/guard/optional-jwt.guard';
+import { FilterCouponsDto } from './dto/filter-coupons.dto';
 
 @Controller('coupons')
 export class CouponsController {
@@ -33,9 +34,9 @@ export class CouponsController {
   }
 
   @Get()
-  list(@Query('active') active?: string) {
-    const onlyActive = active === 'true' ? true : undefined;
-    return this.couponsService.list(onlyActive);
+  list(@Query() filter: FilterCouponsDto) {
+    const onlyActive = filter.active === 'true' ? true : undefined;
+    return this.couponsService.list(onlyActive, filter);
   }
 
   @Delete(':code')
