@@ -79,7 +79,6 @@ model User {
   payments        Payment[]
   reviews         Review[]
   wishlists       Wishlist[]
-  cartItems       CartItem[]
   notifications   Notification[]
   recommendations Recommendation[]
   requests        SupplierRequest[]
@@ -203,7 +202,6 @@ model Activity {
   bookings        Booking[]
   reviews         Review[]
   wishlists       Wishlist[]
-  cartItems       CartItem[]
   recommendations Recommendation[]
 
   @@index([deletedAt])
@@ -234,7 +232,6 @@ model ActivitySchedule {
 
   activity  Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
   bookings  Booking[]
-  cartItems CartItem[]
 
   @@unique([activityId, date, timeSlot])
   @@map("activity_schedules")
@@ -376,24 +373,6 @@ model Wishlist {
 
   @@unique([userId, activityId])
   @@map("wishlists")
-}
-
-model CartItem {
-  id           BigInt   @id @default(autoincrement())
-  sessionId    String   @map("session_id") @db.VarChar(255)
-  userId       BigInt?  @map("user_id")
-  activityId   BigInt   @map("activity_id")
-  scheduleId   BigInt   @map("schedule_id")
-  participants Int      @default(1)
-  price        Decimal  @db.Decimal(10, 2)
-  expiresAt    DateTime @map("expires_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  user     User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activity Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  schedule ActivitySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-
-  @@map("cart_items")
 }
 
 // ===== SYSTEM =====

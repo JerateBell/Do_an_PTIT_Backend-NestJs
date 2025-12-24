@@ -1,10 +1,14 @@
 import { IsOptional, IsString, IsNumber, IsEnum } from "class-validator";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, PaymentStatus } from "@prisma/client";
 
 export class FilterBookingDto {
   @IsOptional()
   @IsEnum(BookingStatus)
   status?: BookingStatus;
+
+  @IsOptional()
+  @IsEnum(PaymentStatus)
+  paymentStatus?: PaymentStatus;
 
   @IsOptional()
   @IsNumber()
