@@ -40,9 +40,10 @@ enum PaymentStatus {
 }
 
 enum PaymentMethod {
+  cash
+  bank_transfer 
   credit_card
   paypal
-  bank_transfer
 }
 
 enum RequestType {
