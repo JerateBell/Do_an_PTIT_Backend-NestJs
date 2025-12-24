@@ -11,7 +11,7 @@ export class ToursService {
     return this.prisma.activity.create({ data });
   }
 
-  async findAllActivities(filter?: { page?: number; limit?: number }) {
+  async findAllActivitiesAdmin(filter?: { page?: number; limit?: number }) {
     const { page = 1, limit = 10 } = filter || {};
     const skip = (page - 1) * limit;
 
@@ -102,6 +102,100 @@ export class ToursService {
       totalPages: Math.ceil(total / limit),
       currentPage: page,
     };
+  }
+
+  async findAllActivities() {
+    const where = {
+      deletedAt: null, // Soft delete filter for activity
+      destination: {
+        deletedAt: null, // Soft delete filter for destination
+        city: {
+          deletedAt: null, // Soft delete filter for city
+          country: {
+            deletedAt: null, // Soft delete filter for country
+          },
+        },
+      },
+    };
+
+    return this.prisma.activity.findMany({
+      where,
+      include: {
+        supplier: {
+          select: {
+            id: true,
+            companyName: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        destination: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            city: {
+              select: {
+                id: true,
+                name: true,
+                country: {
+                  select: {
+                    code: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        images: {
+          where: {
+            activity: {
+              deletedAt: null,
+            },
+          },
+        },
+        schedules: true,
+        reviews: {
+          where: {
+            deletedAt: null,
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            bookings: true,
+            reviews: true,
+            wishlists: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
   async findOneActivity(id: number) {

@@ -25,11 +25,17 @@ export class ToursController {
     return this.toursService.createActivity(dto);
   }
 
+  // Public endpoint - Get all activities
+  @Get('activity')
+  findAllActivities() {
+    return this.toursService.findAllActivities();
+  }
+
   // Admin only endpoint with pagination
   @UseGuards(AuthGuard('jwt'), AdminGuard)
   @Get('activity/admin/all')
-  findAllActivities(@Query() filter: FilterActivitiesDto) {
-    return this.toursService.findAllActivities(filter);
+  findAllActivitiesAdmin(@Query() filter: FilterActivitiesDto) {
+    return this.toursService.findAllActivitiesAdmin(filter);
   }
 
   @Get('activity/:id')
