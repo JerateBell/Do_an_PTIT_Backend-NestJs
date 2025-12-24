@@ -10,7 +10,7 @@ export class ActivitiesService {
   async createForSupplier(userId: bigint, data: any) {
     // Tìm supplier thật dựa vào userId trong bảng suppliers
     const supplier = await this.prisma.supplier.findFirst({
-      where: { 
+      where: {
         userId,
         deletedAt: null, // Soft delete filter
       },
@@ -36,7 +36,7 @@ export class ActivitiesService {
       },
     });
     if (!supplier) throw new Error('Supplier not found');
-    
+
     return this.prisma.activity.findMany({
       where: { 
         supplierId: supplier.id,
@@ -46,12 +46,7 @@ export class ActivitiesService {
   }
 
   async findOneByUser(id: bigint, userId: bigint) {
-    const supplier = await this.prisma.supplier.findFirst({ 
-      where: { 
-        userId,
-        deletedAt: null, // Soft delete filter
-      },
-    });
+    const supplier = await this.prisma.supplier.findUnique({ where: { userId } });
     if (!supplier) throw new Error('Supplier not found');
 
     return this.prisma.activity.findFirst({
@@ -62,7 +57,6 @@ export class ActivitiesService {
       },
     });
   }
-
 
   async updateByUser(id: bigint, data: UpdateActivityDto, userId: bigint) {
     const supplier = await this.prisma.supplier.findFirst({
@@ -85,7 +79,9 @@ export class ActivitiesService {
     });
 
     if (!existing) {
-      throw new NotFoundException('Activity not found or not owned by this supplier');
+      throw new NotFoundException(
+        'Activity not found or not owned by this supplier',
+      );
     }
 
     const updated = await this.prisma.activity.update({
@@ -120,7 +116,9 @@ export class ActivitiesService {
     });
 
     if (!existing) {
-      throw new NotFoundException('Activity not found or not owned by this supplier');
+      throw new NotFoundException(
+        'Activity not found or not owned by this supplier',
+      );
     }
 
     await this.prisma.activity.update({
@@ -129,5 +127,21 @@ export class ActivitiesService {
     });
 
     return { message: 'Activity deleted successfully' };
+  }
+  async search(query: string) {
+    return this.prisma.activity.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: 'insensitive',
+        },
+      },
+      take: 10,
+      select: {
+        id: true,
+        name: true,
+        price: true,
+      },
+    });
   }
 }

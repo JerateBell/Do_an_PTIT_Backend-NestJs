@@ -25,7 +25,6 @@ import { WishlistModule } from './module/wishlist/wishlist.module';
 import { NotificationsModule } from './module/notifications/notifications.module';
 import { SupplierRequestsModule } from './module/supplier-requests/supplier-requests.module';
 import { RecommendationSchedulerModule } from './module/recommendation-scheduler/recommendation-scheduler.module';
-
 @Module({
   imports: [
     PrismaModule,

@@ -154,7 +154,9 @@ export class CouponsService {
     // Check if coupon is private and belongs to the current user
     if (coupon.userId !== null) {
       if (!userId) {
-        throw new BadRequestException('Bạn cần đăng nhập để sử dụng mã giảm giá này');
+        throw new BadRequestException(
+          'Bạn cần đăng nhập để sử dụng mã giảm giá này',
+        );
       }
       if (coupon.userId !== userId) {
         throw new BadRequestException('Mã giảm giá này không dành cho bạn');

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Patch, Delete, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Patch, Delete, Body, UseGuards, Query } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { CurrentSupplier } from '../../common/decorators/current-supplier.decorator';
 import { AuthGuard } from '@nestjs/passport';
@@ -23,11 +23,17 @@ export class ActivitiesController {
     return this.activitiesService.findAllByUser(BigInt(supplier.id));
   }
 
+  @Get('search')
+  @UseGuards()
+  search(@Query('query') query: string) {
+    if (!query || query.trim() === '') {
+      return [];
+    }
+    return this.activitiesService.search(query);
+  }
+
   @Get(':id')
-  async findOne(
-    @Param('id') id: string,
-    @CurrentSupplier() supplier: any,
-  ) {
+  async findOne(@Param('id') id: string, @CurrentSupplier() supplier: any) {
     return this.activitiesService.findOneByUser(
       BigInt(id),
       BigInt(supplier.id),
@@ -46,10 +52,7 @@ export class ActivitiesController {
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id') id: string,
-    @CurrentSupplier() supplier: any,
-  ) {
+  async remove(@Param('id') id: string, @CurrentSupplier() supplier: any) {
     const activityId = BigInt(id);
     const supplierId = BigInt(supplier.id);
     return this.activitiesService.deleteByUser(activityId, supplierId);
