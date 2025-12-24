@@ -74,36 +74,51 @@ export class SupplierRequestsService {
   }
 
   /**
-   * Admin xem tất cả requests (có filter)
+   * Admin xem tất cả requests (có filter và pagination)
    */
   async findAll(filters?: FilterRequestsDto) {
+    const { page = 1, limit = 10, type, status } = filters || {};
+    const skip = (page - 1) * limit;
+
     const where: Prisma.SupplierRequestWhereInput = {};
 
-    if (filters?.type) {
-      where.type = filters.type;
+    if (type) {
+      where.type = type;
     }
 
-    if (filters?.status) {
-      where.status = filters.status;
+    if (status) {
+      where.status = status;
     }
 
-    return this.prisma.supplierRequest.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-            phone: true,
+    const [requests, total] = await Promise.all([
+      this.prisma.supplierRequest.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.supplierRequest.count({ where }),
+    ]);
+
+    return {
+      requests,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
   /**
@@ -286,70 +301,118 @@ export class SupplierRequestsService {
         break;
 
       case RequestType.add_country:
-        // Kiểm tra country đã tồn tại chưa
-        const existingCountry = await this.countriesService.findOne(data.code);
+        // Kiểm tra country đã tồn tại chưa (theo code) - KHÔNG filter deletedAt
+        const existingCountry = await this.countriesService.findByCode(data.code);
+        
         if (existingCountry) {
-          throw new BadRequestException(
-            `Quốc gia với mã "${data.code}" đã tồn tại trong hệ thống`
-          );
+          // Nếu country chưa bị xóa → throw error
+          if (existingCountry.deletedAt === null) {
+            throw new BadRequestException(
+              `Quốc gia với mã "${data.code}" đã tồn tại trong hệ thống`
+            );
+          }
+          // Nếu country đã bị xóa → restore và update thông tin
+          await this.prisma.country.update({
+            where: { code: data.code },
+            data: {
+              deletedAt: null,
+              name: data.name, // Update name nếu có thay đổi
+            },
+          });
+        } else {
+          // Tạo country mới
+          await this.countriesService.create({
+            code: data.code,
+            name: data.name,
+          });
         }
-        await this.countriesService.create({
-          code: data.code,
-          name: data.name,
-        });
         break;
 
       case RequestType.add_city:
-        // Kiểm tra city đã tồn tại chưa (theo name và countryCode)
-        const existingCities = await this.prisma.city.findMany({
-          where: {
+        // Kiểm tra city đã tồn tại chưa (theo name và countryCode) - KHÔNG filter deletedAt
+        const existingCity = await this.citiesService.findByNameAndCountryCode(
+          data.name,
+          data.countryCode,
+        );
+        
+        if (existingCity) {
+          // Nếu city chưa bị xóa → throw error
+          if (existingCity.deletedAt === null) {
+            throw new BadRequestException(
+              `Thành phố "${data.name}" trong quốc gia "${data.countryCode}" đã tồn tại trong hệ thống`
+            );
+          }
+          // Nếu city đã bị xóa → kiểm tra country trước khi restore
+          const country = await this.countriesService.findOne(data.countryCode);
+          if (!country) {
+            throw new BadRequestException(
+              `Quốc gia với mã "${data.countryCode}" không tồn tại. Không thể restore thành phố đã bị xóa.`
+            );
+          }
+          // Restore city
+          await this.citiesService.restore(existingCity.id);
+        } else {
+          // Kiểm tra country có tồn tại không
+          const country = await this.countriesService.findOne(data.countryCode);
+          if (!country) {
+            throw new BadRequestException(
+              `Quốc gia với mã "${data.countryCode}" không tồn tại`
+            );
+          }
+          // Tạo city mới
+          await this.citiesService.create({
             name: data.name,
             countryCode: data.countryCode,
-          },
-        });
-        if (existingCities.length > 0) {
-          throw new BadRequestException(
-            `Thành phố "${data.name}" trong quốc gia "${data.countryCode}" đã tồn tại trong hệ thống`
-          );
+          });
         }
-        // Kiểm tra country có tồn tại không
-        const country = await this.countriesService.findOne(data.countryCode);
-        if (!country) {
-          throw new BadRequestException(
-            `Quốc gia với mã "${data.countryCode}" không tồn tại`
-          );
-        }
-        await this.citiesService.create({
-          name: data.name,
-          countryCode: data.countryCode,
-        });
         break;
 
       case RequestType.add_destination:
-        // Kiểm tra destination đã tồn tại chưa (theo slug)
+        // Kiểm tra destination đã tồn tại chưa (theo slug) - KHÔNG filter deletedAt
         const slug = data.slug || this.generateSlug(data.name);
-        const existingDestination = await this.prisma.destination.findUnique({
-          where: { slug },
-        });
+        const existingDestination = await this.destinationsService.findBySlug(slug);
+        
         if (existingDestination) {
-          throw new BadRequestException(
-            `Điểm đến với slug "${slug}" đã tồn tại trong hệ thống`
-          );
+          // Nếu destination chưa bị xóa → throw error
+          if (existingDestination.deletedAt === null) {
+            throw new BadRequestException(
+              `Điểm đến với slug "${slug}" đã tồn tại trong hệ thống`
+            );
+          }
+          // Nếu destination đã bị xóa → kiểm tra city trước khi restore
+          const city = await this.citiesService.findOne(BigInt(data.cityId));
+          if (!city) {
+            throw new BadRequestException(
+              `Thành phố với ID "${data.cityId}" không tồn tại. Không thể restore điểm đến đã bị xóa.`
+            );
+          }
+          // Restore và update thông tin destination
+          await this.prisma.destination.update({
+            where: { id: existingDestination.id },
+            data: {
+              deletedAt: null,
+              name: data.name,
+              cityId: BigInt(data.cityId),
+              imageUrl: data.imageUrl || existingDestination.imageUrl || '',
+            },
+          });
+        } else {
+          // Kiểm tra city có tồn tại không
+          const city = await this.citiesService.findOne(BigInt(data.cityId));
+          if (!city) {
+            throw new BadRequestException(
+              `Thành phố với ID "${data.cityId}" không tồn tại`
+            );
+          }
+          // Tạo destination mới
+          await this.destinationsService.create({
+            name: data.name,
+            slug: slug,
+            cityId: Number(data.cityId),
+            imageUrl: data.imageUrl || '',
+            description: data.description || '',
+          });
         }
-        // Kiểm tra city có tồn tại không
-        const city = await this.citiesService.findOne(BigInt(data.cityId));
-        if (!city) {
-          throw new BadRequestException(
-            `Thành phố với ID "${data.cityId}" không tồn tại`
-          );
-        }
-        await this.destinationsService.create({
-          name: data.name,
-          slug: slug,
-          cityId: Number(data.cityId),
-          imageUrl: data.imageUrl || '',
-          description: data.description || '',
-        });
         break;
     }
   }

@@ -24,12 +24,19 @@ export class PaymentsService {
   }
 
   async findAll() {
-    return this.prisma.payment.findMany();
+    return this.prisma.payment.findMany({
+      where: {
+        deletedAt: null, // Soft delete filter
+      },
+    });
   }
 
   async findOne(id: bigint) {
-    return this.prisma.payment.findUnique({
-      where: { id },
+    return this.prisma.payment.findFirst({
+      where: { 
+        id,
+        deletedAt: null, // Soft delete filter
+      },
     });
   }
 
@@ -47,14 +54,18 @@ export class PaymentsService {
   }
 
   async remove(id: bigint) {
-    return this.prisma.payment.delete({
+    return this.prisma.payment.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
   }
 
   async getBankInfo(): Promise<BankInfoResponseDto | null> {
     return await this.prisma.adminBankAccount.findFirst({
-      where: { isActive: true },
+      where: { 
+        isActive: true,
+        deletedAt: null, // Soft delete filter
+      },
     });
   }
 
@@ -260,8 +271,11 @@ export class PaymentsService {
         processed++;
 
         // Tìm booking trong database
-        const booking = await this.prisma.booking.findUnique({
-          where: { id: bookingId },
+        const booking = await this.prisma.booking.findFirst({
+          where: { 
+            id: bookingId,
+            deletedAt: null, // Soft delete filter
+          },
         });
 
         if (!booking) {

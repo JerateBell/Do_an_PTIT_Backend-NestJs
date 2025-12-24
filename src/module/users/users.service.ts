@@ -44,6 +44,7 @@ export class UsersService {
     console.log(filter);
     const skip = (page - 1) * limit;
     const where: Prisma.UserWhereInput = {
+      deletedAt: null, // Soft delete filter
       ...(search
         ? {
             OR: [
@@ -86,8 +87,11 @@ export class UsersService {
     };
   }
   async findOne(id: bigint) {
-    return await this.prisma.user.findUnique({
-      where: { id },
+    return await this.prisma.user.findFirst({
+      where: { 
+        id,
+        deletedAt: null, // Soft delete filter
+      },
       select: {
         id: true,
         email: true,
@@ -102,8 +106,11 @@ export class UsersService {
     });
   }
   async updatePassword(userId: number, dto: UpdatePasswordDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+    const user = await this.prisma.user.findFirst({
+      where: { 
+        id: userId,
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!user) {
@@ -141,8 +148,11 @@ export class UsersService {
   }
 
   async getProfile(userId: number) {
-    return this.prisma.user.findUnique({
-      where: { id: userId },
+    return this.prisma.user.findFirst({
+      where: { 
+        id: userId,
+        deletedAt: null, // Soft delete filter
+      },
       select: {
         id: true,
         email: true,
@@ -184,6 +194,9 @@ export class UsersService {
   }
 
   async remove(id: bigint) {
-    return await this.prisma.user.delete({ where: { id } });
+    return await this.prisma.user.update({ 
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 }

@@ -25,8 +25,11 @@ export class CategoriesService {
     }
 
     // Check if slug already exists
-    const existingCategory = await this.prisma.category.findUnique({
-      where: { slug: createCategoryDto.slug },
+    const existingCategory = await this.prisma.category.findFirst({
+      where: { 
+        slug: createCategoryDto.slug,
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (existingCategory) {
@@ -35,8 +38,11 @@ export class CategoriesService {
 
     // Validate parent category if provided
     if (createCategoryDto.parentId) {
-      const parentCategory = await this.prisma.category.findUnique({
-        where: { id: BigInt(createCategoryDto.parentId) },
+      const parentCategory = await this.prisma.category.findFirst({
+        where: { 
+          id: BigInt(createCategoryDto.parentId),
+          deletedAt: null, // Soft delete filter
+        },
       });
 
       if (!parentCategory) {
@@ -67,9 +73,16 @@ export class CategoriesService {
    */
   async findAll() {
     return this.prisma.category.findMany({
+      where: {
+        deletedAt: null, // Soft delete filter
+      },
       include: {
         parent: true,
-        children: true,
+        children: {
+          where: {
+            deletedAt: null, // Soft delete filter for children
+          },
+        },
         _count: {
           select: {
             activities: true,
@@ -90,9 +103,13 @@ export class CategoriesService {
     return this.prisma.category.findMany({
       where: {
         parentId: null,
+        deletedAt: null, // Soft delete filter
       },
       include: {
         children: {
+          where: {
+            deletedAt: null, // Soft delete filter for children
+          },
           orderBy: { sortOrder: 'asc' },
         },
         _count: {
@@ -112,8 +129,11 @@ export class CategoriesService {
    * Get sub-categories of a parent category
    */
   async findSubCategories(parentId: number) {
-    const parent = await this.prisma.category.findUnique({
-      where: { id: BigInt(parentId) },
+    const parent = await this.prisma.category.findFirst({
+      where: { 
+        id: BigInt(parentId),
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!parent) {
@@ -123,6 +143,7 @@ export class CategoriesService {
     return this.prisma.category.findMany({
       where: {
         parentId: BigInt(parentId),
+        deletedAt: null, // Soft delete filter
       },
       include: {
         _count: {
@@ -142,8 +163,11 @@ export class CategoriesService {
    * Get category by ID
    */
   async findOne(id: number) {
-    const category = await this.prisma.category.findUnique({
-      where: { id: BigInt(id) },
+    const category = await this.prisma.category.findFirst({
+      where: { 
+        id: BigInt(id),
+        deletedAt: null, // Soft delete filter
+      },
       include: {
         parent: true,
         children: true,
@@ -166,8 +190,11 @@ export class CategoriesService {
    * Get category by slug
    */
   async findBySlug(slug: string) {
-    const category = await this.prisma.category.findUnique({
-      where: { slug },
+    const category = await this.prisma.category.findFirst({
+      where: { 
+        slug,
+        deletedAt: null, // Soft delete filter
+      },
       include: {
         parent: true,
         children: true,
@@ -197,8 +224,11 @@ export class CategoriesService {
    */
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
     // Check if category exists
-    const existingCategory = await this.prisma.category.findUnique({
-      where: { id: BigInt(id) },
+    const existingCategory = await this.prisma.category.findFirst({
+      where: { 
+        id: BigInt(id),
+        deletedAt: null, // Soft delete filter
+      },
     });
 
     if (!existingCategory) {
@@ -214,8 +244,11 @@ export class CategoriesService {
 
     // Check if new slug conflicts with existing category
     if (updateCategoryDto.slug && updateCategoryDto.slug !== existingCategory.slug) {
-      const slugExists = await this.prisma.category.findUnique({
-        where: { slug: updateCategoryDto.slug },
+      const slugExists = await this.prisma.category.findFirst({
+        where: { 
+          slug: updateCategoryDto.slug,
+          deletedAt: null, // Soft delete filter
+        },
       });
 
       if (slugExists) {
@@ -230,8 +263,11 @@ export class CategoriesService {
       } else if (updateCategoryDto.parentId === id) {
         throw new BadRequestException('Category cannot be its own parent');
       } else {
-        const parentCategory = await this.prisma.category.findUnique({
-          where: { id: BigInt(updateCategoryDto.parentId) },
+        const parentCategory = await this.prisma.category.findFirst({
+          where: { 
+            id: BigInt(updateCategoryDto.parentId),
+            deletedAt: null, // Soft delete filter
+          },
         });
 
         if (!parentCategory) {
@@ -277,8 +313,11 @@ export class CategoriesService {
    * Delete category
    */
   async remove(id: number) {
-    const category = await this.prisma.category.findUnique({
-      where: { id: BigInt(id) },
+    const category = await this.prisma.category.findFirst({
+      where: { 
+        id: BigInt(id),
+        deletedAt: null, // Soft delete filter
+      },
       include: {
         children: true,
         _count: {
@@ -307,8 +346,9 @@ export class CategoriesService {
       );
     }
 
-    return this.prisma.category.delete({
+    return this.prisma.category.update({
       where: { id: BigInt(id) },
+      data: { deletedAt: new Date() },
     });
   }
 
@@ -316,8 +356,11 @@ export class CategoriesService {
    * Helper: Check if a category is a descendant of another
    */
   private async isDescendant(ancestorId: bigint, categoryId: bigint): Promise<boolean> {
-    const category = await this.prisma.category.findUnique({
-      where: { id: categoryId },
+    const category = await this.prisma.category.findFirst({
+      where: { 
+        id: categoryId,
+        deletedAt: null, // Soft delete filter
+      },
       include: { parent: true },
     });
 

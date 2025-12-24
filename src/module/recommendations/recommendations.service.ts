@@ -36,6 +36,18 @@ export class RecommendationsService {
     
     // Lấy danh sách activity IDs còn tồn tại để filter
     const existingActivityIds = await this.prisma.activity.findMany({
+      where: {
+        deletedAt: null, // Soft delete filter for activity
+        destination: {
+          deletedAt: null, // Soft delete filter for destination
+          city: {
+            deletedAt: null, // Soft delete filter for city
+            country: {
+              deletedAt: null, // Soft delete filter for country
+            },
+          },
+        },
+      },
       select: {
         id: true,
       },
@@ -100,6 +112,18 @@ export class RecommendationsService {
 
     // Lấy tất cả activities với thông tin liên quan
     const activities = await this.prisma.activity.findMany({
+      where: {
+        deletedAt: null, // Soft delete filter for activity
+        destination: {
+          deletedAt: null, // Soft delete filter for destination
+          city: {
+            deletedAt: null, // Soft delete filter for city
+            country: {
+              deletedAt: null, // Soft delete filter for country
+            },
+          },
+        },
+      },
       include: {
         category: {
           select: {
@@ -348,6 +372,18 @@ export class RecommendationsService {
     const recommendations = await this.prisma.recommendation.findMany({
       where: {
         userId,
+        activity: {
+          deletedAt: null, // Soft delete filter for activity
+          destination: {
+            deletedAt: null, // Soft delete filter for destination
+            city: {
+              deletedAt: null, // Soft delete filter for city
+              country: {
+                deletedAt: null, // Soft delete filter for country
+              },
+            },
+          },
+        },
       },
       include: {
         activity: {

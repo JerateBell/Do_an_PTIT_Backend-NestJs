@@ -6,14 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { DestinationsService } from './destinations.service';
 import { CreateDestinationDto } from './dto/create-destination.dto';
 import { UpdateDestinationDto } from './dto/update-destination.dto';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 
 @Controller('destinations')
 export class DestinationsController {
-  constructor(private readonly destinationsService: DestinationsService) {}
+  constructor(
+    private readonly destinationsService: DestinationsService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post()
   create(@Body() createDestinationDto: CreateDestinationDto) {
@@ -46,5 +53,12 @@ export class DestinationsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.destinationsService.remove(BigInt(id));
+  }
+
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    const upload = await this.cloudinaryService.uploadImage(file);
+    return { url: upload.secure_url };
   }
 }

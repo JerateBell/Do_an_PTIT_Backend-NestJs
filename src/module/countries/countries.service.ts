@@ -14,12 +14,19 @@ export class CountriesService {
   }
 
   async findAll() {
-    return await this.prisma.country.findMany();
+    return await this.prisma.country.findMany({
+      where: {
+        deletedAt: null, // Soft delete filter
+      },
+    });
   }
 
   findOne(code: string) {
-    return this.prisma.country.findUnique({
-      where: { code },
+    return this.prisma.country.findFirst({
+      where: { 
+        code,
+        deletedAt: null, // Soft delete filter
+      },
     });
   }
 
@@ -31,7 +38,28 @@ export class CountriesService {
   }
 
   remove(code: string) {
-    return this.prisma.country.delete({
+    return this.prisma.country.update({
+      where: { code },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  /**
+   * Restore country (set deletedAt to null)
+   */
+  restore(code: string) {
+    return this.prisma.country.update({
+      where: { code },
+      data: { deletedAt: null },
+    });
+  }
+
+  /**
+   * Find country by code (including deleted ones)
+   * Used for duplicate checking
+   */
+  findByCode(code: string) {
+    return this.prisma.country.findUnique({
       where: { code },
     });
   }

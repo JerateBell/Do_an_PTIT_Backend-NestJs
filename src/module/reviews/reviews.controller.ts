@@ -1,12 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, Query } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ReviewsService } from './reviews.service';
 import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '../auth/guard/admin.guard';
+import { FilterReviewsDto } from './dto/filter-reviews.dto';
 
 @Controller('reviews')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewsService) {}
+
+  // GET all reviews (Admin only) with pagination
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @Get('admin/all')
+  getAll(@Query() filter: FilterReviewsDto) {
+    return this.reviewService.findAll(filter);
+  }
 
   // CREATE 
   @UseGuards(AuthGuard('jwt'))

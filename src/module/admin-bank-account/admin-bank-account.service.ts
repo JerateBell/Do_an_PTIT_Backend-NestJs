@@ -23,11 +23,21 @@ export class AdminBankAccountService {
   }
 
   findAll() {
-    return this.prisma.adminBankAccount.findMany({ orderBy: { createdAt: "desc" } });
+    return this.prisma.adminBankAccount.findMany({ 
+      where: {
+        deletedAt: null, // Soft delete filter
+      },
+      orderBy: { createdAt: "desc" },
+    });
   }
 
   findOne(id: number) {
-    return this.prisma.adminBankAccount.findUnique({ where: { id } });
+    return this.prisma.adminBankAccount.findFirst({ 
+      where: { 
+        id,
+        deletedAt: null, // Soft delete filter
+      },
+    });
   }
 
   async update(id: number, data: UpdateAdminBankAccountDto) {
@@ -44,7 +54,10 @@ export class AdminBankAccountService {
   }
 
   remove(id: number) {
-    return this.prisma.adminBankAccount.delete({ where: { id } });
+    return this.prisma.adminBankAccount.update({ 
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 
   /**

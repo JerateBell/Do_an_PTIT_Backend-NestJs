@@ -56,20 +56,41 @@ export class CouponsService {
     }
   }
 
-  async list(onlyActive?: boolean) {
-    const where: any = {};
+  async list(onlyActive?: boolean, filter?: { page?: number; limit?: number }) {
+    const { page = 1, limit = 10 } = filter || {};
+    const skip = (page - 1) * limit;
+
+    const where: any = {
+      deletedAt: null, // Soft delete filter
+    };
 
     if (onlyActive !== undefined) where.isActive = onlyActive;
 
-    return this.prisma.coupon.findMany({
-      where,
+    const [coupons, total] = await Promise.all([
+      this.prisma.coupon.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.coupon.count({ where }),
+    ]);
 
-      orderBy: { createdAt: 'desc' },
-    });
+    return {
+      coupons,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
   async getByCode(code: string) {
-    const coupon = await this.prisma.coupon.findUnique({ where: { code } });
+    const coupon = await this.prisma.coupon.findFirst({ 
+      where: { 
+        code,
+        deletedAt: null, // Soft delete filter
+      },
+    });
 
     if (!coupon) throw new NotFoundException('Coupon not found');
 
@@ -84,6 +105,7 @@ export class CouponsService {
   async listActive(userId?: bigint) {
     const coupons = await this.prisma.coupon.findMany({
       where: {
+        deletedAt: null, // Soft delete filter
         isActive: true,
         OR: [
           { userId: null }, // Public coupons
@@ -118,7 +140,12 @@ export class CouponsService {
    * - Private coupon (userId != null): only that user can use
    */
   async apply(code: string, amount: number, userId?: bigint) {
-    const coupon = await this.prisma.coupon.findUnique({ where: { code } });
+    const coupon = await this.prisma.coupon.findFirst({ 
+      where: { 
+        code,
+        deletedAt: null, // Soft delete filter
+      },
+    });
 
     if (!coupon) throw new NotFoundException('Coupon not found');
 
@@ -181,7 +208,12 @@ export class CouponsService {
 
   async consume(code: string) {
     return this.prisma.$transaction(async (tx) => {
-      const coupon = await tx.coupon.findUnique({ where: { code } });
+      const coupon = await tx.coupon.findFirst({ 
+        where: { 
+          code,
+          deletedAt: null, // Soft delete filter
+        },
+      });
 
       if (!coupon) throw new NotFoundException('Coupon not found');
 
@@ -199,9 +231,10 @@ export class CouponsService {
   }
   async delete(code: string) {
     try {
-      // Tìm kiếm và xóa Coupon dựa trên code duy nhất
-      const deletedCoupon = await this.prisma.coupon.delete({
+      // Tìm kiếm và soft delete Coupon dựa trên code duy nhất
+      const deletedCoupon = await this.prisma.coupon.update({
         where: { code: code }, // Sử dụng unique field 'code'
+        data: { deletedAt: new Date() },
       });
       console.log(`LOG: Coupon ${code} đã được xóa thành công.`);
       return deletedCoupon;

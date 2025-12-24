@@ -19,6 +19,12 @@ export class CitiesService {
 
   async findAll() {
     const cities = await this.prisma.city.findMany({
+      where: {
+        deletedAt: null, // Soft delete filter for city
+        country: {
+          deletedAt: null, // Soft delete filter for country
+        },
+      },
       include: {
         country: true,
       },
@@ -30,8 +36,14 @@ export class CitiesService {
   }
 
   async findOne(id: bigint) {
-    return await this.prisma.city.findUnique({
-      where: { id },
+    return await this.prisma.city.findFirst({
+      where: { 
+        id,
+        deletedAt: null, // Soft delete filter for city
+        country: {
+          deletedAt: null, // Soft delete filter for country
+        },
+      },
       include: {
         country: true,
       },
@@ -49,8 +61,38 @@ export class CitiesService {
   }
 
   async remove(id: bigint) {
-    return await this.prisma.city.delete({
+    return await this.prisma.city.update({
       where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  /**
+   * Restore city (set deletedAt to null)
+   */
+  async restore(id: bigint) {
+    return await this.prisma.city.update({
+      where: { id },
+      data: { deletedAt: null },
+      include: {
+        country: true,
+      },
+    });
+  }
+
+  /**
+   * Find city by name and countryCode (including deleted ones)
+   * Used for duplicate checking
+   */
+  async findByNameAndCountryCode(name: string, countryCode: string) {
+    return await this.prisma.city.findFirst({
+      where: {
+        name,
+        countryCode,
+      },
+      include: {
+        country: true,
+      },
     });
   }
 }

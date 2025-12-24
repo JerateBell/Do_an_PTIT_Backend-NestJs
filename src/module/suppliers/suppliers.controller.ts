@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { SuppliersService } from './suppliers.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { FilterSuppliersDto } from './dto/filter-suppliers.dto';
 
 @Controller('suppliers')
 export class SuppliersController {
@@ -17,8 +18,8 @@ export class SuppliersController {
   }
 
   @Get()
-  findAll() {
-    return this.suppliersService.findAll();
+  findAll(@Query() filter: FilterSuppliersDto) {
+    return this.suppliersService.findAll(filter);
   }
 
   @Get(':id')
