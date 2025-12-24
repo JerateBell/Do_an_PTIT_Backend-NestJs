@@ -58,6 +58,39 @@ export class PaymentsService {
     });
   }
 
+  async rewardUserWithCoupon(userId: bigint, amount: number) {
+    const THRESHOLD = 1000000;
+
+    if (amount >= THRESHOLD) {
+      // Tạo mã coupon ngẫu nhiên: GIFT-XXXXXX
+      const randomCode = `GIFT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+      await this.prisma.coupon.create({
+        data: {
+          code: randomCode,
+          name: 'Quà tặng tri ân khách hàng',
+          discountType: 'percentage',
+          discountValue: 10,
+          minAmount: 10,
+          maxDiscount: 2000000,
+          userId: userId,
+          validFrom: new Date(),
+          validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          isActive: true,
+          usageLimit: 1,
+        },
+      });
+      await this.prisma.notification.create({
+        data: {
+          userId: userId,
+          title: 'Bạn nhận được mã giảm giá!',
+          message: `Cảm ơn bạn đã thanh toán. Mã ${randomCode} (50k) đã được thêm vào tài khoản của bạn.`,
+          type: 'PROMOTION',
+        },
+      });
+      console.log(`Đã tặng coupon ${randomCode} cho User ID: ${userId}`);
+    }
+  }
   /**
    * Import transaction history từ CSV và tự động cập nhật payment status
    * Format CSV: STT, Ngày giao dịch, Số bút toán, Phát sinh nợ, Phát sinh có, Nội dung, ...
@@ -72,17 +105,21 @@ export class PaymentsService {
       throw new BadRequestException(`File không tồn tại: ${filePath}`);
     }
 
-    const fileContent = fs.readFileSync(filePath, "utf-8");
-    const lines = fileContent.split("\n").filter((line) => line.trim() !== "");
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const lines = fileContent.split('\n').filter((line) => line.trim() !== '');
 
     if (lines.length <= 1) {
-      throw new BadRequestException("File CSV không có dữ liệu");
+      throw new BadRequestException('File CSV không có dữ liệu');
     }
 
     let processed = 0;
     let updated = 0;
     let errors = 0;
-    const details: Array<{ bookingId: string; status: string; message: string }> = [];
+    const details: Array<{
+      bookingId: string;
+      status: string;
+      message: string;
+    }> = [];
 
     // Bỏ qua các dòng header (thường là 20-30 dòng đầu)
     // Tìm dòng bắt đầu có dữ liệu (có số thứ tự)
@@ -98,7 +135,9 @@ export class PaymentsService {
 
     const dataLines = lines.slice(dataStartIndex);
 
-    console.log(`📊 Tìm thấy ${dataLines.length} dòng dữ liệu bắt đầu từ dòng ${dataStartIndex + 1}`);
+    console.log(
+      `📊 Tìm thấy ${dataLines.length} dòng dữ liệu bắt đầu từ dòng ${dataStartIndex + 1}`,
+    );
 
     for (const line of dataLines) {
       try {
@@ -117,36 +156,51 @@ export class PaymentsService {
 
         // Tìm đúng cột Credit và Content (do dấu ngoặc kép làm lệch)
         // Logic: Tìm cột có giá trị số tiền (Credit) và cột tiếp theo là Content
-        let debitStr = "";
-        let creditStr = "";
-        let content = "";
-        
+        let debitStr = '';
+        let creditStr = '';
+        let content = '';
+
         // Tìm Debit (thường ở index 8)
-        debitStr = (columns[8] || "").replace(/^"|"$/g, "");
-        
+        debitStr = (columns[8] || '').replace(/^"|"$/g, '');
+
         // Tìm Credit và Content - do dấu ngoặc kép làm lệch cột
         // Format: ...,0.00,"25,000.00",CUSTOMER Thanh toan don hang 3337...
         // Hoặc: ...,"500,000.00",0.00,GIAO DICH...
-        
-        const col9 = (columns[9] || "").replace(/^"|"$/g, "");
-        const col10 = (columns[10] || "").replace(/^"|"$/g, "");
-        const col11 = (columns[11] || "").replace(/^"|"$/g, "");
-        
+
+        const col9 = (columns[9] || '').replace(/^"|"$/g, '');
+        const col10 = (columns[10] || '').replace(/^"|"$/g, '');
+        const col11 = (columns[11] || '').replace(/^"|"$/g, '');
+
         // Kiểm tra pattern: nếu col9 là "0.00" và col10 là số tiền, thì col10 là Credit, col11 là Content
-        if (col9 === "0.00" && /^\d+[,.]?\d*\.?\d*$/.test(col10) && parseFloat(col10.replace(/,/g, "")) > 0) {
+        if (
+          col9 === '0.00' &&
+          /^\d+[,.]?\d*\.?\d*$/.test(col10) &&
+          parseFloat(col10.replace(/,/g, '')) > 0
+        ) {
           // Pattern: 0.00,"25,000.00",Content
           creditStr = col10;
           content = col11;
-        } else if (/^\d+[,.]?\d*\.?\d*$/.test(col9) && parseFloat(col9.replace(/,/g, "")) > 0 && col10 === "0.00") {
+        } else if (
+          /^\d+[,.]?\d*\.?\d*$/.test(col9) &&
+          parseFloat(col9.replace(/,/g, '')) > 0 &&
+          col10 === '0.00'
+        ) {
           // Pattern: "500,000.00",0.00,Content (Debit transaction)
           // col9 là Debit, không phải Credit, bỏ qua
-          creditStr = "0";
+          creditStr = '0';
           content = col11;
-        } else if (/^\d+[,.]?\d*\.?\d*$/.test(col9) && parseFloat(col9.replace(/,/g, "")) > 0) {
+        } else if (
+          /^\d+[,.]?\d*\.?\d*$/.test(col9) &&
+          parseFloat(col9.replace(/,/g, '')) > 0
+        ) {
           // col9 là số tiền > 0, có thể là Credit
           creditStr = col9;
           // Content ở col10 hoặc col11
-          if (/^\d+[,.]?\d*\.?\d*$/.test(col10) || col10 === "0.00" || col10.trim() === "") {
+          if (
+            /^\d+[,.]?\d*\.?\d*$/.test(col10) ||
+            col10 === '0.00' ||
+            col10.trim() === ''
+          ) {
             content = col11;
           } else {
             content = col10;
@@ -156,25 +210,25 @@ export class PaymentsService {
           creditStr = col9;
           content = col10;
         }
-        
+
         content = content.trim();
         const debitAmount = this.parseAmount(debitStr);
         const creditAmount = this.parseAmount(creditStr);
-        
+
         // Debug log cho dòng đầu tiên
         if (processed === 0 && updated === 0 && errors === 0) {
-          console.log("🔍 Debug dòng đầu tiên:");
-          console.log("  - Raw line:", line.substring(0, 200));
-          console.log("  - Columns count:", columns.length);
-          console.log("  - Column 8 (Debit):", columns[8]);
-          console.log("  - Column 9 (Credit):", columns[9]);
-          console.log("  - Column 10 (Content):", columns[10]);
-          console.log("  - Column 11:", columns[11]);
-          console.log("  - Column 12:", columns[12]);
-          console.log("  - Parsed Credit amount:", creditAmount);
-          console.log("  - Parsed Content:", content);
+          console.log('🔍 Debug dòng đầu tiên:');
+          console.log('  - Raw line:', line.substring(0, 200));
+          console.log('  - Columns count:', columns.length);
+          console.log('  - Column 8 (Debit):', columns[8]);
+          console.log('  - Column 9 (Credit):', columns[9]);
+          console.log('  - Column 10 (Content):', columns[10]);
+          console.log('  - Column 11:', columns[11]);
+          console.log('  - Column 12:', columns[12]);
+          console.log('  - Parsed Credit amount:', creditAmount);
+          console.log('  - Parsed Content:', content);
         }
-        
+
         const contentLower = content.toLowerCase();
 
         // Chỉ xử lý các giao dịch có phát sinh có (tiền vào - khách hàng chuyển tiền cho admin)
@@ -186,14 +240,18 @@ export class PaymentsService {
         // Pattern: "thanh toán đơn hàng #123" hoặc "thanh toan don hang #123" hoặc "thanh toan don hang 123"
         // Có thể có "CUSTOMER" ở đầu: "CUSTOMER Thanh toan don hang 3337"
         // Hỗ trợ cả có dấu và không dấu tiếng Việt
-        const bookingIdMatch = contentLower.match(
-          /(?:customer\s+)?thanh\s*to[aáà]n\s*đ[ơo]?n\s*h[àa]ng\s*#?\s*(\d+)/i
-        ) || contentLower.match(/(?:customer\s+)?thanh\s*toan\s*don\s*hang\s*#?\s*(\d+)/i);
-        
+        const bookingIdMatch =
+          contentLower.match(
+            /(?:customer\s+)?thanh\s*to[aáà]n\s*đ[ơo]?n\s*h[àa]ng\s*#?\s*(\d+)/i,
+          ) ||
+          contentLower.match(
+            /(?:customer\s+)?thanh\s*toan\s*don\s*hang\s*#?\s*(\d+)/i,
+          );
+
         if (!bookingIdMatch) {
           // Debug: Log nội dung không match
           if (processed === 0 && updated === 0 && errors === 0) {
-            console.log("  - Không tìm thấy bookingID trong:", content);
+            console.log('  - Không tìm thấy bookingID trong:', content);
           }
           continue; // Không tìm thấy bookingID
         }
@@ -210,8 +268,8 @@ export class PaymentsService {
           errors++;
           details.push({
             bookingId: bookingIdMatch[1],
-            status: "error",
-            message: "Không tìm thấy booking",
+            status: 'error',
+            message: 'Không tìm thấy booking',
           });
           continue;
         }
@@ -224,7 +282,7 @@ export class PaymentsService {
           errors++;
           details.push({
             bookingId: bookingIdMatch[1],
-            status: "error",
+            status: 'error',
             message: `Số tiền không khớp. Booking total: ${bookingTotal}, Transaction: ${creditAmount}`,
           });
           continue;
@@ -234,22 +292,27 @@ export class PaymentsService {
         await this.prisma.booking.update({
           where: { id: bookingId },
           data: {
-            paymentStatus: "paid",
+            paymentStatus: 'paid',
           },
         });
-
+        try {
+          await this.rewardUserWithCoupon(booking.userId, creditAmount);
+        } catch (couponError) {
+          console.error('Lỗi khi tặng coupon:', couponError);
+          // Không throw lỗi ở đây để tránh làm gián đoạn quá trình import transaction
+        }
         updated++;
         details.push({
           bookingId: bookingIdMatch[1],
-          status: "success",
-          message: "Đã cập nhật paymentStatus thành paid",
+          status: 'success',
+          message: 'Đã cập nhật paymentStatus thành paid',
         });
       } catch (error) {
         errors++;
         details.push({
-          bookingId: "unknown",
-          status: "error",
-          message: error.message || "Lỗi không xác định",
+          bookingId: 'unknown',
+          status: 'error',
+          message: error.message || 'Lỗi không xác định',
         });
       }
     }
@@ -267,12 +330,12 @@ export class PaymentsService {
    */
   private parseCSVLine(line: string): string[] {
     const columns: string[] = [];
-    let current = "";
+    let current = '';
     let inQuotes = false;
 
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      const nextChar = i < line.length - 1 ? line[i + 1] : "";
+      const nextChar = i < line.length - 1 ? line[i + 1] : '';
 
       if (char === '"') {
         // Nếu là dấu ngoặc kép đôi (""), đó là escape character
@@ -283,16 +346,16 @@ export class PaymentsService {
           inQuotes = !inQuotes;
           // Không thêm dấu ngoặc kép vào current
         }
-      } else if (char === "," && !inQuotes) {
+      } else if (char === ',' && !inQuotes) {
         columns.push(current.trim());
-        current = "";
+        current = '';
       } else {
         current += char;
       }
     }
 
     // Thêm cột cuối cùng
-    if (current.length > 0 || line.endsWith(",")) {
+    if (current.length > 0 || line.endsWith(',')) {
       columns.push(current.trim());
     }
 
@@ -303,12 +366,12 @@ export class PaymentsService {
    * Parse số tiền từ format "500,000.00" thành number
    */
   private parseAmount(amountStr: string): number {
-    if (!amountStr || amountStr.trim() === "" || amountStr === "0.00") {
+    if (!amountStr || amountStr.trim() === '' || amountStr === '0.00') {
       return 0;
     }
 
     // Loại bỏ dấu phẩy và chuyển thành number
-    const cleaned = amountStr.replace(/,/g, "");
+    const cleaned = amountStr.replace(/,/g, '');
     const parsed = parseFloat(cleaned);
 
     return isNaN(parsed) ? 0 : parsed;

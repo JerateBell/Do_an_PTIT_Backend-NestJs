@@ -92,7 +92,7 @@ export class RecommendationSchedulerService implements OnModuleInit {
       await this.runPipeline();
     });
 
-    this.schedulerRegistry.addCronJob(jobName, job);
+    this.schedulerRegistry.addCronJob(jobName, job as any);
     job.start();
 
     this.logger.log(`Cron job scheduled with expression: ${cronExpression}`);

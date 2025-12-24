@@ -343,6 +343,8 @@ model Coupon {
   @@map("coupons")
 }
 
+
+
 // ===== WISHLIST & CART =====
 
 model Wishlist {

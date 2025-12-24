@@ -26,23 +26,26 @@ export class ActivitiesService {
   }
 
   async findAllByUser(userId: bigint) {
-    const supplier = await this.prisma.supplier.findUnique({ where: { userId } });
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { userId },
+    });
     if (!supplier) throw new Error('Supplier not found');
-    
+
     return this.prisma.activity.findMany({
       where: { supplierId: supplier.id },
     });
   }
 
   async findOneByUser(id: bigint, userId: bigint) {
-    const supplier = await this.prisma.supplier.findUnique({ where: { userId } });
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { userId },
+    });
     if (!supplier) throw new Error('Supplier not found');
 
     return this.prisma.activity.findFirst({
       where: { id, supplierId: supplier.id },
     });
   }
-
 
   async updateByUser(id: bigint, data: UpdateActivityDto, userId: bigint) {
     const supplier = await this.prisma.supplier.findUnique({
@@ -58,7 +61,9 @@ export class ActivitiesService {
     });
 
     if (!existing) {
-      throw new NotFoundException('Activity not found or not owned by this supplier');
+      throw new NotFoundException(
+        'Activity not found or not owned by this supplier',
+      );
     }
 
     const updated = await this.prisma.activity.update({
@@ -86,7 +91,9 @@ export class ActivitiesService {
     });
 
     if (!existing) {
-      throw new NotFoundException('Activity not found or not owned by this supplier');
+      throw new NotFoundException(
+        'Activity not found or not owned by this supplier',
+      );
     }
 
     await this.prisma.activity.delete({
@@ -94,5 +101,21 @@ export class ActivitiesService {
     });
 
     return { message: 'Activity deleted successfully' };
+  }
+  async search(query: string) {
+    return this.prisma.activity.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: 'insensitive',
+        },
+      },
+      take: 10,
+      select: {
+        id: true,
+        name: true,
+        price: true,
+      },
+    });
   }
 }
