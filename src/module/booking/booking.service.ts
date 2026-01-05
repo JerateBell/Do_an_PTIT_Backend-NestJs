@@ -10,6 +10,8 @@ import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
 import { CreateBookingDto } from './dto/create-booking.dto';
 
+import { FilterBookingDto } from './dto/filter-booking.dto';
+
 import { BadRequestException } from '@nestjs/common';
 
 import { CouponsService } from '../coupons/coupons.service';
@@ -261,5 +263,211 @@ export class BookingsService {
     });
 
     return result;
+  }
+
+  // ===== ADMIN METHODS =====
+
+  // Get all bookings for admin with filters
+  async findAllForAdmin(filters?: FilterBookingDto) {
+    const where: any = {
+      deletedAt: null,
+    };
+
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+
+    if (filters?.paymentStatus) {
+      where.paymentStatus = filters.paymentStatus;
+    }
+
+    if (filters?.activityId) {
+      where.activityId = BigInt(filters.activityId);
+    }
+
+    if (filters?.dateFrom || filters?.dateTo) {
+      where.bookingDate = {};
+      if (filters.dateFrom) {
+        where.bookingDate.gte = new Date(filters.dateFrom);
+      }
+      if (filters.dateTo) {
+        where.bookingDate.lte = new Date(filters.dateTo);
+      }
+    }
+
+    if (filters?.search) {
+      where.OR = [
+        { bookingRef: { contains: filters.search, mode: 'insensitive' } },
+        { customerName: { contains: filters.search, mode: 'insensitive' } },
+        { customerEmail: { contains: filters.search, mode: 'insensitive' } },
+        { customerPhone: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+
+    return this.prisma.booking.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+          },
+        },
+        activity: {
+          include: {
+            destination: {
+              include: {
+                city: {
+                  include: {
+                    country: true,
+                  },
+                },
+              },
+            },
+            supplier: {
+              select: {
+                id: true,
+                companyName: true,
+                businessEmail: true,
+              },
+            },
+          },
+        },
+        schedule: true,
+        supplier: {
+          select: {
+            id: true,
+            companyName: true,
+            businessEmail: true,
+          },
+        },
+        payments: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  // Get one booking detail for admin
+  async findOneForAdmin(id: bigint) {
+    const booking = await this.prisma.booking.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            avatar: true,
+          },
+        },
+        activity: {
+          include: {
+            destination: {
+              include: {
+                city: {
+                  include: {
+                    country: true,
+                  },
+                },
+              },
+            },
+            supplier: {
+              select: {
+                id: true,
+                companyName: true,
+                businessEmail: true,
+                phone: true,
+              },
+            },
+            images: true,
+          },
+        },
+        schedule: true,
+        supplier: {
+          select: {
+            id: true,
+            companyName: true,
+            businessEmail: true,
+            phone: true,
+          },
+        },
+        payments: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        reviews: true,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    return booking;
+  }
+
+  // Update booking status for admin
+  async updateStatusForAdmin(id: bigint, dto: UpdateBookingStatusDto) {
+    const booking = await this.findOneForAdmin(id);
+
+    return this.prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        ...(dto.status && { status: dto.status }),
+        ...(dto.paymentStatus && { paymentStatus: dto.paymentStatus }),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        activity: {
+          include: {
+            destination: true,
+            supplier: {
+              select: {
+                id: true,
+                companyName: true,
+              },
+            },
+          },
+        },
+        schedule: true,
+        supplier: {
+          select: {
+            id: true,
+            companyName: true,
+          },
+        },
+        payments: true,
+      },
+    });
+  }
+
+  // Delete booking for admin (soft delete)
+  async removeForAdmin(id: bigint) {
+    const booking = await this.findOneForAdmin(id);
+
+    await this.prisma.booking.update({
+      where: { id: booking.id },
+      data: { deletedAt: new Date() },
+    });
+
+    return { message: 'Booking deleted successfully' };
   }
 }

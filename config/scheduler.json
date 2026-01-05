@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "cronExpression": "37 13 * * *",
-  "lastRun": "2025-12-23T06:37:00.019Z",
+  "lastRun": "2025-12-24T06:37:00.026Z",
   "lastStatus": "error",
   "lastMessage": "Python script not found: C:\\Users\\dungdt\\Desktop\\do an\\Recommendation-for-BookTour-Website\\final_algorithm\\hybrid_cf_cb.py"
 }

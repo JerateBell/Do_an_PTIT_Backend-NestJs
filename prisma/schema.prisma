@@ -24,8 +24,9 @@ model User {
   resetPasswordToken   String?           @map("reset_password_token") @db.VarChar(255)
   resetPasswordExpires DateTime?         @map("reset_password_expires")
   bookings        Booking[]
-  cartItems       CartItem[]
-  coupons         Coupon[]
+  payments        Payment[]
+  reviews         Review[]
+  wishlists       Wishlist[]
   notifications   Notification[]
   payments        Payment[]
   recommendations Recommendation[]
@@ -115,37 +116,37 @@ model Category {
 }
 
 model Activity {
-  id                  BigInt             @id @default(autoincrement())
-  supplierId          BigInt             @map("supplier_id")
-  destinationId       BigInt             @map("destination_id")
-  categoryId          BigInt             @map("category_id")
-  name                String             @db.VarChar(255)
-  slug                String             @unique @db.VarChar(255)
-  description         String?
-  highlights          Json?
-  duration            Int?
-  price               Decimal            @db.Decimal(10, 2)
-  currency            String             @default("USD") @db.VarChar(3)
-  maxParticipants     Int?               @map("max_participants")
-  rating              Decimal            @default(0) @db.Decimal(3, 2)
-  reviewCount         Int                @default(0) @map("review_count")
-  instantConfirmation Boolean            @default(true) @map("instant_confirmation")
-  freeCancellation    Boolean            @default(false) @map("free_cancellation")
-  status              ActivityStatus     @default(draft)
-  featured            Boolean            @default(false)
-  createdAt           DateTime           @default(now()) @map("created_at")
-  updatedAt           DateTime           @updatedAt @map("updated_at")
-  deletedAt           DateTime?          @map("deleted_at")
-  category            Category           @relation(fields: [categoryId], references: [id])
-  destination         Destination        @relation(fields: [destinationId], references: [id])
-  supplier            Supplier           @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  images              ActivityImage[]
-  schedules           ActivitySchedule[]
-  bookings            Booking[]
-  cartItems           CartItem[]
-  recommendations     Recommendation[]
-  reviews             Review[]
-  wishlists           Wishlist[]
+  id                  BigInt         @id @default(autoincrement())
+  supplierId          BigInt         @map("supplier_id")
+  destinationId       BigInt         @map("destination_id")
+  categoryId          BigInt         @map("category_id")
+  name                String         @db.VarChar(255)
+  slug                String         @unique @db.VarChar(255)
+  description         String?        @db.Text
+  highlights          Json? // ["point1", "point2"]
+  duration            Int? // minutes
+  price               Decimal        @db.Decimal(10, 2)
+  currency            String         @default("USD") @db.VarChar(3)
+  maxParticipants     Int?           @map("max_participants")
+  rating              Decimal        @default(0) @db.Decimal(3, 2)
+  reviewCount         Int            @default(0) @map("review_count")
+  instantConfirmation Boolean        @default(true) @map("instant_confirmation")
+  freeCancellation    Boolean        @default(false) @map("free_cancellation")
+  status              ActivityStatus @default(draft)
+  featured            Boolean        @default(false)
+  createdAt           DateTime       @default(now()) @map("created_at")
+  updatedAt           DateTime       @updatedAt @map("updated_at")
+  deletedAt           DateTime?      @map("deleted_at")
+
+  supplier        Supplier           @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  destination     Destination        @relation(fields: [destinationId], references: [id])
+  category        Category           @relation(fields: [categoryId], references: [id])
+  images          ActivityImage[]
+  schedules       ActivitySchedule[]
+  bookings        Booking[]
+  reviews         Review[]
+  wishlists       Wishlist[]
+  recommendations Recommendation[]
 
   @@index([deletedAt])
   @@map("activities")
@@ -163,17 +164,17 @@ model ActivityImage {
 }
 
 model ActivitySchedule {
-  id             BigInt     @id @default(autoincrement())
-  activityId     BigInt     @map("activity_id")
-  date           DateTime   @db.Date
-  timeSlot       String?    @map("time_slot") @db.VarChar(10)
-  availableSpots Int        @map("available_spots")
-  bookedSpots    Int        @default(0) @map("booked_spots")
-  price          Decimal?   @db.Decimal(10, 2)
-  createdAt      DateTime   @default(now()) @map("created_at")
-  activity       Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  bookings       Booking[]
-  cartItems      CartItem[]
+  id             BigInt   @id @default(autoincrement())
+  activityId     BigInt   @map("activity_id")
+  date           DateTime @db.Date
+  timeSlot       String?  @map("time_slot") @db.VarChar(10) // "09:00", "14:30"
+  availableSpots Int      @map("available_spots")
+  bookedSpots    Int      @default(0) @map("booked_spots")
+  price          Decimal? @db.Decimal(10, 2) // Override activity price
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  activity  Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
 
   @@unique([activityId, date, timeSlot])
   @@map("activity_schedules")
@@ -296,22 +297,7 @@ model Wishlist {
   @@map("wishlists")
 }
 
-model CartItem {
-  id           BigInt           @id @default(autoincrement())
-  sessionId    String           @map("session_id") @db.VarChar(255)
-  userId       BigInt?          @map("user_id")
-  activityId   BigInt           @map("activity_id")
-  scheduleId   BigInt           @map("schedule_id")
-  participants Int              @default(1)
-  price        Decimal          @db.Decimal(10, 2)
-  expiresAt    DateTime         @map("expires_at")
-  createdAt    DateTime         @default(now()) @map("created_at")
-  activity     Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  schedule     ActivitySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  user         User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("cart_items")
-}
+// ===== SYSTEM =====
 
 model Notification {
   id        BigInt   @id @default(autoincrement())
