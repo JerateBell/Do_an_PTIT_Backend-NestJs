@@ -7,6 +7,361 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id              BigInt            @id @default(autoincrement())
+  email           String            @unique @db.VarChar(255)
+  passwordHash    String            @map("password_hash") @db.VarChar(255)
+  firstName       String?           @map("first_name") @db.VarChar(100)
+  lastName        String?           @map("last_name") @db.VarChar(100)
+  phone           String?           @db.VarChar(20)
+  avatar          String?           @db.VarChar(500)
+  role            UserRole          @default(customer)
+  status          UserStatus        @default(active)
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  googleId        String?           @unique @map("google_id") @db.VarChar(255)
+  deletedAt       DateTime?         @map("deleted_at")
+  resetPasswordToken   String?           @map("reset_password_token") @db.VarChar(255)
+  resetPasswordExpires DateTime?         @map("reset_password_expires")
+  bookings        Booking[]
+  cartItems       CartItem[]
+  coupons         Coupon[]
+  notifications   Notification[]
+  payments        Payment[]
+  recommendations Recommendation[]
+  reviews         Review[]
+  requests        SupplierRequest[]
+  supplierProfile Supplier?
+  wishlists       Wishlist[]
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model Supplier {
+  id             BigInt     @id @default(autoincrement())
+  companyName    String     @map("company_name") @db.VarChar(255)
+  businessEmail  String?    @map("business_email") @db.VarChar(255)
+  phone          String?    @db.VarChar(20)
+  address        String?
+  commissionRate Decimal    @default(15.00) @map("commission_rate") @db.Decimal(5, 2)
+  userId         BigInt     @unique @map("user_id")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  deletedAt      DateTime?  @map("deleted_at")
+  activities     Activity[]
+  bookings       Booking[]
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([deletedAt])
+  @@map("suppliers")
+}
+
+model Country {
+  code      String    @id @db.VarChar(2)
+  name      String    @db.VarChar(100)
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+  cities    City[]
+
+  @@index([deletedAt])
+  @@map("countries")
+}
+
+model City {
+  id           BigInt        @id @default(autoincrement())
+  name         String        @db.VarChar(100)
+  countryCode  String        @map("country_code") @db.VarChar(2)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  deletedAt    DateTime?     @map("deleted_at")
+  country      Country       @relation(fields: [countryCode], references: [code])
+  destinations Destination[]
+
+  @@unique([name, countryCode])
+  @@index([deletedAt])
+  @@map("cities")
+}
+
+model Destination {
+  id         BigInt     @id @default(autoincrement())
+  name       String     @db.VarChar(255)
+  slug       String     @unique @db.VarChar(255)
+  cityId     BigInt     @map("city_id")
+  imageUrl   String?    @map("image_url") @db.VarChar(500)
+  createdAt  DateTime   @default(now()) @map("created_at")
+  deletedAt  DateTime?  @map("deleted_at")
+  activities Activity[]
+  city       City       @relation(fields: [cityId], references: [id])
+
+  @@index([deletedAt])
+  @@map("destinations")
+}
+
+model Category {
+  id         BigInt     @id @default(autoincrement())
+  name       String     @db.VarChar(255)
+  slug       String     @unique @db.VarChar(255)
+  parentId   BigInt?    @map("parent_id")
+  imageUrl   String?    @map("image_url") @db.VarChar(500)
+  sortOrder  Int        @default(0) @map("sort_order")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  deletedAt  DateTime?  @map("deleted_at")
+  activities Activity[]
+  parent     Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children   Category[] @relation("CategoryTree")
+
+  @@index([deletedAt])
+  @@map("categories")
+}
+
+model Activity {
+  id                  BigInt             @id @default(autoincrement())
+  supplierId          BigInt             @map("supplier_id")
+  destinationId       BigInt             @map("destination_id")
+  categoryId          BigInt             @map("category_id")
+  name                String             @db.VarChar(255)
+  slug                String             @unique @db.VarChar(255)
+  description         String?
+  highlights          Json?
+  duration            Int?
+  price               Decimal            @db.Decimal(10, 2)
+  currency            String             @default("USD") @db.VarChar(3)
+  maxParticipants     Int?               @map("max_participants")
+  rating              Decimal            @default(0) @db.Decimal(3, 2)
+  reviewCount         Int                @default(0) @map("review_count")
+  instantConfirmation Boolean            @default(true) @map("instant_confirmation")
+  freeCancellation    Boolean            @default(false) @map("free_cancellation")
+  status              ActivityStatus     @default(draft)
+  featured            Boolean            @default(false)
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+  deletedAt           DateTime?          @map("deleted_at")
+  category            Category           @relation(fields: [categoryId], references: [id])
+  destination         Destination        @relation(fields: [destinationId], references: [id])
+  supplier            Supplier           @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  images              ActivityImage[]
+  schedules           ActivitySchedule[]
+  bookings            Booking[]
+  cartItems           CartItem[]
+  recommendations     Recommendation[]
+  reviews             Review[]
+  wishlists           Wishlist[]
+
+  @@index([deletedAt])
+  @@map("activities")
+}
+
+model ActivityImage {
+  id         BigInt   @id @default(autoincrement())
+  activityId BigInt   @map("activity_id")
+  imageUrl   String   @map("image_url") @db.VarChar(500)
+  isPrimary  Boolean  @default(false) @map("is_primary")
+  sortOrder  Int      @default(0) @map("sort_order")
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@map("activity_images")
+}
+
+model ActivitySchedule {
+  id             BigInt     @id @default(autoincrement())
+  activityId     BigInt     @map("activity_id")
+  date           DateTime   @db.Date
+  timeSlot       String?    @map("time_slot") @db.VarChar(10)
+  availableSpots Int        @map("available_spots")
+  bookedSpots    Int        @default(0) @map("booked_spots")
+  price          Decimal?   @db.Decimal(10, 2)
+  createdAt      DateTime   @default(now()) @map("created_at")
+  activity       Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  bookings       Booking[]
+  cartItems      CartItem[]
+
+  @@unique([activityId, date, timeSlot])
+  @@map("activity_schedules")
+}
+
+model Booking {
+  id            BigInt           @id @default(autoincrement())
+  bookingRef    String           @unique @map("booking_ref") @db.VarChar(20)
+  userId        BigInt           @map("user_id")
+  activityId    BigInt           @map("activity_id")
+  scheduleId    BigInt           @map("schedule_id")
+  supplierId    BigInt           @map("supplier_id")
+  customerName  String           @map("customer_name") @db.VarChar(255)
+  customerEmail String           @map("customer_email") @db.VarChar(255)
+  customerPhone String?          @map("customer_phone") @db.VarChar(20)
+  bookingDate   DateTime         @map("booking_date") @db.Date
+  participants  Int              @default(1)
+  subtotal      Decimal          @db.Decimal(10, 2)
+  discount      Decimal          @default(0) @db.Decimal(10, 2)
+  total         Decimal          @db.Decimal(10, 2)
+  currency      String           @default("USD") @db.VarChar(3)
+  status        BookingStatus    @default(pending)
+  paymentStatus PaymentStatus    @default(pending) @map("payment_status")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  couponCode    String?          @map("coupon_code") @db.VarChar(50)
+  deletedAt     DateTime?        @map("deleted_at")
+  activity      Activity         @relation(fields: [activityId], references: [id])
+  schedule      ActivitySchedule @relation(fields: [scheduleId], references: [id])
+  supplier      Supplier         @relation(fields: [supplierId], references: [id])
+  user          User             @relation(fields: [userId], references: [id])
+  payments      Payment[]
+  reviews       Review?
+
+  @@index([deletedAt])
+  @@map("bookings")
+}
+
+model Payment {
+  id            BigInt        @id @default(autoincrement())
+  userId        BigInt        @map("user_id")
+  bookingId     BigInt        @map("booking_id")
+  method        PaymentMethod
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD") @db.VarChar(3)
+  transactionId String?       @map("transaction_id") @db.VarChar(255)
+  status        PaymentStatus @default(pending)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  deletedAt     DateTime?     @map("deleted_at")
+  booking       Booking       @relation(fields: [bookingId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+
+  @@index([deletedAt])
+  @@map("payments")
+}
+
+model AdminBankAccount {
+  id        Int       @id @default(autoincrement())
+  bankName  String    @db.VarChar(100)
+  accountNo String    @db.VarChar(50)
+  ownerName String    @db.VarChar(100)
+  qrCode    String?   @db.VarChar(255)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([deletedAt])
+  @@map("admin_bank_accounts")
+}
+
+model Review {
+  id         BigInt    @id @default(autoincrement())
+  bookingId  BigInt    @unique @map("booking_id")
+  userId     BigInt    @map("user_id")
+  activityId BigInt    @map("activity_id")
+  rating     Int       @db.SmallInt
+  comment    String?
+  images     Json?
+  createdAt  DateTime  @default(now()) @map("created_at")
+  deletedAt  DateTime? @map("deleted_at")
+  activity   Activity  @relation(fields: [activityId], references: [id])
+  booking    Booking   @relation(fields: [bookingId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@index([deletedAt])
+  @@map("reviews")
+}
+
+model Coupon {
+  id            BigInt    @id @default(autoincrement())
+  code          String    @unique @db.VarChar(50)
+  name          String    @db.VarChar(255)
+  discountType  String    @map("discount_type") @db.VarChar(20)
+  discountValue Decimal   @map("discount_value") @db.Decimal(10, 2)
+  minAmount     Decimal   @default(0) @map("min_amount") @db.Decimal(10, 2)
+  maxDiscount   Decimal?  @map("max_discount") @db.Decimal(10, 2)
+  usageLimit    Int?      @map("usage_limit")
+  usedCount     Int       @default(0) @map("used_count")
+  validFrom     DateTime  @map("valid_from")
+  validTo       DateTime  @map("valid_to")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  userId        BigInt?   @map("user_id")
+  deletedAt     DateTime? @map("deleted_at")
+  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([deletedAt])
+  @@map("coupons")
+}
+
+model Wishlist {
+  id         BigInt   @id @default(autoincrement())
+  userId     BigInt   @map("user_id")
+  activityId BigInt   @map("activity_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@map("wishlists")
+}
+
+model CartItem {
+  id           BigInt           @id @default(autoincrement())
+  sessionId    String           @map("session_id") @db.VarChar(255)
+  userId       BigInt?          @map("user_id")
+  activityId   BigInt           @map("activity_id")
+  scheduleId   BigInt           @map("schedule_id")
+  participants Int              @default(1)
+  price        Decimal          @db.Decimal(10, 2)
+  expiresAt    DateTime         @map("expires_at")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  activity     Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  schedule     ActivitySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  user         User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("cart_items")
+}
+
+model Notification {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt   @map("user_id")
+  title     String   @db.VarChar(255)
+  message   String
+  type      String   @db.VarChar(50)
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Recommendation {
+  id              BigInt   @id @default(autoincrement())
+  userId          BigInt   @map("user_id")
+  activityId      BigInt   @map("activity_id")
+  predictedRating Decimal  @db.Decimal(3, 2)
+  rank            Int
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  activity        Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@index([userId])
+  @@index([activityId])
+  @@map("recommendations")
+}
+
+model SupplierRequest {
+  id          BigInt        @id @default(autoincrement())
+  userId      BigInt        @map("user_id")
+  type        RequestType
+  status      RequestStatus @default(pending)
+  requestData Json          @map("request_data")
+  adminNotes  String?       @map("admin_notes")
+  processedBy BigInt?       @map("processed_by")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  processedAt DateTime?     @map("processed_at")
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@map("supplier_requests")
+}
+
 enum UserRole {
   customer
   supplier
@@ -40,10 +395,10 @@ enum PaymentStatus {
 }
 
 enum PaymentMethod {
-  cash
-  bank_transfer 
   credit_card
   paypal
+  bank_transfer
+  cash
 }
 
 enum RequestType {
@@ -57,410 +412,4 @@ enum RequestStatus {
   pending
   approved
   rejected
-}
-
-// ===== CORE TABLES =====
-model User {
-  id              BigInt            @id @default(autoincrement())
-  email           String            @unique @db.VarChar(255)
-  passwordHash    String            @map("password_hash") @db.VarChar(255)
-  firstName       String?           @map("first_name") @db.VarChar(100)
-  lastName        String?           @map("last_name") @db.VarChar(100)
-  phone           String?           @db.VarChar(20)
-  avatar          String?           @db.VarChar(500)
-  role            UserRole          @default(customer)
-  status          UserStatus        @default(active)
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @updatedAt @map("updated_at")
-  deletedAt       DateTime?         @map("deleted_at")
-  googleId        String?           @unique @map("google_id") @db.VarChar(255)
-  supplierProfile Supplier?
-  bookings        Booking[]
-  payments        Payment[]
-  reviews         Review[]
-  wishlists       Wishlist[]
-  cartItems       CartItem[]
-  notifications   Notification[]
-  recommendations Recommendation[]
-  requests        SupplierRequest[]
-  coupons         Coupon[]
-
-  @@index([deletedAt])
-  @@map("users")
-}
-
-model Supplier {
-  id             BigInt    @id @default(autoincrement())
-  companyName    String    @map("company_name") @db.VarChar(255)
-  businessEmail  String?   @map("business_email") @db.VarChar(255) // Email công ty (optional, khác với email cá nhân)
-  phone          String?   @db.VarChar(20)
-  address        String?   @db.Text
-  commissionRate Decimal   @default(15.00) @map("commission_rate") @db.Decimal(5, 2)
-  userId         BigInt    @unique @map("user_id")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  deletedAt      DateTime? @map("deleted_at")
-
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activities Activity[]
-  bookings   Booking[]
-
-  @@index([deletedAt])
-  @@map("suppliers")
-}
-
-model Country {
-  code      String    @id @db.VarChar(2) // ISO code làm khóa chính
-  name      String    @db.VarChar(100)
-  createdAt DateTime  @default(now()) @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  cities City[]
-
-  @@index([deletedAt])
-  @@map("countries")
-}
-
-model City {
-  id          BigInt    @id @default(autoincrement())
-  name        String    @db.VarChar(100)
-  countryCode String    @map("country_code") @db.VarChar(2)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  country      Country       @relation(fields: [countryCode], references: [code])
-  destinations Destination[]
-
-  @@unique([name, countryCode])
-  @@index([deletedAt])
-  @@map("cities")
-}
-
-model Destination {
-  id        BigInt    @id @default(autoincrement())
-  name      String    @db.VarChar(255)
-  slug      String    @unique @db.VarChar(255)
-  cityId    BigInt    @map("city_id")
-  imageUrl  String?   @map("image_url") @db.VarChar(500)
-  createdAt DateTime  @default(now()) @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  city       City       @relation(fields: [cityId], references: [id])
-  activities Activity[]
-
-  @@index([deletedAt])
-  @@map("destinations")
-}
-
-model Category {
-  id        BigInt    @id @default(autoincrement())
-  name      String    @db.VarChar(255)
-  slug      String    @unique @db.VarChar(255)
-  parentId  BigInt?   @map("parent_id")
-  imageUrl  String?   @map("image_url") @db.VarChar(500)
-  sortOrder Int       @default(0) @map("sort_order")
-  createdAt DateTime  @default(now()) @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  parent     Category?  @relation("CategoryTree", fields: [parentId], references: [id])
-  children   Category[] @relation("CategoryTree")
-  activities Activity[]
-
-  @@index([deletedAt])
-  @@map("categories")
-}
-
-// ===== ACTIVITY/PRODUCT =====
-
-model Activity {
-  id                  BigInt         @id @default(autoincrement())
-  supplierId          BigInt         @map("supplier_id")
-  destinationId       BigInt         @map("destination_id")
-  categoryId          BigInt         @map("category_id")
-  name                String         @db.VarChar(255)
-  slug                String         @unique @db.VarChar(255)
-  description         String?        @db.Text
-  highlights          Json? // ["point1", "point2"]
-  duration            Int? // minutes
-  price               Decimal        @db.Decimal(10, 2)
-  currency            String         @default("USD") @db.VarChar(3)
-  maxParticipants     Int?           @map("max_participants")
-  rating              Decimal        @default(0) @db.Decimal(3, 2)
-  reviewCount         Int            @default(0) @map("review_count")
-  instantConfirmation Boolean        @default(true) @map("instant_confirmation")
-  freeCancellation    Boolean        @default(false) @map("free_cancellation")
-  status              ActivityStatus @default(draft)
-  featured            Boolean        @default(false)
-  createdAt           DateTime       @default(now()) @map("created_at")
-  updatedAt           DateTime       @updatedAt @map("updated_at")
-  deletedAt           DateTime?      @map("deleted_at")
-
-  supplier        Supplier           @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  destination     Destination        @relation(fields: [destinationId], references: [id])
-  category        Category           @relation(fields: [categoryId], references: [id])
-  images          ActivityImage[]
-  schedules       ActivitySchedule[]
-  bookings        Booking[]
-  reviews         Review[]
-  wishlists       Wishlist[]
-  cartItems       CartItem[]
-  recommendations Recommendation[]
-
-  @@index([deletedAt])
-  @@map("activities")
-}
-
-model ActivityImage {
-  id         BigInt  @id @default(autoincrement())
-  activityId BigInt  @map("activity_id")
-  imageUrl   String  @map("image_url") @db.VarChar(500)
-  isPrimary  Boolean @default(false) @map("is_primary")
-  sortOrder  Int     @default(0) @map("sort_order")
-
-  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-
-  @@map("activity_images")
-}
-
-model ActivitySchedule {
-  id             BigInt   @id @default(autoincrement())
-  activityId     BigInt   @map("activity_id")
-  date           DateTime @db.Date
-  timeSlot       String?  @map("time_slot") @db.VarChar(10) // "09:00", "14:30"
-  availableSpots Int      @map("available_spots")
-  bookedSpots    Int      @default(0) @map("booked_spots")
-  price          Decimal? @db.Decimal(10, 2) // Override activity price
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  activity  Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  bookings  Booking[]
-  cartItems CartItem[]
-
-  @@unique([activityId, date, timeSlot])
-  @@map("activity_schedules")
-}
-
-// ===== BOOKING =====
-
-model Booking {
-  id         BigInt @id @default(autoincrement())
-  bookingRef String @unique @map("booking_ref") @db.VarChar(20)
-  userId     BigInt @map("user_id")
-  activityId BigInt @map("activity_id")
-  scheduleId BigInt @map("schedule_id")
-  supplierId BigInt @map("supplier_id")
-
-  customerName  String  @map("customer_name") @db.VarChar(255)
-  customerEmail String  @map("customer_email") @db.VarChar(255)
-  customerPhone String? @map("customer_phone") @db.VarChar(20)
-
-  bookingDate  DateTime @map("booking_date") @db.Date
-  participants Int      @default(1)
-
-  subtotal Decimal @db.Decimal(10, 2)
-  discount Decimal @default(0) @db.Decimal(10, 2)
-  total    Decimal @db.Decimal(10, 2)
-  currency String  @default("USD") @db.VarChar(3)
-
-  status        BookingStatus @default(pending)
-  paymentStatus PaymentStatus @default(pending) @map("payment_status")
-
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  user       User             @relation(fields: [userId], references: [id])
-  activity   Activity         @relation(fields: [activityId], references: [id])
-  schedule   ActivitySchedule @relation(fields: [scheduleId], references: [id])
-  supplier   Supplier         @relation(fields: [supplierId], references: [id])
-  payments   Payment[]
-  reviews    Review[]
-  couponCode String?          @map("coupon_code") @db.VarChar(50)
-
-  @@index([deletedAt])
-  @@map("bookings")
-}
-
-// ===== PAYMENT =====
-
-model Payment {
-  id            BigInt        @id @default(autoincrement())
-  userId        BigInt        @map("user_id")
-  bookingId     BigInt        @map("booking_id")
-  method        PaymentMethod
-  amount        Decimal       @db.Decimal(10, 2)
-  currency      String        @default("USD") @db.VarChar(3)
-  transactionId String?       @map("transaction_id") @db.VarChar(255)
-  status        PaymentStatus @default(pending)
-  createdAt     DateTime      @default(now()) @map("created_at")
-  deletedAt     DateTime?     @map("deleted_at")
-
-  user    User    @relation(fields: [userId], references: [id])
-  booking Booking @relation(fields: [bookingId], references: [id])
-
-  @@index([deletedAt])
-  @@map("payments")
-}
-
-model AdminBankAccount {
-  id        Int       @id @default(autoincrement())
-  bankName  String    @db.VarChar(100)
-  accountNo String    @db.VarChar(50)
-  ownerName String    @db.VarChar(100)
-  qrCode    String?   @db.VarChar(255) // URL QR code
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  deletedAt DateTime? @map("deleted_at")
-
-  @@index([deletedAt])
-  @@map("admin_bank_accounts")
-}
-
-// ===== REVIEW =====
-
-model Review {
-  id         BigInt    @id @default(autoincrement())
-  bookingId  BigInt    @unique @map("booking_id")
-  userId     BigInt    @map("user_id")
-  activityId BigInt    @map("activity_id")
-  rating     Int       @db.SmallInt
-  comment    String?   @db.Text
-  images     Json?
-  createdAt  DateTime  @default(now()) @map("created_at")
-  deletedAt  DateTime? @map("deleted_at")
-
-  booking  Booking  @relation(fields: [bookingId], references: [id])
-  user     User     @relation(fields: [userId], references: [id])
-  activity Activity @relation(fields: [activityId], references: [id])
-
-  @@index([deletedAt])
-  @@map("reviews")
-}
-
-// ===== COUPON =====
-
-model Coupon {
-  id            BigInt    @id @default(autoincrement())
-  code          String    @unique @db.VarChar(50)
-  name          String    @db.VarChar(255)
-  discountType  String    @map("discount_type") @db.VarChar(20) // "percentage", "fixed"
-  discountValue Decimal   @map("discount_value") @db.Decimal(10, 2)
-  minAmount     Decimal   @default(0) @map("min_amount") @db.Decimal(10, 2)
-  maxDiscount   Decimal?  @map("max_discount") @db.Decimal(10, 2)
-  usageLimit    Int?      @map("usage_limit")
-  usedCount     Int       @default(0) @map("used_count")
-  validFrom     DateTime  @map("valid_from")
-  validTo       DateTime  @map("valid_to")
-  isActive      Boolean   @default(true) @map("is_active")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  deletedAt     DateTime? @map("deleted_at")
-
-  // null = public coupon (ai cũng dùng được), có userId = coupon riêng cho user đó
-  userId BigInt? @map("user_id")
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([deletedAt])
-  @@map("coupons")
-}
-
-
-
-// ===== WISHLIST & CART =====
-
-model Wishlist {
-  id         BigInt   @id @default(autoincrement())
-  userId     BigInt   @map("user_id")
-  activityId BigInt   @map("activity_id")
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, activityId])
-  @@map("wishlists")
-}
-
-model CartItem {
-  id           BigInt   @id @default(autoincrement())
-  sessionId    String   @map("session_id") @db.VarChar(255)
-  userId       BigInt?  @map("user_id")
-  activityId   BigInt   @map("activity_id")
-  scheduleId   BigInt   @map("schedule_id")
-  participants Int      @default(1)
-  price        Decimal  @db.Decimal(10, 2)
-  expiresAt    DateTime @map("expires_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  user     User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activity Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  schedule ActivitySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-
-  @@map("cart_items")
-}
-
-// ===== SYSTEM =====
-
-model Notification {
-  id        BigInt   @id @default(autoincrement())
-  userId    BigInt   @map("user_id")
-  title     String   @db.VarChar(255)
-  message   String   @db.Text
-  type      String   @db.VarChar(50)
-  isRead    Boolean  @default(false) @map("is_read")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
-}
-
-// ===== RECOMMENDATIONS =====
-
-model Recommendation {
-  id              BigInt   @id @default(autoincrement())
-  userId          BigInt   @map("user_id")
-  activityId      BigInt   @map("activity_id")
-  predictedRating Decimal  @db.Decimal(3, 2)
-  rank            Int // Thứ tự từ 1-10 (top 10 recommendations)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, activityId])
-  @@index([userId])
-  @@index([activityId])
-  @@map("recommendations")
-}
-
-// ===== SUPPLIER REQUESTS =====
-
-model SupplierRequest {
-  id     BigInt        @id @default(autoincrement())
-  userId BigInt        @map("user_id")
-  type   RequestType // become_supplier, add_country, add_city, add_destination
-  status RequestStatus @default(pending)
-
-  // Thông tin request (JSON format)
-  // Với become_supplier: { companyName, businessEmail, phone, address, commissionRate }
-  // Với add_location: { name, code (cho country), countryCode (cho city), cityId (cho destination), imageUrl, slug }
-  requestData Json @map("request_data")
-
-  // Ghi chú từ admin khi xử lý
-  adminNotes String? @map("admin_notes") @db.Text
-
-  // Admin xử lý request (nullable nếu chưa được xử lý)
-  processedBy BigInt? @map("processed_by")
-
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  processedAt DateTime? @map("processed_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([type])
-  @@index([status])
-  @@map("supplier_requests")
 }

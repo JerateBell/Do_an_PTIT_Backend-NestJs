@@ -11,10 +11,7 @@ export class CouponsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: any) {
-    // 1. LOG: Dữ liệu đầu vào DTO
     console.log('LOG [Create Coupon]: DTO nhận được:', dto);
-
-    // Biến đổi DTO thành dữ liệu DB (để debug)
     const dataToCreate = {
       code: dto.code,
       name: dto.name,
@@ -27,31 +24,22 @@ export class CouponsService {
       validFrom: new Date(dto.validFrom),
       validTo: new Date(dto.validTo),
       isActive: dto.isActive ?? true,
-      // null = public coupon, có userId = coupon riêng cho user đó
       userId: dto.userId ? BigInt(dto.userId) : null,
     };
-
-    // 2. LOG: Dữ liệu sau khi xử lý (chuẩn bị gửi đến Prisma)
     console.log('LOG [Create Coupon]: Dữ liệu chuẩn bị gửi:', dataToCreate);
 
     try {
       const result = await this.prisma.coupon.create({
         data: dataToCreate,
       });
-
-      // 3. LOG: Kết quả thành công
       console.log('LOG [Create Coupon]: Coupon tạo thành công:', result);
       return result;
     } catch (error) {
-      // 4. LOG/BẮT LỖI: Xử lý lỗi
       console.error('LOG [Create Coupon]: LỖI KHI TẠO:', error);
-
-      // Nếu là lỗi P2002 (Unique constraint failed), ném BadRequest rõ ràng
       if (error.code === 'P2002') {
         throw new BadRequestException(`Mã ${dto.code} đã tồn tại.`);
       }
 
-      // Ném lỗi khác lên Controller để NestJS xử lý
       throw error;
     }
   }

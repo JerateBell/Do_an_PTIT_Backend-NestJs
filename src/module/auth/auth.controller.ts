@@ -16,6 +16,8 @@ import { JwtGuard } from './guard/jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../users/users.service';
 import type { Response, Request as ExpressRequest } from 'express';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 @Controller('auth')
 @ApiTags('Authentication')
 export class AuthController {
@@ -34,6 +36,16 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto.email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
+  }
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) {}
@@ -43,7 +55,7 @@ export class AuthController {
   async googleCallback(@Req() req, @Res() res) {
     console.log('REQ.USER:', req.user);
 
-    const token = req.user.access_token; 
+    const token = req.user.access_token;
     return res.redirect(`http://localhost:5173/login-success?token=${token}`);
   }
 
