@@ -51,6 +51,54 @@ export class BookingsService {
     });
   }
 
+  // Lấy tất cả booking của user (customer) đang đăng nhập
+  async findAllForUser(userId: bigint) {
+    return this.prisma.booking.findMany({
+      where: {
+        userId,
+        deletedAt: null, // Soft delete filter
+      },
+      include: {
+        activity: {
+          include: {
+            destination: {
+              include: {
+                city: {
+                  include: {
+                    country: true,
+                  },
+                },
+              },
+            },
+            supplier: {
+              select: {
+                id: true,
+                companyName: true,
+                businessEmail: true,
+              },
+            },
+            images: true,
+          },
+        },
+        schedule: true,
+        supplier: {
+          select: {
+            id: true,
+            companyName: true,
+            businessEmail: true,
+          },
+        },
+        payments: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        reviews: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   //  Lấy chi tiết một booking
   async findOneForSupplier(id: bigint, userId: bigint) {
     const supplier = await this.getSupplierByUserId(userId);

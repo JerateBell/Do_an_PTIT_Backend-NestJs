@@ -410,7 +410,6 @@ export class SupplierRequestsService {
             slug: slug,
             cityId: Number(data.cityId),
             imageUrl: data.imageUrl || '',
-            description: data.description || '',
           });
         }
         break;

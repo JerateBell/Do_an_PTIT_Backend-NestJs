@@ -28,12 +28,9 @@ model User {
   reviews         Review[]
   wishlists       Wishlist[]
   notifications   Notification[]
-  payments        Payment[]
   recommendations Recommendation[]
-  reviews         Review[]
   requests        SupplierRequest[]
   supplierProfile Supplier?
-  wishlists       Wishlist[]
 
   @@index([deletedAt])
   @@map("users")

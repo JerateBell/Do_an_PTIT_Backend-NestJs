@@ -11,6 +11,7 @@ import {
   UploadedFile,
   BadRequestException,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
@@ -22,9 +23,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Admin } from 'src/common/decorators/admin.decorator';
 import type { Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('payments')
-// @UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'))
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
