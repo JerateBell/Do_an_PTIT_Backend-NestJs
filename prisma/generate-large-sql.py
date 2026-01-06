@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Script to generate large SQL seed file with:
-- 120+ users (100 customers, 15 suppliers, 5 admins)
+Script để tạo file SQL seed lớn với:
+- 120+ users (100 khách hàng, 15 nhà cung cấp, 5 admin)
 - 500+ activities
 - 3000+ bookings
-- 2500+ reviews (ratings)
+- 2500+ reviews (đánh giá)
 """
 
 import random
+import sys
+import io
 from datetime import datetime, timedelta
 
-# Password hash for 'password123' (bcrypt - actual hash)
+# Fix encoding cho Windows console
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
+# Password hash cho 'password123' (bcrypt - hash thực tế)
 PASSWORD_HASH = "$2b$10$rOzJ5X5V5qN5qN5qN5qN5uO1qN5qN5qN5qN5qN5qN5qN5qN5qN5q"
 
-# First names and last names for users
+# Tên và họ cho users
 FIRST_NAMES = [
     'John', 'Sarah', 'Michael', 'Emily', 'David', 'Jessica', 'Christopher', 'Amanda',
     'Matthew', 'Ashley', 'James', 'Lisa', 'Daniel', 'Michelle', 'Robert', 'Jennifer',
@@ -54,53 +62,59 @@ COMPANY_NAMES = [
 ]
 
 ACTIVITY_NAMES = [
-    # Adventure
-    'Mountain Hiking Adventure', 'Rock Climbing Experience', 'Kayaking Tour', 'Zip Lining Adventure',
-    'Bungee Jumping Experience', 'Paragliding Tour', 'Mountain Biking Trail', 'Cave Exploration',
-    'Canyoning Adventure', 'Trekking Expedition', 'River Rafting', 'Scuba Diving Adventure',
-    # Culture
-    'Historical City Walking Tour', 'Traditional Temple Visit', 'Museum Discovery Tour',
-    'Local Village Experience', 'Ancient Ruins Exploration', 'Cultural Heritage Walk',
-    'Traditional Craft Workshop', 'Local Market Tour', 'Historical Site Visit', 'Cultural Performance Show',
-    # Food
-    'Street Food Tour', 'Cooking Class Experience', 'Fine Dining Experience', 'Local Food Market Tour',
-    'Wine Tasting Session', 'Coffee Culture Tour', 'Seafood Feast', 'Traditional Cuisine Class',
-    'Food & Culture Walk', 'Local Restaurant Hopping',
-    # Nature
-    'National Park Visit', 'Waterfall Hiking', 'Sunrise Mountain View', 'Jungle Trekking',
-    'Wildlife Watching', 'Botanical Garden Tour', 'Scenic Landscape Photography', 'Eco-Tourism Experience',
-    'Forest Bathing Session', 'Nature Conservation Tour',
-    # Beach & Water Sports
-    'Snorkeling Adventure', 'Scuba Diving Experience', 'Surfing Lesson', 'Beach Volleyball',
-    'Jet Ski Tour', 'Sunset Cruise', 'Beach Yoga Session', 'Water Skiing', 'Beach Picnic Experience',
-    # And more...
+    # Phiêu lưu
+    'Chuyến đi bộ leo núi', 'Trải nghiệm leo núi đá', 'Tour chèo thuyền kayak', 'Trải nghiệm zipline',
+    'Trải nghiệm nhảy bungee', 'Tour dù lượn', 'Đường mòn đạp xe leo núi', 'Khám phá hang động',
+    'Phiêu lưu canyoning', 'Hành trình trekking', 'Chèo thuyền vượt thác', 'Trải nghiệm lặn biển',
+    # Văn hóa
+    'Tour đi bộ thành phố lịch sử', 'Tham quan đền chùa truyền thống', 'Tour khám phá bảo tàng',
+    'Trải nghiệm làng quê địa phương', 'Khám phá di tích cổ xưa', 'Đi bộ di sản văn hóa',
+    'Workshop thủ công truyền thống', 'Tour chợ địa phương', 'Tham quan di tích lịch sử', 'Buổi biểu diễn văn hóa',
+    # Ẩm thực
+    'Tour ẩm thực đường phố', 'Trải nghiệm lớp học nấu ăn', 'Trải nghiệm fine dining', 'Tour chợ thực phẩm địa phương',
+    'Buổi thử rượu vang', 'Tour văn hóa cà phê', 'Bữa tiệc hải sản', 'Lớp học ẩm thực truyền thống',
+    'Đi bộ ẩm thực & văn hóa', 'Tham quan nhà hàng địa phương',
+    # Thiên nhiên
+    'Tham quan vườn quốc gia', 'Đi bộ thác nước', 'Ngắm cảnh bình minh trên núi', 'Trekking rừng rậm',
+    'Ngắm động vật hoang dã', 'Tour vườn bách thảo', 'Chụp ảnh phong cảnh', 'Trải nghiệm du lịch sinh thái',
+    'Buổi tắm rừng', 'Tour bảo tồn thiên nhiên',
+    # Bãi biển & Thể thao dưới nước
+    'Phiêu lưu lặn ống thở', 'Trải nghiệm lặn biển', 'Lớp học lướt sóng', 'Bóng chuyền bãi biển',
+    'Tour jet ski', 'Du thuyền hoàng hôn', 'Buổi tập yoga bãi biển', 'Trượt nước', 'Trải nghiệm picnic bãi biển',
+    # Và nhiều hơn nữa...
 ]
 
 COMMENTS = [
-    'Great experience! Highly recommend.', 'Amazing activity, had a wonderful time.',
-    'Very enjoyable and well organized.', 'Good value for money.',
-    'Excellent guide and service.', 'Would definitely do this again!',
-    'Fantastic experience overall.', 'Really enjoyed this activity.',
-    'Wonderful memories created here.', 'Highly satisfied with the service.',
-    'Perfect for families!', 'Professional and friendly staff.',
-    'Beautiful location, amazing views.', 'Great way to explore the area.',
-    'Learned so much from this experience.', 'Unforgettable adventure!'
+    'Trải nghiệm tuyệt vời! Rất đáng để thử.', 'Hoạt động tuyệt vời, đã có khoảng thời gian tuyệt vời.',
+    'Rất thú vị và được tổ chức tốt.', 'Giá trị tốt so với số tiền bỏ ra.',
+    'Hướng dẫn viên và dịch vụ xuất sắc.', 'Chắc chắn sẽ làm lại lần nữa!',
+    'Trải nghiệm tuyệt vời tổng thể.', 'Thực sự thích hoạt động này.',
+    'Những kỷ niệm tuyệt vời được tạo ra ở đây.', 'Rất hài lòng với dịch vụ.',
+    'Hoàn hảo cho gia đình!', 'Nhân viên chuyên nghiệp và thân thiện.',
+    'Địa điểm đẹp, cảnh quan tuyệt vời.', 'Cách tuyệt vời để khám phá khu vực.',
+    'Học được rất nhiều từ trải nghiệm này.', 'Cuộc phiêu lưu không thể quên!'
 ]
 
 def create_slug(name):
-    """Create slug from name"""
+    """Tạo slug từ tên"""
     return name.lower().replace(' ', '-').replace('&', 'and').replace(',', '').replace("'", '')
 
+def escape_sql_string(s):
+    """Escape string cho SQL (thay thế dấu nháy đơn bằng hai dấu nháy đơn)"""
+    if s is None:
+        return 'NULL'
+    return "'" + str(s).replace("'", "''") + "'"
+
 def generate_users(num_customers=100, num_suppliers=15, num_admins=5):
-    """Generate SQL INSERT statements for users"""
+    """Tạo các câu lệnh SQL INSERT cho users"""
     sql = "-- =====================================================\n"
-    sql += "-- PART 1: USERS ({} customers, {} suppliers, {} admins)\n".format(num_customers, num_suppliers, num_admins)
+    sql += "-- PHẦN 1: USERS ({} khách hàng, {} nhà cung cấp, {} admin)\n".format(num_customers, num_suppliers, num_admins)
     sql += "-- =====================================================\n\n"
     
     user_id = 1
     
-    # Customers
-    sql += "-- Customer Users\n"
+    # Khách hàng
+    sql += "-- Khách hàng\n"
     for i in range(1, num_customers + 1):
         first_name = random.choice(FIRST_NAMES)
         last_name = random.choice(LAST_NAMES)
@@ -109,9 +123,9 @@ def generate_users(num_customers=100, num_suppliers=15, num_admins=5):
         status = random.choices(['active', 'active', 'active', 'suspended', 'deleted'], weights=[70, 70, 70, 5, 5])[0]
         
         sql += f"INSERT INTO \"users\" (\"email\", \"password_hash\", \"first_name\", \"last_name\", \"phone\", \"role\", \"status\", \"created_at\", \"updated_at\") VALUES\n"
-        sql += f"('{email}', '{PASSWORD_HASH}', '{first_name}', '{last_name}', '{phone}', 'customer', '{status}', NOW(), NOW());\n"
+        sql += f"({escape_sql_string(email)}, {escape_sql_string(PASSWORD_HASH)}, {escape_sql_string(first_name)}, {escape_sql_string(last_name)}, {escape_sql_string(phone)}, 'customer', {escape_sql_string(status)}, NOW(), NOW());\n"
     
-    sql += "\n-- Supplier Users\n"
+    sql += "\n-- Nhà cung cấp\n"
     supplier_users = []
     for i in range(1, num_suppliers + 1):
         first_name = random.choice(FIRST_NAMES)
@@ -120,14 +134,14 @@ def generate_users(num_customers=100, num_suppliers=15, num_admins=5):
         phone = f'+84 902234{i:03d}'
         
         sql += f"INSERT INTO \"users\" (\"email\", \"password_hash\", \"first_name\", \"last_name\", \"phone\", \"role\", \"status\", \"created_at\", \"updated_at\") VALUES\n"
-        sql += f"('{email}', '{PASSWORD_HASH}', '{first_name}', '{last_name}', '{phone}', 'supplier', 'active', NOW(), NOW());\n"
+        sql += f"({escape_sql_string(email)}, {escape_sql_string(PASSWORD_HASH)}, {escape_sql_string(first_name)}, {escape_sql_string(last_name)}, {escape_sql_string(phone)}, 'supplier', 'active', NOW(), NOW());\n"
         
         supplier_users.append({
             'email': email,
             'company': random.choice(COMPANY_NAMES)
         })
     
-    sql += "\n-- Admin Users\n"
+    sql += "\n-- Admin\n"
     for i in range(1, num_admins + 1):
         first_name = random.choice(FIRST_NAMES)
         last_name = random.choice(LAST_NAMES)
@@ -135,14 +149,14 @@ def generate_users(num_customers=100, num_suppliers=15, num_admins=5):
         phone = f'+84 903234{i:03d}'
         
         sql += f"INSERT INTO \"users\" (\"email\", \"password_hash\", \"first_name\", \"last_name\", \"phone\", \"role\", \"status\", \"created_at\", \"updated_at\") VALUES\n"
-        sql += f"('{email}', '{PASSWORD_HASH}', '{first_name}', '{last_name}', '{phone}', 'admin', 'active', NOW(), NOW());\n"
+        sql += f"({escape_sql_string(email)}, {escape_sql_string(PASSWORD_HASH)}, {escape_sql_string(first_name)}, {escape_sql_string(last_name)}, {escape_sql_string(phone)}, 'admin', 'active', NOW(), NOW());\n"
     
     return sql, supplier_users
 
 def generate_suppliers_sql(num_suppliers=15):
-    """Generate SQL for suppliers"""
+    """Tạo SQL cho suppliers"""
     sql = "\n\n-- =====================================================\n"
-    sql += f"-- PART 2: SUPPLIERS ({num_suppliers} suppliers)\n"
+    sql += f"-- PHẦN 2: SUPPLIERS ({num_suppliers} nhà cung cấp)\n"
     sql += "-- =====================================================\n\n"
     
     for i in range(1, num_suppliers + 1):
@@ -152,9 +166,9 @@ def generate_suppliers_sql(num_suppliers=15):
         commission_rate = round(10 + random.random() * 10, 2)
         
         sql += f"""INSERT INTO "suppliers" ("company_name", "business_email", "phone", "address", "commission_rate", "user_id", "created_at", "updated_at")
-SELECT '{company_name}', '{business_email}', '{phone}', 'Hanoi, Vietnam', {commission_rate}, u.id, NOW(), NOW()
+SELECT {escape_sql_string(company_name)}, {escape_sql_string(business_email)}, {escape_sql_string(phone)}, {escape_sql_string('Hanoi, Vietnam')}, {commission_rate}, u.id, NOW(), NOW()
 FROM "users" u
-WHERE u.email = 'supplier{i:02d}@example.com'
+WHERE u.email = {escape_sql_string(f'supplier{i:02d}@example.com')}
   AND u.role = 'supplier'
   AND NOT EXISTS (SELECT 1 FROM "suppliers" s WHERE s.user_id = u.id);
 
@@ -163,30 +177,31 @@ WHERE u.email = 'supplier{i:02d}@example.com'
     return sql
 
 def generate_activities_sql(num_activities=500):
-    """Generate SQL for activities using subqueries"""
+    """Tạo SQL cho activities sử dụng subqueries"""
     sql = "\n\n-- =====================================================\n"
-    sql += f"-- PART 3: ACTIVITIES ({num_activities} activities)\n"
+    sql += f"-- PHẦN 3: ACTIVITIES ({num_activities} hoạt động)\n"
     sql += "-- =====================================================\n\n"
     
     activity_templates = {
-        'Adventure': ['Mountain Hiking', 'Rock Climbing', 'Kayaking', 'Zip Lining', 'Bungee Jumping', 
-                     'Paragliding', 'Mountain Biking', 'Cave Exploration', 'Canyoning', 'Trekking'],
-        'Culture': ['Historical Walking Tour', 'Temple Visit', 'Museum Tour', 'Village Experience',
-                   'Ancient Ruins', 'Cultural Heritage Walk', 'Craft Workshop', 'Market Tour'],
-        'Food': ['Street Food Tour', 'Cooking Class', 'Fine Dining', 'Food Market Tour',
-                'Wine Tasting', 'Coffee Tour', 'Seafood Feast', 'Cuisine Class'],
-        'Nature': ['National Park', 'Waterfall Hiking', 'Sunrise View', 'Jungle Trekking',
-                  'Wildlife Watching', 'Botanical Garden', 'Scenic Photography', 'Eco-Tourism'],
-        'Beach & Water Sports': ['Snorkeling', 'Scuba Diving', 'Surfing', 'Beach Volleyball',
-                                'Jet Ski', 'Sunset Cruise', 'Beach Yoga', 'Water Skiing'],
-        'Wellness & Spa': ['Spa Treatment', 'Hot Spring', 'Yoga Retreat', 'Massage Therapy',
-                          'Wellness Center', 'Aromatherapy', 'Healing Session'],
-        'Nightlife & Entertainment': ['Night Market', 'Live Music', 'Nightclub', 'Karaoke',
-                                     'Cultural Show', 'City Lights Tour', 'Bar Hopping'],
+        'Adventure': ['Đi bộ leo núi', 'Leo núi đá', 'Chèo thuyền kayak', 'Zipline', 'Nhảy bungee', 
+                     'Dù lượn', 'Đạp xe leo núi', 'Khám phá hang động', 'Canyoning', 'Trekking'],
+        'Culture': ['Tour đi bộ lịch sử', 'Tham quan đền chùa', 'Tour bảo tàng', 'Trải nghiệm làng quê',
+                   'Di tích cổ xưa', 'Đi bộ di sản văn hóa', 'Workshop thủ công', 'Tour chợ'],
+        'Food': ['Tour ẩm thực đường phố', 'Lớp học nấu ăn', 'Fine dining', 'Tour chợ thực phẩm',
+                'Thử rượu vang', 'Tour cà phê', 'Bữa tiệc hải sản', 'Lớp học ẩm thực'],
+        'Nature': ['Vườn quốc gia', 'Đi bộ thác nước', 'Ngắm bình minh', 'Trekking rừng rậm',
+                  'Ngắm động vật hoang dã', 'Vườn bách thảo', 'Chụp ảnh phong cảnh', 'Du lịch sinh thái'],
+        'Beach & Water Sports': ['Lặn ống thở', 'Lặn biển', 'Lướt sóng', 'Bóng chuyền bãi biển',
+                                'Jet ski', 'Du thuyền hoàng hôn', 'Yoga bãi biển', 'Trượt nước'],
+        'Wellness & Spa': ['Điều trị spa', 'Suối nước nóng', 'Yoga retreat', 'Massage trị liệu',
+                          'Trung tâm wellness', 'Liệu pháp hương thơm', 'Buổi chữa lành'],
+        'Nightlife & Entertainment': ['Chợ đêm', 'Nhạc sống', 'Câu lạc bộ đêm', 'Karaoke',
+                                     'Buổi biểu diễn văn hóa', 'Tour ánh sáng thành phố', 'Bar hopping'],
     }
     
-    destination_names = ['Ha Long Bay', 'Hoan Kiem Lake', 'Ben Thanh Market', 'Statue of Liberty',
-                        'Old Quarter', 'Temple of Literature', 'Ngoc Son Temple', 'Water Puppet Theater']
+    # Tên địa điểm (sử dụng để tạo tên activity, không phải để map destination ID)
+    destination_names = ['Vịnh Hạ Long', 'Hồ Hoàn Kiếm', 'Chợ Bến Thành', 'Tượng Nữ thần Tự do',
+                        'Phố cổ', 'Văn Miếu', 'Đền Ngọc Sơn', 'Nhà hát múa rối nước']
     
     activity_id = 1
     for _ in range(num_activities):
@@ -203,25 +218,45 @@ def generate_activities_sql(num_activities=500):
         instant_confirmation = random.choice([True, True, True, False])
         free_cancellation = random.choice([True, False])
         status = random.choices(['active', 'active', 'draft', 'inactive'], weights=[70, 70, 5, 5])[0]
-        featured = random.random() < 0.15
         
-        highlights = f'["Experience {category_name.lower()}", "Professional guide", "Small group size"]'
-        description = f"An amazing {category_name.lower()} experience at {destination_name}."
+        # Dịch highlights và description sang tiếng Việt
+        category_vn_map = {
+            'Adventure': 'phiêu lưu',
+            'Culture': 'văn hóa',
+            'Food': 'ẩm thực',
+            'Nature': 'thiên nhiên',
+            'Beach & Water Sports': 'bãi biển & thể thao dưới nước',
+            'Wellness & Spa': 'sức khỏe & spa',
+            'Nightlife & Entertainment': 'giải trí & đêm'
+        }
+        category_vn = category_vn_map.get(category_name, category_name.lower())
+        highlights = f'["Trải nghiệm {category_vn}", "Hướng dẫn viên chuyên nghiệp", "Nhóm nhỏ"]'
+        description = f"Trải nghiệm tuyệt vời về {category_vn} tại {destination_name}."
+        
+        # Escape strings để tránh SQL injection
+        full_name_escaped = escape_sql_string(full_name)
+        slug_escaped = escape_sql_string(slug)
+        description_escaped = escape_sql_string(description)
+        highlights_escaped = escape_sql_string(highlights)
+        category_name_escaped = escape_sql_string(category_name)
+        
+        # Chia đều supplier: sử dụng modulo với activity_id
+        supplier_mod = f"(({activity_id} - 1) % (SELECT COUNT(*) FROM suppliers))"
         
         sql += f"""INSERT INTO "activities" (
   "supplier_id", "destination_id", "category_id", "name", "slug", "description",
   "highlights", "duration", "price", "currency", "max_participants",
   "rating", "review_count", "instant_confirmation", "free_cancellation",
-  "status", "featured", "created_at", "updated_at"
+  "status", "created_at", "updated_at"
 )
 SELECT 
-  s.id,
+  (SELECT id FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY id) - 1 as rn FROM suppliers) s WHERE s.rn = {supplier_mod}),
   (SELECT id FROM "destinations" ORDER BY RANDOM() LIMIT 1),
-  (SELECT id FROM "categories" WHERE "name" = '{category_name}' AND "parent_id" IS NULL LIMIT 1),
-  '{full_name}',
-  '{slug}',
-  '{description}',
-  '{highlights}'::jsonb,
+  (SELECT id FROM "categories" WHERE "name" = {category_name_escaped} AND "parent_id" IS NULL LIMIT 1),
+  {full_name_escaped},
+  {slug_escaped},
+  {description_escaped},
+  {highlights_escaped}::jsonb,
   {duration},
   {price},
   'USD',
@@ -230,13 +265,9 @@ SELECT
   0,
   {str(instant_confirmation).lower()},
   {str(free_cancellation).lower()},
-  '{status}'::"ActivityStatus",
-  {str(featured).lower()},
+  {escape_sql_string(status)}::"ActivityStatus",
   NOW(),
   NOW()
-FROM "suppliers" s
-ORDER BY RANDOM()
-LIMIT 1
 ON CONFLICT (slug) DO NOTHING;
 
 """
@@ -245,14 +276,14 @@ ON CONFLICT (slug) DO NOTHING;
     return sql
 
 def generate_schedules_sql(num_activities=500, schedules_per_activity=3):
-    """Generate SQL for activity schedules"""
+    """Tạo SQL cho lịch trình activities"""
     sql = "\n\n-- =====================================================\n"
-    sql += f"-- PART 4: ACTIVITY SCHEDULES ({num_activities * schedules_per_activity} schedules)\n"
+    sql += f"-- PHẦN 4: LỊCH TRÌNH ACTIVITIES ({num_activities * schedules_per_activity} lịch trình)\n"
     sql += "-- =====================================================\n\n"
     
     time_slots = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00']
     
-    sql += """-- Generate schedules for all activities
+    sql += """-- Tạo lịch trình cho tất cả activities
 DO $$
 DECLARE
   activity_record RECORD;
@@ -265,7 +296,7 @@ DECLARE
 BEGIN
   FOR activity_record IN SELECT id, price FROM "activities" WHERE "status" = 'active'
   LOOP
-    -- Create 3-5 schedules per activity
+    -- Tạo 3-5 lịch trình cho mỗi activity
     v_loop_count := 3 + (random() * 2)::int;
     FOR i IN 1..v_loop_count
     LOOP
@@ -296,12 +327,12 @@ END $$;
     return sql
 
 def generate_bookings_sql(num_bookings=3000):
-    """Generate SQL for bookings"""
+    """Tạo SQL cho bookings"""
     sql = "\n\n-- =====================================================\n"
-    sql += f"-- PART 5: BOOKINGS ({num_bookings} bookings)\n"
+    sql += f"-- PHẦN 5: BOOKINGS ({num_bookings} đặt chỗ)\n"
     sql += "-- =====================================================\n\n"
     
-    sql += f"""-- Generate bookings using PL/pgSQL for better performance
+    sql += f"""-- Tạo bookings sử dụng PL/pgSQL để hiệu suất tốt hơn
 DO $$
 DECLARE
   customer_user RECORD;
@@ -318,14 +349,14 @@ DECLARE
 BEGIN
   FOR customer_user IN SELECT id, email, first_name, last_name, phone FROM "users" WHERE "role" = 'customer' AND "status" = 'active' LIMIT 100
   LOOP
-    -- Each customer gets 20-40 bookings
+    -- Mỗi khách hàng có 20-40 bookings
     FOR i IN 1..(20 + (random() * 20)::int)
     LOOP
       IF booking_counter > {num_bookings} THEN
         EXIT;
       END IF;
       
-      -- Get random activity with schedule
+      -- Lấy activity ngẫu nhiên có lịch trình
       SELECT 
         a.id as activity_id, 
         a.supplier_id, 
@@ -347,7 +378,7 @@ BEGIN
         CONTINUE;
       END IF;
       
-      -- Get supplier
+      -- Lấy supplier
       SELECT id INTO supplier_record FROM "suppliers" WHERE id = activity_record.supplier_id;
       
       IF supplier_record.id IS NULL THEN
@@ -393,7 +424,7 @@ BEGIN
         NOW()
       );
       
-      -- Update booked spots
+      -- Cập nhật số chỗ đã đặt
       UPDATE "activity_schedules"
       SET "booked_spots" = "booked_spots" + participants
       WHERE id = activity_record.schedule_id;
@@ -411,31 +442,15 @@ END $$;
     return sql
 
 def generate_reviews_sql(num_reviews=2500):
-    """Generate SQL for reviews"""
+    """Tạo SQL cho reviews (đánh giá)"""
     sql = "\n\n-- =====================================================\n"
-    sql += f"-- PART 6: REVIEWS (RATINGS) ({num_reviews} reviews)\n"
+    sql += f"-- PHẦN 6: REVIEWS (ĐÁNH GIÁ) ({num_reviews} đánh giá)\n"
     sql += "-- =====================================================\n\n"
     
-    comments = [
-        "Great experience! Highly recommend.",
-        "Amazing activity, had a wonderful time.",
-        "Very enjoyable and well organized.",
-        "Good value for money.",
-        "Excellent guide and service.",
-        "Would definitely do this again!",
-        "Fantastic experience overall.",
-        "Really enjoyed this activity.",
-        "Wonderful memories created here.",
-        "Highly satisfied with the service.",
-        "Perfect for families!",
-        "Professional and friendly staff.",
-        "Beautiful location, amazing views.",
-        "Great way to explore the area.",
-        "Learned so much from this experience.",
-        "Unforgettable adventure!"
-    ]
+    # Sử dụng COMMENTS đã được dịch sang tiếng Việt
+    comments = COMMENTS
     
-    sql += f"""-- Generate reviews from completed/confirmed bookings
+    sql += f"""-- Tạo reviews từ các bookings đã hoàn thành/xác nhận
 DO $$
 DECLARE
   booking_record RECORD;
@@ -453,14 +468,14 @@ BEGIN
     ORDER BY RANDOM()
     LIMIT {num_reviews}
   LOOP
-    -- 70% of bookings get reviews, rating between 3-5 (mostly 4-5)
+    -- 70% bookings có reviews, rating từ 3-5 (chủ yếu 4-5)
     rating := CASE
       WHEN random() < 0.6 THEN 5
       WHEN random() < 0.8 THEN 4
       ELSE 3
     END;
     
-    comment_text := (ARRAY['Great experience! Highly recommend.', 'Amazing activity, had a wonderful time.', 'Very enjoyable and well organized.', 'Good value for money.', 'Excellent guide and service.', 'Would definitely do this again!', 'Fantastic experience overall.', 'Really enjoyed this activity.', 'Wonderful memories created here.', 'Highly satisfied with the service.', 'Perfect for families!', 'Professional and friendly staff.', 'Beautiful location, amazing views.', 'Great way to explore the area.', 'Learned so much from this experience.', 'Unforgettable adventure!'])[floor(random() * 16 + 1)::int];
+    comment_text := (ARRAY['Trải nghiệm tuyệt vời! Rất đáng để thử.', 'Hoạt động tuyệt vời, đã có khoảng thời gian tuyệt vời.', 'Rất thú vị và được tổ chức tốt.', 'Giá trị tốt so với số tiền bỏ ra.', 'Hướng dẫn viên và dịch vụ xuất sắc.', 'Chắc chắn sẽ làm lại lần nữa!', 'Trải nghiệm tuyệt vời tổng thể.', 'Thực sự thích hoạt động này.', 'Những kỷ niệm tuyệt vời được tạo ra ở đây.', 'Rất hài lòng với dịch vụ.', 'Hoàn hảo cho gia đình!', 'Nhân viên chuyên nghiệp và thân thiện.', 'Địa điểm đẹp, cảnh quan tuyệt vời.', 'Cách tuyệt vời để khám phá khu vực.', 'Học được rất nhiều từ trải nghiệm này.', 'Cuộc phiêu lưu không thể quên!'])[floor(random() * 16 + 1)::int];
     
     INSERT INTO "reviews" (
       "booking_id", "user_id", "activity_id", "rating", "comment", "created_at"
@@ -478,7 +493,7 @@ BEGIN
     review_counter := review_counter + 1;
   END LOOP;
   
-  -- Update activity ratings and review counts
+  -- Cập nhật rating và số lượng reviews của activities
   UPDATE "activities" a
   SET 
     "rating" = (
@@ -499,58 +514,58 @@ END $$;
     return sql
 
 def generate_sql_file():
-    """Generate the complete SQL file"""
+    """Tạo file SQL hoàn chỉnh"""
     sql_content = """-- =====================================================
--- LARGE DATA SEED SCRIPT - AUTO GENERATED
+-- SCRIPT TẠO DỮ LIỆU LỚN - TỰ ĐỘNG TẠO
 -- =====================================================
--- This script creates:
--- - 120+ users (100 customers, 15 suppliers, 5 admins)
+-- Script này tạo:
+-- - 120+ users (100 khách hàng, 15 nhà cung cấp, 5 admin)
 -- - 15 suppliers
 -- - 500+ activities
 -- - 3000+ bookings
--- - 2500+ reviews (ratings)
--- And all related data
+-- - 2500+ reviews (đánh giá)
+-- Và tất cả dữ liệu liên quan
 -- =====================================================
 
--- IMPORTANT: Run the main seed first!
+-- QUAN TRỌNG: Chạy seed chính trước!
 -- npm run prisma:seed
 -- 
--- This script uses subqueries and PL/pgSQL to work with existing data
--- Make sure you have categories, destinations, and cities from main seed
+-- Script này sử dụng subqueries và PL/pgSQL để làm việc với dữ liệu hiện có
+-- Đảm bảo bạn đã có categories, destinations, và cities từ seed chính
 -- =====================================================\n\n"""
     
-    # Generate users
-    print("Generating users...")
+    # Tạo users
+    print("Đang tạo users...")
     users_sql, supplier_users = generate_users()
     sql_content += users_sql
     
-    # Generate suppliers
-    print("Generating suppliers...")
+    # Tạo suppliers
+    print("Đang tạo suppliers...")
     suppliers_sql = generate_suppliers_sql()
     sql_content += suppliers_sql
     
-    # Generate activities
-    print("Generating activities...")
+    # Tạo activities
+    print("Đang tạo activities...")
     activities_sql = generate_activities_sql(500)
     sql_content += activities_sql
     
-    # Generate schedules
-    print("Generating schedules...")
+    # Tạo schedules
+    print("Đang tạo schedules...")
     schedules_sql = generate_schedules_sql(500, 3)
     sql_content += schedules_sql
     
-    # Generate bookings
-    print("Generating bookings...")
+    # Tạo bookings
+    print("Đang tạo bookings...")
     bookings_sql = generate_bookings_sql(3000)
     sql_content += bookings_sql
     
-    # Generate reviews
-    print("Generating reviews...")
+    # Tạo reviews
+    print("Đang tạo reviews...")
     reviews_sql = generate_reviews_sql(2500)
     sql_content += reviews_sql
     
     sql_content += "\n\n-- =====================================================\n"
-    sql_content += "-- COMPLETE! Check your data:\n"
+    sql_content += "-- HOÀN TẤT! Kiểm tra dữ liệu:\n"
     sql_content += "-- SELECT COUNT(*) FROM users;\n"
     sql_content += "-- SELECT COUNT(*) FROM activities;\n"
     sql_content += "-- SELECT COUNT(*) FROM bookings;\n"
@@ -560,12 +575,12 @@ def generate_sql_file():
     return sql_content
 
 if __name__ == '__main__':
-    print("Generating large SQL file...")
+    print("Đang tạo file SQL lớn...")
     sql = generate_sql_file()
     
     with open('seed-large-data.sql', 'w', encoding='utf-8') as f:
         f.write(sql)
     
-    print("SQL file generated: seed-large-data.sql")
-    print("Note: This is a template. Full generation requires database connection to get IDs.")
+    print("Đã tạo file SQL: seed-large-data.sql")
+    print("Lưu ý: Đây là template. Tạo đầy đủ cần kết nối database để lấy IDs.")
 

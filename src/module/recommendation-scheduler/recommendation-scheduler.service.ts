@@ -278,15 +278,40 @@ export class RecommendationSchedulerService implements OnModuleInit {
     }
     this.logger.log(`   ✅ Script file exists`);
 
-    // Try different Python commands
-    const pythonCommands = ['python', 'python3', 'py'];
+    // Tìm Python từ .venv trong thư mục Recommendation-for-BookTour-Website
+    const rcmBasePath = path.join(process.cwd(), '..', 'Recommendation-for-BookTour-Website');
+    const venvPythonPath = process.platform === 'win32'
+      ? path.join(rcmBasePath, '.venv', 'Scripts', 'python.exe')
+      : path.join(rcmBasePath, '.venv', 'bin', 'python');
+    
+    // Kiểm tra .venv có tồn tại không
+    const pythonCommands: string[] = [];
+    if (fs.existsSync(venvPythonPath)) {
+      pythonCommands.push(venvPythonPath);
+      this.logger.log(`   🐍 Found .venv at: ${venvPythonPath}`);
+    } else {
+      this.logger.log(`   ⚠️ .venv not found at: ${venvPythonPath}`);
+    }
+    
+    // Thêm các lệnh mặc định
+    pythonCommands.push('python', 'python3', 'py');
+    
+    // Nếu có PYTHON_PATH trong .env, ưu tiên sử dụng
+    const pythonEnv = process.env.PYTHON_PATH || process.env.PYTHON_CMD;
+    if (pythonEnv && !pythonCommands.includes(pythonEnv)) {
+      pythonCommands.unshift(pythonEnv);
+      this.logger.log(`   🔧 Using Python from .env: ${pythonEnv}`);
+    }
+    
     const errors: string[] = [];
     
     for (const pythonCmd of pythonCommands) {
       try {
-        this.logger.log(`   🔄 Trying command: ${pythonCmd} ${scriptName}`);
+        // Wrap Python path in quotes if it contains spaces (Windows issue)
+        const pythonCmdQuoted = pythonCmd.includes(' ') ? `"${pythonCmd}"` : pythonCmd;
+        this.logger.log(`   🔄 Trying command: ${pythonCmdQuoted} ${scriptName}`);
         
-        const { stdout, stderr } = await execAsync(`${pythonCmd} ${scriptName}`, {
+        const { stdout, stderr } = await execAsync(`${pythonCmdQuoted} ${scriptName}`, {
           timeout: 600000, // 10 minutes timeout
           cwd: scriptDir,
           maxBuffer: 10 * 1024 * 1024, // 10MB buffer
