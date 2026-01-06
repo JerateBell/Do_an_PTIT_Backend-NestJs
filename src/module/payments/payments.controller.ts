@@ -1,17 +1,27 @@
 import {
-  Controller, Get, Post, Body, Patch, Param, Delete, Req,
-  UseGuards, UseInterceptors, UploadedFile, BadRequestException,
-} from "@nestjs/common";
-import { PaymentsService } from "./payments.service";
-import { CreatePaymentDto } from "./dto/create-payment.dto";
-import { UpdatePaymentDto } from "./dto/update-payment.dto";
-import { AuthGuard } from "@nestjs/passport";
-import { BankInfoResponseDto } from "./dto/get-bank-info.dto";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import * as path from "path";
-import * as fs from "fs";
-import { Admin } from "src/common/decorators/admin.decorator";
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+  Res,
+} from '@nestjs/common';
+import { PaymentsService } from './payments.service';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { BankInfoResponseDto } from './dto/get-bank-info.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import * as fs from 'fs';
+import { Admin } from 'src/common/decorators/admin.decorator';
+import type { Response } from 'express';
 
 @Controller('payments')
 // @UseGuards(AuthGuard('jwt'))
@@ -19,7 +29,10 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
-  create(@Req() req, @Body() dto: CreatePaymentDto) {
+  create(
+    @Req() req: { user: { id: string | number } },
+    @Body() dto: CreatePaymentDto,
+  ) {
     const userId = BigInt(req.user.id);
     return this.paymentsService.create(userId, dto);
   }
@@ -32,6 +45,75 @@ export class PaymentsController {
   @Get('bank-info')
   getBankInfo(): Promise<BankInfoResponseDto | null> {
     return this.paymentsService.getBankInfo();
+  }
+
+  /**
+   * Xuất file CSV danh sách số tiền cần thanh toán cho nhà cung cấp
+   * Chỉ admin mới có thể sử dụng endpoint này
+   */
+  @Get('export-supplier-payments')
+  @Admin()
+  async exportSupplierPayments(@Res() res: Response): Promise<void> {
+    try {
+      const fileName = await this.paymentsService.exportSupplierPayments();
+      const filePath = path.join(process.cwd(), 'exports', fileName);
+
+      if (!fs.existsSync(filePath)) {
+        throw new BadRequestException('File không tồn tại');
+      }
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${encodeURIComponent(fileName)}"`,
+      );
+
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Lỗi khi xuất file danh sách thanh toán nhà cung cấp';
+      throw new BadRequestException(errorMessage);
+    }
+  }
+
+  /**
+   * Download file CSV đã xuất theo tên file
+   */
+  @Get('download-supplier-payments/:fileName')
+  @Admin()
+  downloadSupplierPayments(
+    @Param('fileName') fileName: string,
+    @Res() res: Response,
+  ): void {
+    try {
+      // Bảo mật: chỉ cho phép tải file CSV từ thư mục exports
+      const sanitizedFileName = path.basename(fileName);
+      if (!sanitizedFileName.endsWith('.csv')) {
+        throw new BadRequestException('Chỉ cho phép tải file CSV');
+      }
+
+      const filePath = path.join(process.cwd(), 'exports', sanitizedFileName);
+
+      if (!fs.existsSync(filePath)) {
+        throw new BadRequestException('File không tồn tại');
+      }
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${encodeURIComponent(sanitizedFileName)}"`,
+      );
+
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Lỗi khi tải file';
+      throw new BadRequestException(errorMessage);
+    }
   }
 
   @Get(':id')
@@ -122,10 +204,12 @@ export class PaymentsController {
         message: 'Kích hoạt tặng quà thành công!',
         data: result,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Lỗi không xác định';
       return {
         message: 'Lỗi khi test quà tặng',
-        error: error.message,
+        error: errorMessage,
       };
     }
   }

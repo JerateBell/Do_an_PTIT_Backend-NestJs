@@ -37,6 +37,7 @@
     "class-validator": "^0.14.2",
     "cloudinary": "^2.8.0",
     "cron": "^4.4.0",
+    "express": "^5.2.1",
     "multer": "^2.0.2",
     "nanoid": "^5.1.6",
     "nodemailer": "^7.0.12",

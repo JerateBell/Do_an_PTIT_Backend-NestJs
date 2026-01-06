@@ -111,6 +111,7 @@ export class PaymentsService {
     updated: number;
     errors: number;
     details: Array<{ bookingId: string; status: string; message: string }>;
+    exportFileName?: string | null;
   }> {
     if (!fs.existsSync(filePath)) {
       throw new BadRequestException(`File không tồn tại: ${filePath}`);
@@ -243,6 +244,7 @@ export class PaymentsService {
         const contentLower = content.toLowerCase();
 
         // Chỉ xử lý các giao dịch có phát sinh có (tiền vào - khách hàng chuyển tiền cho admin)
+        // debitAmount không được sử dụng nhưng giữ lại để code rõ ràng
         if (creditAmount === 0) {
           continue;
         }
@@ -321,14 +323,33 @@ export class PaymentsService {
           status: 'success',
           message: 'Đã cập nhật paymentStatus thành paid',
         });
-      } catch (error) {
+      } catch (error: unknown) {
         errors++;
+        const errorMessage =
+          error instanceof Error ? error.message : 'Lỗi không xác định';
         details.push({
           bookingId: 'unknown',
           status: 'error',
-          message: error.message || 'Lỗi không xác định',
+          message: errorMessage,
         });
       }
+    }
+
+    // Tự động xuất file CSV danh sách số tiền cần thanh toán cho nhà cung cấp
+    let exportFileName: string | null = null;
+    try {
+      if (updated > 0) {
+        exportFileName = await this.exportSupplierPayments();
+        console.log(
+          `✅ Đã xuất file danh sách thanh toán nhà cung cấp: ${exportFileName}`,
+        );
+      }
+    } catch (exportError) {
+      console.error(
+        '⚠️ Lỗi khi xuất file danh sách thanh toán nhà cung cấp:',
+        exportError,
+      );
+      // Không throw lỗi để không làm gián đoạn kết quả import
     }
 
     return {
@@ -336,6 +357,7 @@ export class PaymentsService {
       updated,
       errors,
       details,
+      exportFileName, // Thêm tên file đã xuất vào response
     };
   }
 
@@ -389,5 +411,174 @@ export class PaymentsService {
     const parsed = parseFloat(cleaned);
 
     return isNaN(parsed) ? 0 : parsed;
+  }
+
+  /**
+   * Xuất file CSV danh sách số tiền cần thanh toán cho nhà cung cấp
+   * Dựa trên các booking đã thanh toán (paymentStatus = 'paid')
+   */
+  async exportSupplierPayments(): Promise<string> {
+    // Lấy tất cả các booking đã thanh toán
+    const paidBookings = await this.prisma.booking.findMany({
+      where: {
+        paymentStatus: 'paid',
+        deletedAt: null,
+      },
+      include: {
+        supplier: {
+          include: {
+            user: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                phone: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        supplierId: 'asc',
+      },
+    });
+
+    if (paidBookings.length === 0) {
+      throw new BadRequestException('Không có booking nào đã thanh toán');
+    }
+
+    // Nhóm theo supplier và tính tổng số tiền cần thanh toán
+    const supplierPaymentsMap = new Map<
+      bigint,
+      {
+        supplierId: bigint;
+        companyName: string;
+        email: string;
+        phone: string | null;
+        commissionRate: number;
+        totalAmount: number; // Tổng số tiền cần thanh toán
+        bookingCount: number; // Số lượng booking
+        bookings: Array<{
+          bookingId: bigint;
+          bookingRef: string;
+          total: number;
+          paymentAmount: number; // Số tiền cần thanh toán cho booking này
+        }>;
+      }
+    >();
+
+    for (const booking of paidBookings) {
+      const supplierId = booking.supplierId;
+      const commissionRate = Number(booking.supplier.commissionRate);
+      const bookingTotal = Number(booking.total) * 25000; // Chuyển từ USD sang VND
+      const paymentAmount = bookingTotal * (1 - commissionRate / 100); // Số tiền cần thanh toán = total * (1 - commissionRate%)
+
+      if (!supplierPaymentsMap.has(supplierId)) {
+        supplierPaymentsMap.set(supplierId, {
+          supplierId,
+          companyName: booking.supplier.companyName,
+          email: booking.supplier.user.email,
+          phone: booking.supplier.user.phone || booking.supplier.phone || null,
+          commissionRate,
+          totalAmount: 0,
+          bookingCount: 0,
+          bookings: [],
+        });
+      }
+
+      const supplierPayment = supplierPaymentsMap.get(supplierId)!;
+      supplierPayment.totalAmount += paymentAmount;
+      supplierPayment.bookingCount += 1;
+      supplierPayment.bookings.push({
+        bookingId: booking.id,
+        bookingRef: booking.bookingRef,
+        total: bookingTotal,
+        paymentAmount,
+      });
+    }
+
+    // Tạo nội dung CSV
+    const csvLines: string[] = [];
+
+    // Header
+    csvLines.push(
+      'STT,ID Nhà cung cấp,Tên công ty,Email,Điện thoại,Tỷ lệ hoa hồng (%),Số lượng booking,Tổng số tiền cần thanh toán (VND),Ghi chú',
+    );
+
+    // Dữ liệu
+    let stt = 1;
+    for (const [supplierId, supplierPayment] of supplierPaymentsMap.entries()) {
+      const formattedAmount = this.formatCurrency(supplierPayment.totalAmount);
+      csvLines.push(
+        `${stt},${supplierId},"${this.escapeCSV(supplierPayment.companyName)}","${this.escapeCSV(supplierPayment.email)}","${this.escapeCSV(supplierPayment.phone || '')}",${supplierPayment.commissionRate},${supplierPayment.bookingCount},"${formattedAmount}","Tổng số tiền cần thanh toán cho ${supplierPayment.bookingCount} booking(s)"`,
+      );
+      stt++;
+    }
+
+    // Thêm dòng tổng kết
+    const totalAmount = Array.from(supplierPaymentsMap.values()).reduce(
+      (sum, sp) => sum + sp.totalAmount,
+      0,
+    );
+    const totalBookings = Array.from(supplierPaymentsMap.values()).reduce(
+      (sum, sp) => sum + sp.bookingCount,
+      0,
+    );
+    csvLines.push('');
+    csvLines.push(
+      `TỔNG CỘNG,,,,,${totalBookings} booking(s),"${this.formatCurrency(totalAmount)}","Tổng số tiền cần thanh toán cho tất cả nhà cung cấp"`,
+    );
+
+    // Thêm chi tiết từng booking (optional - có thể comment nếu không cần)
+    csvLines.push('');
+    csvLines.push('CHI TIẾT TỪNG BOOKING');
+    csvLines.push(
+      'STT,ID Nhà cung cấp,Tên công ty,Booking ID,Booking Ref,Tổng tiền booking (VND),Số tiền cần thanh toán (VND)',
+    );
+
+    let detailStt = 1;
+    for (const [supplierId, supplierPayment] of supplierPaymentsMap.entries()) {
+      for (const booking of supplierPayment.bookings) {
+        csvLines.push(
+          `${detailStt},${supplierId},"${this.escapeCSV(supplierPayment.companyName)}",${booking.bookingId},"${booking.bookingRef}","${this.formatCurrency(booking.total)}","${this.formatCurrency(booking.paymentAmount)}"`,
+        );
+        detailStt++;
+      }
+    }
+
+    const csvContent = csvLines.join('\n');
+
+    // Lưu file vào thư mục exports
+    const exportsDir = path.join(process.cwd(), 'exports');
+    if (!fs.existsSync(exportsDir)) {
+      fs.mkdirSync(exportsDir, { recursive: true });
+    }
+
+    const fileName = `supplier-payments-${Date.now()}.csv`;
+    const filePath = path.join(exportsDir, fileName);
+    fs.writeFileSync(filePath, '\ufeff' + csvContent, 'utf-8'); // Thêm BOM để Excel hiển thị tiếng Việt đúng
+
+    return fileName;
+  }
+
+  /**
+   * Escape các ký tự đặc biệt trong CSV
+   */
+  private escapeCSV(value: string | null | undefined): string {
+    if (!value) return '';
+    // Nếu có dấu phẩy, dấu ngoặc kép hoặc xuống dòng, cần đặt trong dấu ngoặc kép và escape dấu ngoặc kép
+    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+      return value.replace(/"/g, '""');
+    }
+    return value;
+  }
+
+  /**
+   * Format số tiền theo định dạng VND với dấu phẩy phân cách hàng nghìn
+   */
+  private formatCurrency(amount: number): string {
+    return Math.round(amount)
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 }
