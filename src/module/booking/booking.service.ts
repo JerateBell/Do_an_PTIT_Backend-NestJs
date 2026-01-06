@@ -3,108 +3,80 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-
 import { PrismaService } from '../prisma/prisma.service';
-
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
-
 import { CreateBookingDto } from './dto/create-booking.dto';
-
 import { BadRequestException } from '@nestjs/common';
-
 import { CouponsService } from '../coupons/coupons.service';
-
 import { Coupon } from '@prisma/client';
 
 @Injectable()
 export class BookingsService {
   constructor(
     private prisma: PrismaService,
-
     private couponsService: CouponsService,
   ) {}
 
-  // ✅ Helper: Lấy supplier theo userId
-
+  //  Helper: Lấy supplier theo userId
   private async getSupplierByUserId(userId: bigint) {
     const supplier = await this.prisma.supplier.findUnique({
       where: { userId },
     });
-
     if (!supplier) throw new NotFoundException('Supplier not found');
-
     return supplier;
   }
 
-  // 🟩 Lấy tất cả booking của supplier đang đăng nhập
-
+  // Lấy tất cả booking của supplier đang đăng nhập
   async findAllForSupplier(userId: bigint) {
     const supplier = await this.getSupplierByUserId(userId);
 
     return this.prisma.booking.findMany({
       where: {
-        supplierId: supplier.id, // ✅ lọc trực tiếp theo supplierId
+        supplierId: supplier.id, // lọc trực tiếp theo supplierId
       },
-
       include: {
         user: true,
-
         activity: true,
-
         schedule: true,
-
         payments: true,
       },
-
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  // 🟦 Lấy chi tiết một booking
-
+  //  Lấy chi tiết một booking
   async findOneForSupplier(id: bigint, userId: bigint) {
     const supplier = await this.getSupplierByUserId(userId);
-
     const booking = await this.prisma.booking.findUnique({
       where: { id },
 
       include: {
         user: true,
-
         activity: true,
-
         schedule: true,
-
         payments: true,
       },
     });
-
     if (!booking) throw new NotFoundException('Booking not found');
 
     if (booking.supplierId !== supplier.id) {
       throw new ForbiddenException('You do not have access to this booking');
     }
-
     return booking;
   }
 
-  // 🟨 Cập nhật trạng thái booking
-
+  //  Cập nhật trạng thái booking
   async updateStatus(id: bigint, userId: bigint, dto: UpdateBookingStatusDto) {
     const booking = await this.findOneForSupplier(id, userId);
 
     return this.prisma.booking.update({
       where: { id: booking.id },
-
       data: {
         ...(dto.status && { status: dto.status }),
-
         ...(dto.paymentStatus && { paymentStatus: dto.paymentStatus }),
       },
-
       include: {
         activity: true,
-
         schedule: true,
       },
     });
@@ -134,7 +106,6 @@ export class BookingsService {
     }
 
     let discount = 0;
-
     let appliedCoupon: Coupon | null = null;
 
     // ====== CHECK COUPON ======
@@ -181,7 +152,6 @@ export class BookingsService {
       }
 
       // Tính discount
-
       if (appliedCoupon.discountType === 'percentage') {
         discount = (subtotal * Number(appliedCoupon.discountValue)) / 100;
 
@@ -193,6 +163,12 @@ export class BookingsService {
       }
     }
 
+    if (dto.bookingStatus === 'confirmed' && !dto.scheduleId) {
+      throw new BadRequestException(
+        'Confirmed booking must have scheduleId'
+      );
+    }
+
     const total = Math.max(0, subtotal - discount);
 
     const bookingRef = this.generateBookingRef();
@@ -201,36 +177,24 @@ export class BookingsService {
       const booking = await tx.booking.create({
         data: {
           bookingRef,
-
           userId,
-
           activityId: dto.activityId,
-
           scheduleId: dto.scheduleId,
-
           supplierId: dto.supplierId,
-
           customerName: dto.customerName,
-
           customerEmail: dto.customerEmail,
-
           customerPhone: dto.customerPhone || '',
-
           bookingDate: new Date(dto.bookingDate),
-
           participants: dto.participants,
-
           subtotal,
-
           discount,
-
           total,
-
           couponCode: dto.couponCode || null,
-
           currency: dto.currency || 'VND',
-
-          status: 'pending',
+          status:
+            dto.bookingStatus === 'confirmed'
+              ? 'confirmed'
+              : 'pending',
 
           paymentStatus: 'pending',
         },
