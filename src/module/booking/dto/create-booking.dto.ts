@@ -1,3 +1,4 @@
+import { BookingStatus } from '@prisma/client';
 import {
   IsNumber,
   IsString,
@@ -6,6 +7,7 @@ import {
   IsNotEmpty,
   IsOptional,
   Min,
+  IsEnum,
 } from 'class-validator';
 
 export class CreateBookingDto {
@@ -55,4 +57,6 @@ export class CreateBookingDto {
   @IsOptional()
   @IsNotEmpty()
   currency?: string;
+
+  bookingStatus?: 'pending' | 'confirmed';
 }
