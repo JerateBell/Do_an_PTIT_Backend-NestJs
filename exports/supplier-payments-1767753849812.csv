@@ -1,0 +1,8 @@
+﻿STT,ID Nhà cung cấp,Tên công ty,Email,Điện thoại,Tỷ lệ hoa hồng (%),Số lượng booking,Tổng số tiền cần thanh toán (VND),Ghi chú
+1,1,"Vietnam Adventures Co.","supplier@example.com","+84 902345678",15,1,"7,650","Tổng số tiền cần thanh toán cho 1 booking(s)"
+
+TỔNG CỘNG,,,,,1 booking(s),"7,650","Tổng số tiền cần thanh toán cho tất cả nhà cung cấp"
+
+CHI TIẾT TỪNG BOOKING
+STT,ID Nhà cung cấp,Tên công ty,Booking ID,Booking Ref,Tổng tiền booking (VND),Số tiền cần thanh toán (VND)
+1,1,"Vietnam Adventures Co.",3325,"BK534101519723","9,000","7,650"

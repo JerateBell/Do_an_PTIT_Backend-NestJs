@@ -82,4 +82,21 @@ export class BookingsController {
     const userId = BigInt(req.user.id);
     return this.bookingsService.createBooking(userId, dto);
   }
+
+  // 🟦 PATCH cập nhật booking với coupon code
+  @Patch(':id/coupon')
+  applyCoupon(
+    @Param('id') id: string,
+    @Body('couponCode') couponCode: string,
+    @Req() req: { user: { id: string | number | bigint } },
+  ) {
+    if (!/^\d+$/.test(id)) {
+      throw new BadRequestException('Invalid booking ID');
+    }
+    if (!couponCode) {
+      throw new BadRequestException('couponCode is required');
+    }
+    const userId = BigInt(req.user.id);
+    return this.bookingsService.applyCoupon(BigInt(id), userId, couponCode);
+  }
 }

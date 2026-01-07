@@ -141,6 +141,102 @@ export class BookingsService {
     });
   }
 
+  // 🟦 Cập nhật booking với coupon code
+  async applyCoupon(id: bigint, userId: bigint, couponCode: string) {
+    // Tìm booking và kiểm tra quyền
+    const booking = await this.prisma.booking.findFirst({
+      where: {
+        id,
+        userId,
+        deletedAt: null,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking không tồn tại');
+    }
+
+    // Kiểm tra booking chưa thanh toán
+    if (booking.paymentStatus === 'paid') {
+      throw new BadRequestException('Không thể áp dụng coupon cho booking đã thanh toán');
+    }
+
+    // Validate và tính discount từ coupon code (sử dụng logic tương tự createBooking)
+    const subtotal = Number(booking.subtotal);
+    let discount = 0;
+    let appliedCoupon: Coupon | null = null;
+
+    appliedCoupon = await this.prisma.coupon.findFirst({
+      where: {
+        code: couponCode,
+        deletedAt: null,
+      },
+    });
+
+    if (!appliedCoupon) {
+      throw new BadRequestException('Coupon không tồn tại');
+    }
+
+    // Check if coupon is private and belongs to the current user
+    if (appliedCoupon.userId !== null) {
+      if (appliedCoupon.userId !== userId) {
+        throw new BadRequestException('Mã giảm giá này không dành cho bạn');
+      }
+    }
+
+    const now = new Date();
+
+    if (
+      !appliedCoupon.isActive ||
+      appliedCoupon.validFrom > now ||
+      appliedCoupon.validTo < now
+    ) {
+      throw new BadRequestException('Coupon không hợp lệ hoặc đã hết hạn');
+    }
+
+    if (
+      appliedCoupon.usageLimit &&
+      appliedCoupon.usedCount >= appliedCoupon.usageLimit
+    ) {
+      throw new BadRequestException('Coupon đã hết lượt sử dụng');
+    }
+
+    const minAmount = Number(appliedCoupon.minAmount);
+
+    if (subtotal < minAmount) {
+      throw new BadRequestException(
+        `Tổng tiền tối thiểu để dùng coupon là ${minAmount}`,
+      );
+    }
+
+    // Tính discount
+    if (appliedCoupon.discountType === 'percentage') {
+      discount = (subtotal * Number(appliedCoupon.discountValue)) / 100;
+
+      if (appliedCoupon.maxDiscount) {
+        discount = Math.min(discount, Number(appliedCoupon.maxDiscount));
+      }
+    } else {
+      discount = Number(appliedCoupon.discountValue);
+    }
+
+    const total = Math.max(0, subtotal - discount);
+
+    // Cập nhật booking
+    return this.prisma.booking.update({
+      where: { id },
+      data: {
+        couponCode,
+        discount,
+        total,
+      },
+      include: {
+        activity: true,
+        schedule: true,
+      },
+    });
+  }
+
   // 🟥 Xóa booking (nếu cần)
 
   async remove(id: bigint, userId: bigint) {

@@ -124,6 +124,9 @@ export class PaymentsService {
       throw new BadRequestException('File CSV không có dữ liệu');
     }
 
+    // Lưu timestamp trước khi bắt đầu import để chỉ export những booking vừa được import
+    const importStartTime = new Date();
+
     let processed = 0;
     let updated = 0;
     let errors = 0;
@@ -291,26 +294,72 @@ export class PaymentsService {
         }
 
         // So sánh số tiền với total của booking
-        const bookingTotal = Number(booking.total) * 25000;
+        // booking.total đã là subtotal - discount (số tiền sau khi trừ mã giảm giá)
+        // Chuyển đổi booking.total sang VND nếu currency là USD
+        const bookingTotalVND = booking.currency === 'USD' 
+          ? Number(booking.total) * 25000 
+          : Number(booking.total);
+        
+        // Chuyển đổi subtotal và discount sang VND để hiển thị thông tin đầy đủ
+        const bookingSubtotalVND = booking.currency === 'USD'
+          ? Number(booking.subtotal) * 25000
+          : Number(booking.subtotal);
+        const bookingDiscountVND = booking.currency === 'USD'
+          ? Number(booking.discount) * 25000
+          : Number(booking.discount);
+        
         const tolerance = 0.01; // Cho phép sai số 0.01 VND
 
-        if (Math.abs(creditAmount - bookingTotal) > tolerance) {
+        // Transaction amount phải bằng booking.total (đã trừ discount)
+        // Kiểm tra xem transaction amount có khớp với total không
+        const matchesTotal = Math.abs(creditAmount - bookingTotalVND) <= tolerance;
+        
+        // Nếu không khớp với total, kiểm tra xem có khớp với subtotal không (trường hợp transaction chưa trừ discount)
+        const matchesSubtotal = Math.abs(creditAmount - bookingSubtotalVND) <= tolerance;
+        
+        if (!matchesTotal && !matchesSubtotal) {
           errors++;
           details.push({
             bookingId: bookingIdMatch[1],
             status: 'error',
-            message: `Số tiền không khớp. Booking total: ${bookingTotal}, Transaction: ${creditAmount}`,
+            message: `Số tiền không khớp. Subtotal (${booking.currency}): ${Number(booking.subtotal)}, Discount (${booking.currency}): ${Number(booking.discount)}, Total (${booking.currency}): ${Number(booking.total)}, Total (VND): ${bookingTotalVND}, Subtotal (VND): ${bookingSubtotalVND}, Transaction (VND): ${creditAmount}`,
           });
           continue;
         }
+        
+        // Nếu transaction khớp với subtotal nhưng không khớp với total, có thể transaction chưa trừ discount
+        // Trong trường hợp này, vẫn chấp nhận nhưng cảnh báo
+        if (matchesSubtotal && !matchesTotal && bookingDiscountVND > 0) {
+          console.warn(`⚠️ Booking #${bookingIdMatch[1]}: Transaction amount khớp với subtotal nhưng không khớp với total. Có thể transaction chưa trừ discount ${bookingDiscountVND} VND.`);
+        }
 
-        // Cập nhật paymentStatus thành "paid"
-        await this.prisma.booking.update({
-          where: { id: bookingId },
-          data: {
-            paymentStatus: 'paid',
-          },
+        // Tạo transactionId từ nội dung giao dịch hoặc timestamp
+        const transactionId = `TXN-${Date.now()}-${bookingId}`;
+        
+        // Cập nhật paymentStatus thành "paid" và tạo Payment record để track đã import thành công
+        await this.prisma.$transaction(async (tx) => {
+          // Cập nhật booking
+          await tx.booking.update({
+            where: { id: bookingId },
+            data: {
+              paymentStatus: 'paid',
+            },
+          });
+          
+          // Tạo Payment record để track đã import thành công
+          await tx.payment.create({
+            data: {
+              userId: booking.userId,
+              bookingId: bookingId,
+              method: 'bank_transfer', // Phương thức thanh toán từ import transaction
+              amount: bookingTotalVND,
+              currency: 'VND',
+              transactionId: transactionId,
+              status: 'paid',
+            },
+          });
         });
+        
         try {
           await this.rewardUserWithCoupon(booking.userId, creditAmount);
         } catch (couponError) {
@@ -336,12 +385,16 @@ export class PaymentsService {
     }
 
     // Tự động xuất file CSV danh sách số tiền cần thanh toán cho nhà cung cấp
+    // Chỉ export những booking vừa được import thành công trong lần import này
     let exportFileName: string | null = null;
     try {
       if (updated > 0) {
-        exportFileName = await this.exportSupplierPayments();
+        exportFileName = await this.exportSupplierPayments(importStartTime);
         console.log(
           `✅ Đã xuất file danh sách thanh toán nhà cung cấp: ${exportFileName}`,
+        );
+        console.log(
+          `   (Chỉ chứa ${updated} booking vừa được import thành công)`,
         );
       }
     } catch (exportError) {
@@ -415,15 +468,34 @@ export class PaymentsService {
 
   /**
    * Xuất file CSV danh sách số tiền cần thanh toán cho nhà cung cấp
-   * Dựa trên các booking đã thanh toán (paymentStatus = 'paid')
+   * Chỉ lấy những booking vừa được import thành công trong lần import gần nhất
+   * @param sinceTimestamp - Chỉ lấy những payment được tạo sau thời điểm này (nếu có)
    */
-  async exportSupplierPayments(): Promise<string> {
-    // Lấy tất cả các booking đã thanh toán
-    const paidBookings = await this.prisma.booking.findMany({
-      where: {
-        paymentStatus: 'paid',
-        deletedAt: null,
+  async exportSupplierPayments(sinceTimestamp?: Date): Promise<string> {
+    // Lấy những booking đã thanh toán và có payment record với transactionId
+    // Nếu có sinceTimestamp, chỉ lấy những payment được tạo sau thời điểm đó
+    const whereCondition: any = {
+      paymentStatus: 'paid',
+      deletedAt: null,
+      payments: {
+        some: {
+          transactionId: {
+            not: null, // Có transactionId nghĩa là đã được import từ transaction history
+          },
+          deletedAt: null,
+        },
       },
+    };
+
+    // Nếu có sinceTimestamp, chỉ lấy những payment được tạo sau thời điểm đó
+    if (sinceTimestamp) {
+      whereCondition.payments.some.createdAt = {
+        gte: sinceTimestamp,
+      };
+    }
+
+    const paidBookings = await this.prisma.booking.findMany({
+      where: whereCondition,
       include: {
         supplier: {
           include: {
@@ -470,8 +542,11 @@ export class PaymentsService {
     for (const booking of paidBookings) {
       const supplierId = booking.supplierId;
       const commissionRate = Number(booking.supplier.commissionRate);
-      const bookingTotal = Number(booking.total) * 25000; // Chuyển từ USD sang VND
-      const paymentAmount = bookingTotal * (1 - commissionRate / 100); // Số tiền cần thanh toán = total * (1 - commissionRate%)
+      // Chuyển đổi booking.total sang VND nếu currency là USD
+      const bookingTotalVND = booking.currency === 'USD' 
+        ? Number(booking.total) * 25000 
+        : Number(booking.total);
+      const paymentAmount = bookingTotalVND * (1 - commissionRate / 100); // Số tiền cần thanh toán = total * (1 - commissionRate%)
 
       if (!supplierPaymentsMap.has(supplierId)) {
         supplierPaymentsMap.set(supplierId, {
@@ -492,7 +567,7 @@ export class PaymentsService {
       supplierPayment.bookings.push({
         bookingId: booking.id,
         bookingRef: booking.bookingRef,
-        total: bookingTotal,
+        total: bookingTotalVND,
         paymentAmount,
       });
     }
