@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "cronExpression": "37 13 * * *",
-  "lastRun": "2026-01-06T18:24:46.479Z",
+  "lastRun": "2026-01-08T15:12:51.351Z",
   "lastStatus": "success",
-  "lastMessage": "Pipeline completed in 28.56s. Imported 1050 recommendations."
+  "lastMessage": "Pipeline completed in 4.85s. Imported 43 recommendations."
 }
